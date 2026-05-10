@@ -18204,7 +18204,7 @@ g.CreateChangelogGUI = function()
 
    task.spawn(function()
       local ok,data = pcall(function()
-         return game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/LifeTogetherAdminChangeLogs/refs/heads/main/LifeTogetherAdmin_Changelogs.js")
+         return game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/LifeTG_Admin_Changelogs.js")
       end)
 
       if not ok or not data or data == "" then
