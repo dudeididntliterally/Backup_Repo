@@ -4053,10 +4053,10 @@ local github_urls = {
       "https://raw.githubusercontent.com/EnterpriseExperience/Script_Framework/refs/heads/main/Dex_Explorer_Checker.lua"
    },
    Configuration_API = {
-      "https://raw.githubusercontent.com/EnterpriseExperience/RushTeam/main/configuration.lua"
+      "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Configuration_GUI.lua"
    },
    NotifyLib = {
-      "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/main/Notification_Lib.lua"
+      "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Notify_Lib.lua"
    },
    Life_Together_Admin = {
       "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/LifeTogether_RP_Admin.lua"
@@ -4961,7 +4961,7 @@ if not g.spoofed_maximum_fps_count then
    if setfpscap or setfps or set_fps or set_fps_cap then
       set_fps(360)
       fw(0.2)
-      notify("Success", "Successfully maximized FPS capabilities.", 5)
+      if g.notify then g.notify("Success", "Successfully maximized FPS capabilities.", 5) end
    end
 
    g.spoofed_maximum_fps_count = true
