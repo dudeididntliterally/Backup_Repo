@@ -1,6 +1,7 @@
 // You need a VPS to use this system and to set it up properly.
 // You can use Kamatera, which is entirely free to use to set up this system.
 // Then use Firebase Firestore to use the coins system.
+// Also create a file named .env in your VPS root folder.
 require('dotenv').config()
 const WebSocket = require("ws")
 const wss = new WebSocket.Server({ port: 80 })
