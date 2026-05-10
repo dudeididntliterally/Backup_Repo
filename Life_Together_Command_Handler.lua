@@ -771,7 +771,7 @@ getgenv().handleCommand = function(sender, message)
       end
 
       g.FreeEmotes_Enabled = true
-      loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/flames_emotes_gui_new.lua"))()
+      loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Emotes_Backup.lua"))()
    elseif raw_cmd == "allcars" or raw_cmd == "allvehicles" or raw_cmd == "listvehicles" then
       car_listing_gui()
    elseif raw_cmd == "alwaysshowtitles" or raw_cmd == "neverhidebio" or raw_cmd == "neverhidename" or raw_cmd == "neverhidetitles" or raw_cmd == "alwaysseetitles" or raw_cmd == "neverhidedesc" then
