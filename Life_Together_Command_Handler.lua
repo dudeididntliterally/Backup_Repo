@@ -84,10 +84,6 @@ getgenv().handleCommand = function(sender, message)
       end
 
       stop_rainbow_car()
-   elseif raw_cmd == "earncoins" or raw_cmd == "flamescoins" or raw_cmd == "flameshubcoins" or raw_cmd == "coinssystem" then
-      g.open_minigame_menu()
-   elseif raw_cmd == "togglechat" or raw_cmd == "uichat" or raw_cmd == "flameschat" or raw_cmd == "toggleflameschat" or raw_cmd == "flameschatui" or raw_cmd == "flamesnet" or raw_cmd == "chat" or raw_cmd == "chattoggle" or raw_cmd == "chatui" then
-      g.set_chat_visible(true)
    elseif raw_cmd == "commandbar" or raw_cmd == "cmdbar" or raw_cmd == "commandsbar" or raw_cmd == "cmdsbar" then
       command_bar_GUI(true)
    elseif raw_cmd == "twotonecar" or raw_cmd == "carcolorswap" or raw_cmd == "carcolorswapper" or raw_cmd == "colorflasher" or raw_cmd == "carcolorflasher" then
