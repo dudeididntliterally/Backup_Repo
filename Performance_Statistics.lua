@@ -35,6 +35,12 @@ local function safe_service(name)
     return svc
 end
 
+if not g.GlobalEnvironmentFramework_Initialized then
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Global_Environment.lua"))()
+   wait(0.1)
+   g.GlobalEnvironmentFramework_Initialized = true
+end
+
 Workspace = safe_service("Workspace")
 CoreGui = safe_service("CoreGui")
 Players = safe_service("Players")
