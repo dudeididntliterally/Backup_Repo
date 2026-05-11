@@ -177,9 +177,7 @@ get_or_set("Safe_Wrapper", SafeGet)
 get_or_set("Service_Wrap", SafeGet)
 get_or_set("Service_Wrapper", SafeGet)
 
-local NotifyLib = loadstring(game:HttpGet(
-   "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/Notification_Lib.lua"
-))()
+local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Notify_Lib.lua"))()
 
 if SafeGet and type(SafeGet) == "function" then
 	get_or_set("SafeGet", SafeGet)
@@ -850,7 +848,7 @@ flames_api.BypassAdonis = function()
 		return getgenv().notify("Warning", "You've already loaded Adonis Bypass.", 5)
 	end
 	
-	loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/Adonis_Bypass_BACKUP.lua'))()
+	loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Adonis_Bypass_Backup.lua'))()
 	wait(0.2)
 	getgenv().AdonisBypass_Already_Loaded = true
 end
