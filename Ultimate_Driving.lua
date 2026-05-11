@@ -1109,12 +1109,6 @@ Callback = function(anti_ragdoll)
     end
 end,})
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local LocalPlayer = Players.LocalPlayer
-local Vehicles_Folder = workspace:FindFirstChild("_Main"):FindFirstChild("Vehicles")
-local g = getgenv()
 g.vehicle_fly = g.vehicle_fly or false
 g.vehicle_fly_speed = g.vehicle_fly_speed or 3
 g.vehiclefly_conns = g.vehiclefly_conns or {}
@@ -1128,203 +1122,190 @@ if is_mobile then
    Control_Module = require(LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
 end
 
-local function Retrieve_Vehicle()
-   for _, v in ipairs(Vehicles_Folder:GetChildren()) do
-      local vals = v:FindFirstChild("Values", true)
-      if vals and vals:GetAttribute("Owner") == LocalPlayer.Name then
-         return v
-      end
-   end
-end
-
 local function Get_Seat(Car)
-   return Car:FindFirstChildWhichIsA("VehicleSeat", true)
+    return Car:FindFirstChildWhichIsA("VehicleSeat", true)
 end
 
 g.cleanup = function()
-   if g.vehiclefly_conns.render then
-      pcall(function() g.vehiclefly_conns.render:Disconnect() end)
-      g.vehiclefly_conns.render = nil
-   end
-   if g.vehiclefly_conns.down then
-      pcall(function() g.vehiclefly_conns.down:Disconnect() end)
-      g.vehiclefly_conns.down = nil
-   end
-   if g.vehiclefly_conns.up then
-      pcall(function() g.vehiclefly_conns.up:Disconnect() end)
-      g.vehiclefly_conns.up = nil
-   end
+    if g.vehiclefly_conns.render then
+        pcall(function() g.vehiclefly_conns.render:Disconnect() end)
+        g.vehiclefly_conns.render = nil
+    end
+    if g.vehiclefly_conns.down then
+        pcall(function() g.vehiclefly_conns.down:Disconnect() end)
+        g.vehiclefly_conns.down = nil
+    end
+    if g.vehiclefly_conns.up then
+        pcall(function() g.vehiclefly_conns.up:Disconnect() end)
+        g.vehiclefly_conns.up = nil
+    end
 
-   if g.vehiclefly_bv then
-      pcall(function() g.vehiclefly_bv.Velocity = Vector3.zero end)
-      pcall(function() g.vehiclefly_bv:Destroy() end)
-      g.vehiclefly_bv = nil
-   end
+    if g.vehiclefly_bv then
+        pcall(function() g.vehiclefly_bv.Velocity = Vector3.zero end)
+        pcall(function() g.vehiclefly_bv:Destroy() end)
+        g.vehiclefly_bv = nil
+    end
 
-   if g.vehiclefly_bg then
-      pcall(function() g.vehiclefly_bg:Destroy() end)
-      g.vehiclefly_bg = nil
-   end
+    if g.vehiclefly_bg then
+        pcall(function() g.vehiclefly_bg:Destroy() end)
+        g.vehiclefly_bg = nil
+    end
 end
 
 g.enable_vehicle_noclip = function()
-   if g.vehiclefly_noclip then return end
-   g.vehiclefly_noclip = true
-   g.vehiclefly_collisions = {}
-   local Car = Retrieve_Vehicle()
-   if not Car then return end
+    if g.vehiclefly_noclip then return end
+    g.vehiclefly_noclip = true
+    g.vehiclefly_collisions = {}
+    local Car = retrieve_vehicle()
+    if not Car then return end
 
-   for _, v in ipairs(Car:GetDescendants()) do
-      if v:IsA("BasePart") then
-         g.vehiclefly_collisions[v] = v.CanCollide
-         v.CanCollide = false
-      end
-   end
+    for _, v in ipairs(Car:GetDescendants()) do
+        if v:IsA("BasePart") then
+            g.vehiclefly_collisions[v] = v.CanCollide
+            v.CanCollide = false
+        end
+    end
 end
 
 g.disable_vehicle_noclip = function()
-   if not g.vehiclefly_noclip then return end
-   g.vehiclefly_noclip = false
+    if not g.vehiclefly_noclip then return end
+    g.vehiclefly_noclip = false
 
-   for Part, State in pairs(g.vehiclefly_collisions) do
-      if Part and Part.Parent then
-         Part.CanCollide = State
-      end
-   end
-   g.vehiclefly_collisions = {}
+    for Part, State in pairs(g.vehiclefly_collisions) do
+        if Part and Part.Parent then
+            Part.CanCollide = State
+        end
+    end
+    g.vehiclefly_collisions = {}
 end
 
 g.disable_springs = function(Car)
-   g.vehiclefly_springs = {}
-   for _, v in ipairs(Car:GetDescendants()) do
-      if v:IsA("SpringConstraint") then
-         g.vehiclefly_springs[v] = {
-            Free_Length = v.FreeLength,
-            Stiffness = v.Stiffness,
-            Damping = v.Damping,
-         }
-         pcall(function()
-            v.Stiffness = 0
-            v.Damping = 0
-            v.FreeLength = v.CurrentLength
-         end)
-      end
-   end
+    g.vehiclefly_springs = {}
+    for _, v in ipairs(Car:GetDescendants()) do
+        if v:IsA("SpringConstraint") then
+            g.vehiclefly_springs[v] = {
+                Free_Length = v.FreeLength,
+                Stiffness = v.Stiffness,
+                Damping = v.Damping,
+            }
+            pcall(function()
+                v.Stiffness = 0
+                v.Damping = 0
+                v.FreeLength = v.CurrentLength
+            end)
+        end
+    end
 end
 
 g.restore_springs = function()
-   for Spring, Data in pairs(g.vehiclefly_springs) do
-      if Spring and Spring.Parent then
-         pcall(function()
-            Spring.FreeLength = Data.Free_Length
-            Spring.Stiffness = Data.Stiffness
-            Spring.Damping = Data.Damping
-         end)
-      end
-   end
-   g.vehiclefly_springs = {}
+    for Spring, Data in pairs(g.vehiclefly_springs) do
+        if Spring and Spring.Parent then
+            pcall(function()
+                Spring.FreeLength = Data.Free_Length
+                Spring.Stiffness = Data.Stiffness
+                Spring.Damping = Data.Damping
+            end)
+        end
+    end
+    g.vehiclefly_springs = {}
 end
 
 g.start_vehicle_fly = function()
-   if g.vehiclefly_bg or g.vehiclefly_bv then return end
-   local Car = Retrieve_Vehicle()
-   if not Car then return end
-   local Seat = Get_Seat(Car)
-   if not Seat then return end
-   local Weight_Part = Car:FindFirstChild("#Weight", true)
-   local Physics_Root = Weight_Part or Seat
-   local Drag_Force = Seat:FindFirstChild("DragForce")
-   local Boost_Force = Seat:FindFirstChild("BoostForce")
-   local Float_Force = Seat:FindFirstChild("FloatForce")
-   if Drag_Force then Drag_Force.Force = Vector3.zero end
-   if Boost_Force then Boost_Force.Force = Vector3.zero end
-   if Float_Force then Float_Force.Position = Seat.Position end
+    if g.vehiclefly_bg or g.vehiclefly_bv then return end
+    local Car = retrieve_vehicle()
+    if not Car then return end
+    local Seat = Get_Seat(Car)
+    if not Seat then return end
+    local Weight_Part = Car:FindFirstChild("#Weight", true)
+    local Physics_Root = Weight_Part or Seat
+    local Drag_Force = Seat:FindFirstChild("DragForce")
+    local Boost_Force = Seat:FindFirstChild("BoostForce")
+    local Float_Force = Seat:FindFirstChild("FloatForce")
+    if Drag_Force then Drag_Force.Force = Vector3.zero end
+    if Boost_Force then Boost_Force.Force = Vector3.zero end
+    if Float_Force then Float_Force.Position = Seat.Position end
+    g.disable_springs(Car)
 
-   g.disable_springs(Car)
+    local Bg = Instance.new("BodyGyro")
+    Bg.P = 3e4
+    Bg.D = 1e3
+    Bg.MaxTorque = Vector3.new(0, 9e9, 0)
+    Bg.CFrame = Physics_Root.CFrame
+    Bg.Parent = Physics_Root
 
-   local Bg = Instance.new("BodyGyro")
-   Bg.P = 3e4
-   Bg.D = 1e3
-   Bg.MaxTorque = Vector3.new(0, 9e9, 0)
-   Bg.CFrame = Physics_Root.CFrame
-   Bg.Parent = Physics_Root
+    local Bv = Instance.new("BodyVelocity")
+    Bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    Bv.Velocity = Vector3.zero
+    Bv.Parent = Physics_Root
+    g.vehiclefly_bg = Bg
+    g.vehiclefly_bv = Bv
+    g.vehiclefly_conns.render = RunService.Heartbeat:Connect(function()
+        if not g.vehicle_fly or not Physics_Root.Parent then
+            Bv.Velocity = Vector3.zero
+            g.vehiclefly_control = {f=0,b=0,l=0,r=0,q=0,e=0}
+            return
+        end
 
-   local Bv = Instance.new("BodyVelocity")
-   Bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-   Bv.Velocity = Vector3.zero
-   Bv.Parent = Physics_Root
+        Physics_Root.AssemblyAngularVelocity = Vector3.zero
 
-   g.vehiclefly_bg = Bg
-   g.vehiclefly_bv = Bv
+        if Float_Force then Float_Force.Position = Seat.Position end
+        if Drag_Force then Drag_Force.Force = Vector3.zero end
+        if Boost_Force then Boost_Force.Force = Vector3.zero end
 
-   g.vehiclefly_conns.render = RunService.Heartbeat:Connect(function()
-      if not g.vehicle_fly or not Physics_Root.Parent then
-         Bv.Velocity = Vector3.zero
-         g.vehiclefly_control = {f=0,b=0,l=0,r=0,q=0,e=0}
-         return
-      end
+        local Cam = workspace.CurrentCamera
 
-      Physics_Root.AssemblyAngularVelocity = Vector3.zero
+        if is_mobile then
+            Bg.CFrame = Cam.CFrame
+            local Mv = Control_Module:GetMoveVector()
+            local Vel = Vector3.zero
+            if Mv.X ~= 0 then Vel = Vel + Cam.CFrame.RightVector * (Mv.X * (45 * g.vehicle_fly_speed)) end
+            if Mv.Z ~= 0 then Vel = Vel - Cam.CFrame.LookVector * (Mv.Z * (45 * g.vehicle_fly_speed)) end
+            Bv.Velocity = Vel
+        else
+            local Look = Cam.CFrame.LookVector
+            local Yaw = math.atan2(-Look.X, -Look.Z)
+            Bg.CFrame = CFrame.new(Physics_Root.Position) * CFrame.Angles(0, Yaw, 0)
+            local c = g.vehiclefly_control
+            local Forward = (c.f or 0) + (c.b or 0)
+            local Right = (c.l or 0) + (c.r or 0)
+            local Up = (c.q or 0) + (c.e or 0)
 
-      if Float_Force then Float_Force.Position = Seat.Position end
-      if Drag_Force then Drag_Force.Force = Vector3.zero end
-      if Boost_Force then Boost_Force.Force = Vector3.zero end
+            Bv.Velocity = (
+                Cam.CFrame.LookVector * Forward +
+                Cam.CFrame.RightVector * Right +
+                Vector3.new(0, Up, 0)
+            ) * (45 * g.vehicle_fly_speed)
+        end
+    end)
 
-      local Cam = workspace.CurrentCamera
+    if not is_mobile then
+        g.vehiclefly_conns.down = UserInputService.InputBegan:Connect(function(i, gp)
+            if gp then return end
+            if i.KeyCode == Enum.KeyCode.W then g.vehiclefly_control.f = 1  end
+            if i.KeyCode == Enum.KeyCode.S then g.vehiclefly_control.b = -1 end
+            if i.KeyCode == Enum.KeyCode.A then g.vehiclefly_control.l = -1 end
+            if i.KeyCode == Enum.KeyCode.D then g.vehiclefly_control.r = 1  end
+            if i.KeyCode == Enum.KeyCode.Q then g.vehiclefly_control.q = -1 end
+            if i.KeyCode == Enum.KeyCode.E then g.vehiclefly_control.e = 1  end
+        end)
 
-      if is_mobile then
-         Bg.CFrame = Cam.CFrame
-         local Mv = Control_Module:GetMoveVector()
-         local Vel = Vector3.zero
-         if Mv.X ~= 0 then Vel = Vel + Cam.CFrame.RightVector * (Mv.X * (45 * g.vehicle_fly_speed)) end
-         if Mv.Z ~= 0 then Vel = Vel - Cam.CFrame.LookVector * (Mv.Z * (45 * g.vehicle_fly_speed)) end
-         Bv.Velocity = Vel
-      else
-         local Look = Cam.CFrame.LookVector
-         local Yaw = math.atan2(-Look.X, -Look.Z)
-         Bg.CFrame = CFrame.new(Physics_Root.Position) * CFrame.Angles(0, Yaw, 0)
-
-         local c = g.vehiclefly_control
-         local Forward = (c.f or 0) + (c.b or 0)
-         local Right = (c.l or 0) + (c.r or 0)
-         local Up = (c.q or 0) + (c.e or 0)
-
-         Bv.Velocity = (
-            Cam.CFrame.LookVector * Forward +
-            Cam.CFrame.RightVector * Right +
-            Vector3.new(0, Up, 0)
-         ) * (45 * g.vehicle_fly_speed)
-      end
-   end)
-
-   if not is_mobile then
-      g.vehiclefly_conns.down = UserInputService.InputBegan:Connect(function(i, gp)
-         if gp then return end
-         if i.KeyCode == Enum.KeyCode.W then g.vehiclefly_control.f = 1  end
-         if i.KeyCode == Enum.KeyCode.S then g.vehiclefly_control.b = -1 end
-         if i.KeyCode == Enum.KeyCode.A then g.vehiclefly_control.l = -1 end
-         if i.KeyCode == Enum.KeyCode.D then g.vehiclefly_control.r = 1  end
-         if i.KeyCode == Enum.KeyCode.Q then g.vehiclefly_control.q = -1 end
-         if i.KeyCode == Enum.KeyCode.E then g.vehiclefly_control.e = 1  end
-      end)
-
-      g.vehiclefly_conns.up = UserInputService.InputEnded:Connect(function(i)
-         if i.KeyCode == Enum.KeyCode.W then g.vehiclefly_control.f = 0 end
-         if i.KeyCode == Enum.KeyCode.S then g.vehiclefly_control.b = 0 end
-         if i.KeyCode == Enum.KeyCode.A then g.vehiclefly_control.l = 0 end
-         if i.KeyCode == Enum.KeyCode.D then g.vehiclefly_control.r = 0 end
-         if i.KeyCode == Enum.KeyCode.Q then g.vehiclefly_control.q = 0 end
-         if i.KeyCode == Enum.KeyCode.E then g.vehiclefly_control.e = 0 end
-      end)
-   end
+        g.vehiclefly_conns.up = UserInputService.InputEnded:Connect(function(i)
+            if i.KeyCode == Enum.KeyCode.W then g.vehiclefly_control.f = 0 end
+            if i.KeyCode == Enum.KeyCode.S then g.vehiclefly_control.b = 0 end
+            if i.KeyCode == Enum.KeyCode.A then g.vehiclefly_control.l = 0 end
+            if i.KeyCode == Enum.KeyCode.D then g.vehiclefly_control.r = 0 end
+            if i.KeyCode == Enum.KeyCode.Q then g.vehiclefly_control.q = 0 end
+            if i.KeyCode == Enum.KeyCode.E then g.vehiclefly_control.e = 0 end
+        end)
+    end
 end
 
 g.stop_vehicle_fly = function()
-   g.vehicle_fly = false
-   g.restore_springs()
-   g.disable_vehicle_noclip()
-   g.cleanup()
-   g.vehiclefly_control = {f=0,b=0,l=0,r=0,q=0,e=0}
+    g.vehicle_fly = false
+    g.restore_springs()
+    g.disable_vehicle_noclip()
+    g.cleanup()
+    g.vehiclefly_control = {f=0,b=0,l=0,r=0,q=0,e=0}
 end
 task.wait(0.25)
 getgenv().Vehicle_Fly_Script = Tab4:CreateToggle({
@@ -1339,6 +1320,17 @@ Callback = function(toggle_v_fly)
     else
         getgenv().stop_vehicle_fly()
     end
+end,})
+
+getgenv().Vehicle_Fly_Speed_Slider = Tab4:CreateSlider({
+Name = "Vehicle Fly Speed",
+Range = {1, 50},
+Increment = 1,
+Suffix = "",
+CurrentValue = g.vehicle_fly_speed or 3,
+Flag = "VehicleFlySpeedSlider",
+Callback = function(speed_value)
+    g.vehicle_fly_speed = speed_value
 end,})
 
 if not getgenv().WalkSpeed_Has_Been_Applied then
