@@ -13455,7 +13455,7 @@ g.always_show_title_of_player_regardless_of_chats = function(toggled)
          fw(0)
             for _, v in ipairs(Players:GetPlayers()) do
                if v ~= Players.LocalPlayer then
-                  if not v:GetAttribute("chatting") then print("why does this not exist here?") end
+                  if not v:GetAttribute("chatting") then lib.disconnect("showing_billboard_titles_above_heads_anyways") task.wait() print("why does this not exist here?") end
                   v:SetAttribute("chatting", false)
                end
             end
