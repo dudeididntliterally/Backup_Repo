@@ -337,7 +337,8 @@ local function retrieve_vehicle()
     end
 end
 
-local Old_PVP_Enabled = Character:GetAttribute("PVPDamageEnabled")
+local char_pvp = getgenv().Character or LocalPlayer.Character or get_char(LocalPlayer, 10)
+local Old_PVP_Enabled = char_pvp:GetAttribute("PVPDamageEnabled")
 getgenv().specific_weapon_mod = false
 getgenv().all_weapon_mods = false
 local User_Configuration = User_Configuration or {}
@@ -1480,32 +1481,28 @@ Flag = "PvPToggle",
 Callback = function(is_pvp_on)
     if is_pvp_on then
         getgenv().pvp_damage_value = true
-        local Character = getgenv().Character or LocalPlayer.Character or get_char(LocalPlayer, 5)
-        local PvP_Attribute = Character and Character:GetAttribute("PVPDamageEnabled")
-        if not PvP_Attribute then
+        local char_pvp = getgenv().Character or LocalPlayer.Character or get_char(LocalPlayer, 10)
+        local PvP_Attribute = char_pvp:GetAttribute("PVPDamageEnabled")
+        if PvP_Attribute == nil then
             getgenv().pvp_damage_value = false
             getgenv().PvPSetting:Set(false)
             return getgenv().notify("Error", "PvP Attribute was not found in Character, cannot set PvP.", 5)
         end
 
         if getgenv().pvp_damage_value == true then
-            Character:SetAttribute("PVPDamageEnabled", true)
+            char_pvp:SetAttribute("PVPDamageEnabled", true)
         end
     else
         getgenv().pvp_damage_value = false
-        if getgenv().Character:GetAttribute("PVPDamageEnabled") and getgenv().Character:GetAttribute("PVPDamageEnabled") == true then
+        local char_pvp = getgenv().Character or LocalPlayer.Character or get_char(LocalPlayer, 10)
+        local PvP_Attribute = char_pvp:GetAttribute("PVPDamageEnabled")
+        if PvP_Attribute == true then
             getgenv().Character:SetAttribute("PVPDamageEnabled", false)
         end
     end
 end,})
-wait(0.3)
-if Old_PVP_Enabled == true then
-    getgenv().PvPSetting:Set(true)
-    getgenv().Character:SetAttribute("PVPDamageEnabled", true)
-else
-    getgenv().PvPSetting:Set(false)
-    getgenv().Character:SetAttribute("PVPDamageEnabled", false)
-end
+wait(0.25)
+pcall(function() getgenv().Character:SetAttribute("PvPDamageEnabled", getgenv().pvp_damage_value or false) end)
 
 getgenv().looping_kills = true
 getgenv().LoopKill_Plr = Tab5:CreateInput({
