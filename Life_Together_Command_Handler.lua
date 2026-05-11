@@ -1232,8 +1232,6 @@ getgenv().handleCommand = function(sender, message)
       else
          return notify("Error", "This player isn't friends with you! add them!", 5)
       end
-   elseif raw_cmd == "feedback" or raw_cmd == "feedbackgui" or raw_cmd == "feedbackui" or raw_cmd == "sendfeedback" or raw_cmd == "sendfeedbackgui" or raw_cmd == "sendfeedbackui" then
-      feedback_GUI()
    elseif raw_cmd == "bringcar" or raw_cmd == "bringvehicle" or raw_cmd == "bringv" then
       local Util = g.Util or require(g.ReplicatedStorage:FindFirstChild("Util", true))
       if not Util then return g.notify("Error", "ModuleScript: 'Util' does not seem to exist.", 5) end
