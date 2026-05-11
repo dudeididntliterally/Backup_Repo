@@ -1442,8 +1442,6 @@ getgenv().handleCommand = function(sender, message)
       end
 
       change_vehicle_color(col, Vehicle_Target)
-   elseif raw_cmd == "musicplr" or raw_cmd == "ytmusic" or raw_cmd == "musicplayer" or raw_cmd == "musicplayerscript" or raw_cmd == "ytmusicplayer" or raw_cmd == "ytmusicplr" then
-      youtube_music_player()
    elseif raw_cmd == "resit" or raw_cmd == "unantisit" or raw_cmd == "unnosit" then
       anti_sit_func(false)
    elseif raw_cmd == "flashname" or raw_cmd == "startflashname" then
