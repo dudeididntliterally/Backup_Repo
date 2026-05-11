@@ -312,7 +312,7 @@ wait(1)
 
 local function spawn_vehicle(name)
     if type(name) ~= "string" then
-        return notify("Error", tostring(name).." is not a string!", 5)
+        return 
     end
 
     local args = {
@@ -868,7 +868,6 @@ if writefile and delfile and loadfile then
         if isfile("car_tint_config.json") then
             local contents = readfile("car_tint_config.json")
             local data = HttpService:JSONDecode(contents)
-
             current_car_tint_color = Color3.new(data.TintColor.R, data.TintColor.G, data.TintColor.B)
             current_car_tint_transparency = data.TintTransparency
             task.wait(.3)
@@ -887,44 +886,136 @@ else
     warn("Didn't load these options, writefile/del/loadfile is unsupported.")
 end
 
+local function apply_inf_stamina(humanoid)
+    if not humanoid then return end
+    getgenv().FlamesLibrary.spawn("inf_stamina_loop", "spawn", function()
+        while getgenv().inf_stamina == true do
+            task.wait(0)
+            pcall(function() humanoid:SetAttribute("Stamina", 9e9) end)
+        end
+    end)
+end
+
 getgenv().InfStamina_FE = Tab2:CreateToggle({
 Name = "Infinite Stamina (FE)",
 CurrentValue = getgenv().inf_stamina or false,
 Flag = "InfStaminaScript",
 Callback = function(inf_stamina)
     if inf_stamina then
-        local Players = getgenv().Players
-        local LocalPlayer = getgenv().LocalPlayer
-        local Character = getgenv().Character or LocalPlayer.Character or get_char(LocalPlayer, 10)
-        local Humanoid = getgenv().Humanoid or Character and Character:FindFirstChildOfClass("Humanoid") or get_human(LocalPlayer, 10)
-        local Modules = LocalPlayer:FindFirstChild("Modules", true)
-        local Managers_Folder = Modules:FindFirstChild("Managers", true)
-        local Sprint_Manager = require(Managers_Folder:FindFirstChild("SprintManager"))
-        local Stamina_Attribute = Humanoid and Humanoid:GetAttribute("Stamina")
-        if not Stamina_Attribute then
+        local char = getgenv().Character or getgenv().LocalPlayer.Character or get_char(getgenv().LocalPlayer, 10)
+        local humanoid = getgenv().Humanoid or char and char:FindFirstChildOfClass("Humanoid") or get_human(getgenv().LocalPlayer, 10)
+        local stamina_attribute = humanoid and humanoid:GetAttribute("Stamina")
+        if stamina_attribute == nil then
             getgenv().inf_stamina = false
-            return warn("Unable to return Stamina value Attribute!") 
+            return warn("Unable to return Stamina value Attribute!")
         end
-        wait(0.2)
+        task.wait(0.2)
         getgenv().inf_stamina = true
-        Inf_Stamina_Active = true
+        apply_inf_stamina(humanoid)
 
-        if inf_stamina then
-            while getgenv().inf_stamina == true do
-            task.wait(0)
-                pcall(function() Humanoid:SetAttribute("Stamina", 9e9) end)
-            end
-        end
+        getgenv().FlamesLibrary.connect("inf_stamina_char_added", getgenv().LocalPlayer.CharacterAdded:Connect(function(new_char)
+            getgenv().FlamesLibrary.spawn("inf_stamina_char_spawn", "delay", 0.3, function()
+                if not new_char then
+                    repeat task.wait() until new_char and new_char:FindFirstChild("Humanoid")
+                end
+                local new_humanoid = new_char:WaitForChild("Humanoid", 5)
+                getgenv().Humanoid = new_humanoid
+                if not new_humanoid or not new_humanoid:GetAttribute("Stamina") then return warn("Unable to return Stamina value Attribute!") end
+                getgenv().FlamesLibrary.disconnect("inf_stamina_loop")
+                task.wait(0.1)
+                apply_inf_stamina(new_humanoid)
+            end)
+        end))
     else
         getgenv().inf_stamina = false
-        if getgenv().Humanoid:GetAttribute("Stamina") then
-            getgenv().Humanoid:SetAttribute("Stamina", 100)
+        getgenv().FlamesLibrary.disconnect("inf_stamina_loop")
+        getgenv().FlamesLibrary.disconnect("inf_stamina_char_added")
+        getgenv().FlamesLibrary.disconnect("inf_stamina_char_spawn")
+        task.wait(0.25)
+        local humanoid = getgenv().Humanoid or getgenv().Character:FindFirstChildOfClass("Humanoid") or get_human(LocalPlayer, 10)
+        if humanoid and humanoid:GetAttribute("Stamina") then
+            pcall(function() humanoid:SetAttribute("Stamina", 100) end)
             return getgenv().notify("Success", "Sprint stamina successfully reset to 100.", 5)
         else
             return getgenv().notify("Error", "Stamina Attribute was not found in Humanoid!", 5)
         end
     end
 end,})
+
+local function disable_script(script_instance, target_parent)
+    if not script_instance then return end
+    if script_instance:IsA("LocalScript") or (typeof(script_instance.Disabled) == "boolean") then
+        script_instance.Disabled = true
+    end
+    script_instance.Parent = target_parent
+end
+
+local function apply_anti_ragdoll()
+    local char = getgenv().Character
+    if not (char and char:FindFirstChildOfClass("Humanoid") and getgenv().Humanoid) then return end
+
+    if char:FindFirstChild("RagdollConstraints") then
+        char:FindFirstChild("RagdollConstraints"):Destroy()
+    end
+
+    local ragdoll_client_scripts = getgenv().LocalPlayer.PlayerScripts:FindFirstChild("RagdollClient")
+    if ragdoll_client_scripts then
+        disable_script(ragdoll_client_scripts, getgenv().SoundService)
+    end
+
+    local starter_ragdoll_client = getgenv().StarterPlayer.StarterPlayerScripts:FindFirstChild("RagdollClient")
+    if starter_ragdoll_client then
+        disable_script(starter_ragdoll_client, getgenv().TweenService)
+    end
+
+    if getgenv().ReplicatedStorage:FindFirstChild("WeaponsSystem")
+        and getgenv().ReplicatedStorage.WeaponsSystem:FindFirstChild("Libraries")
+        and getgenv().ReplicatedStorage.WeaponsSystem.Libraries:FindFirstChild("Ragdoll") then
+        local ragdoll_module = getgenv().ReplicatedStorage.WeaponsSystem.Libraries.Ragdoll
+        if ragdoll_module:IsA("LocalScript") or (typeof(ragdoll_module.Disabled) == "boolean") then
+            ragdoll_module.Disabled = true
+        end
+        ragdoll_module.Parent = game:GetService("ReplicatedFirst")
+    end
+
+    if Modules:FindFirstChild("Ragdoll") then
+        local ragdoll_mod = Modules.Ragdoll
+        if ragdoll_mod:IsA("LocalScript") or (typeof(ragdoll_mod.Disabled) == "boolean") then
+            ragdoll_mod.Disabled = true
+        end
+        ragdoll_mod.Parent = getgenv().AssetService
+    end
+
+    if getgenv().ReplicatedFirst:FindFirstChild("Ragdoll") then
+        local rf_ragdoll = getgenv().ReplicatedFirst.Ragdoll
+        if rf_ragdoll:IsA("LocalScript") or (typeof(rf_ragdoll.Disabled) == "boolean") then
+            rf_ragdoll.Disabled = true
+        end
+        rf_ragdoll.Parent = getgenv().AssetService
+    end
+end
+
+local function revert_anti_ragdoll()
+    if getgenv().SoundService:FindFirstChild("RagdollClient") then
+        local s = getgenv().SoundService.RagdollClient
+        s.Disabled = false
+        s.Parent = getgenv().LocalPlayer.PlayerScripts
+    end
+
+    if getgenv().TweenService:FindFirstChild("RagdollClient") then
+        local s = getgenv().TweenService.RagdollClient
+        s.Disabled = false
+        s.Parent = getgenv().StarterPlayer.StarterPlayerScripts
+    end
+
+    if getgenv().AssetService:FindFirstChild("Ragdoll") then
+        local s = getgenv().AssetService.Ragdoll
+        if typeof(s.Disabled) == "boolean" then
+            s.Disabled = false
+        end
+        s.Parent = Modules
+    end
+end
 
 getgenv().AntiRagdoll = Tab2:CreateToggle({
 Name = "Anti Ragdoll",
@@ -933,128 +1024,106 @@ Flag = "FullAntiRagdoll",
 Callback = function(anti_ragdoll)
     if anti_ragdoll then
         getgenv().Anti_Ragdoll_Enabled = true
-        Anti_Ragdoll_Active = true
-        task.wait(.3)
-        if getgenv().Character and getgenv().Character:FindFirstChildOfClass("Humanoid") and getgenv().Humanoid then
-            if getgenv().Character:FindFirstChild("RagdollConstraints") then
-                getgenv().Character:FindFirstChild("RagdollConstraints"):Destroy()
-            end
-            if getgenv().LocalPlayer:FindFirstChild("PlayerScripts"):FindFirstChild("RagdollClient") then
-                getgenv().LocalPlayer:FindFirstChild("PlayerScripts"):FindFirstChild("RagdollClient").Parent = getgenv().SoundService
-            end
-            if getgenv().StarterPlayer:FindFirstChild("StarterPlayerScripts"):FindFirstChild("RagdollClient") then
-                getgenv().StarterPlayer:FindFirstChild("StarterPlayerScripts"):FindFirstChild("RagdollClient").Parent = getgenv().TweenService
-            end
-            if getgenv().ReplicatedStorage:FindFirstChild("WeaponsSystem"):FindFirstChild("Libraries"):FindFirstChild("Ragdoll") then
-                getgenv().ReplicatedStorage:FindFirstChild("WeaponsSystem"):FindFirstChild("Libraries"):FindFirstChild("Ragdoll").Parent = getgenv().ReplicatedFirst or game:GetService("ReplicatedFirst")
-            end
-            if Modules:FindFirstChild("Ragdoll") then
-                Modules:FindFirstChild("Ragdoll").Parent = getgenv().AssetService
-            end
-            if getgenv().ReplicatedFirst:FindFirstChild("Ragdoll") then
-                getgenv().ReplicatedFirst:FindFirstChild("Ragdoll"):Destroy()
-            end
-        end
+
+        getgenv().FlamesLibrary.connect("anti_ragdoll_char_added", getgenv().LocalPlayer.CharacterAdded:Connect(function(char)
+            getgenv().FlamesLibrary.spawn("anti_ragdoll_char_spawn", "delay", 0.3, function()
+                getgenv().Character = char
+                getgenv().Humanoid = char:WaitForChild("Humanoid", 5)
+                apply_anti_ragdoll()
+            end)
+        end))
+
+        getgenv().FlamesLibrary.spawn("anti_ragdoll_init", "delay", 0.3, function()
+            apply_anti_ragdoll()
+        end)
     else
         getgenv().Anti_Ragdoll_Enabled = false
-        getgenv().Anti_Ragdoll_Enabled = false
-        Anti_Ragdoll_Active = false
-        Anti_Ragdoll_Active = false
-        task.wait(.3)
-        if getgenv().SoundService:FindFirstChild("RagdollClient") then
-            getgenv().SoundService:FindFirstChild("RagdollClient").Parent = getgenv().LocalPlayer:FindFirstChild("PlayerScripts")
-        end
-        if getgenv().TweenService:FindFirstChild("RagdollClient") then
-            getgenv().TweenService:FindFirstChild("RagdollClient").Parent = getgenv().StarterPlayer:FindFirstChild("StarterPlayerScripts")
-        end
-        if getgenv().AssetService:FindFirstChild("Ragdoll") then
-            getgenv().AssetService:FindFirstChild("Ragdoll").Parent = Modules
-        end
+
+        getgenv().FlamesLibrary.disconnect("anti_ragdoll_char_added")
+        getgenv().FlamesLibrary.disconnect("anti_ragdoll_char_spawn")
+        getgenv().FlamesLibrary.disconnect("anti_ragdoll_init")
+
+        task.wait(0.25)
+        revert_anti_ragdoll()
     end
 end,})
 
-getgenv().run_Shift_Speed = getgenv().run_Shift_Speed or 50
-getgenv().walkSpeed = getgenv().walkSpeed or 16
-getgenv().runningEnabled = getgenv().runningEnabled or false
-getgenv().shift_to_run_connection = getgenv().shift_to_run_connection or nil
-getgenv().shift_input_began = getgenv().shift_input_began or nil
-getgenv().shift_input_end = getgenv().shift_input_end or nil
-getgenv().shift_char_added = getgenv().shift_char_added or nil
-getgenv().get_human_here = getgenv().get_human_here or function(plr)
-    local c = getgenv().Character or get_char(LocalPlayer) or plr.Character
+getgenv().run_shift_speed = getgenv().run_shift_speed or 50
+getgenv().walk_speed = getgenv().walk_speed or 16
+getgenv().running_enabled = getgenv().running_enabled or false
+local function get_human_here(plr)
+    local c = getgenv().Character or plr.Character or get_char(plr)
     if not c then return nil end
     return c:FindFirstChildOfClass("Humanoid")
 end
-getgenv().setup_shift_to_run = getgenv().setup_shift_to_run or function()
-    if getgenv().shift_to_run_connection then getgenv().shift_to_run_connection:Disconnect() end
-    if getgenv().shift_input_began then getgenv().shift_input_began:Disconnect() end
-    if getgenv().shift_input_end then getgenv().shift_input_end:Disconnect() end
-    if getgenv().shift_char_added then getgenv().shift_char_added:Disconnect() end
 
-    local shiftHeld = false
-    local hum = getgenv().get_human_here(getgenv().LocalPlayer)
+local function setup_shift_to_run()
+    getgenv().FlamesLibrary.disconnect("shift_heartbeat")
+    getgenv().FlamesLibrary.disconnect("shift_input_began")
+    getgenv().FlamesLibrary.disconnect("shift_input_end")
+    getgenv().FlamesLibrary.disconnect("shift_char_added")
 
-    getgenv().shift_to_run_connection = getgenv().RunService.Heartbeat:Connect(function()
-        if not getgenv().runningEnabled then return end
-        hum = getgenv().get_human_here(getgenv().LocalPlayer)
+    local shift_held = false
+    local hum = get_human_here(getgenv().LocalPlayer)
+    getgenv().FlamesLibrary.connect("shift_heartbeat", getgenv().RunService.Heartbeat:Connect(function()
+        if not getgenv().running_enabled then return end
+        hum = get_human_here(getgenv().LocalPlayer)
         if not hum then return end
-        if shiftHeld then
-            hum.WalkSpeed = getgenv().run_Shift_Speed
-        else
-            hum.WalkSpeed = getgenv().walkSpeed
-        end
-    end)
+        hum.WalkSpeed = shift_held and getgenv().run_shift_speed or getgenv().walk_speed
+    end))
 
-    getgenv().shift_input_began = getgenv().UserInputService.InputBegan:Connect(function(i, g)
-        if g then return end
-        if not getgenv().runningEnabled then return end
+    getgenv().FlamesLibrary.connect("shift_input_began", getgenv().UserInputService.InputBegan:Connect(function(i, g)
+        if g or not getgenv().running_enabled then return end
         if i.KeyCode == Enum.KeyCode.LeftShift then
-            shiftHeld = true
+            shift_held = true
         end
-    end)
+    end))
 
-    getgenv().shift_input_end = getgenv().UserInputService.InputEnded:Connect(function(i, g)
-        if g then return end
-        if not getgenv().runningEnabled then return end
+    getgenv().FlamesLibrary.connect("shift_input_end", getgenv().UserInputService.InputEnded:Connect(function(i, g)
+        if g or not getgenv().running_enabled then return end
         if i.KeyCode == Enum.KeyCode.LeftShift then
-            shiftHeld = false
+            shift_held = false
         end
-    end)
+    end))
 
-    getgenv().shift_char_added = getgenv().LocalPlayer.CharacterAdded:Connect(function()
-        hum = getgenv().get_human_here(getgenv().LocalPlayer)
-    end)
+    getgenv().FlamesLibrary.connect("shift_char_added", getgenv().LocalPlayer.CharacterAdded:Connect(function(new_char)
+        getgenv().FlamesLibrary.spawn("shift_char_spawn", "delay", 0.3, function()
+            getgenv().Character = new_char
+            hum = get_human_here(getgenv().LocalPlayer)
+        end)
+    end))
 end
 
-getgenv().disable_shift_to_run = getgenv().disable_shift_to_run or function()
-    if getgenv().shift_to_run_connection then getgenv().shift_to_run_connection:Disconnect() end
-    if getgenv().shift_input_began then getgenv().shift_input_began:Disconnect() end
-    if getgenv().shift_input_end then getgenv().shift_input_end:Disconnect() end
-    if getgenv().shift_char_added then getgenv().shift_char_added:Disconnect() end
+local function disable_shift_to_run()
+    getgenv().FlamesLibrary.disconnect("shift_heartbeat")
+    getgenv().FlamesLibrary.disconnect("shift_input_began")
+    getgenv().FlamesLibrary.disconnect("shift_input_end")
+    getgenv().FlamesLibrary.disconnect("shift_char_added")
+    getgenv().FlamesLibrary.disconnect("shift_char_spawn")
 
-    local hum = getgenv().get_human_here(getgenv().LocalPlayer)
-    if hum then hum.WalkSpeed = getgenv().walkSpeed end
+    local hum = get_human_here(getgenv().LocalPlayer)
+    if hum then hum.WalkSpeed = getgenv().walk_speed end
 end
 
-getgenv().ShifTToRunSpeed = Tab2:CreateInput({
-Name = "Shift_To_Run Speed",
+getgenv().ShiftToRunSpeed = Tab2:CreateInput({
+Name = "Shift To Run Speed",
 PlaceholderText = "Enter Speed",
 RemoveTextAfterFocusLost = true,
 Callback = function(get_speed)
     local s = tonumber(get_speed)
-    if s then getgenv().run_Shift_Speed = s end
+    if s then getgenv().run_shift_speed = s end
 end,})
-wait(0.2)
+
 getgenv().ShiftToRun = Tab2:CreateToggle({
 Name = "Shift To Run",
-CurrentValue = getgenv().runningEnabled or false,
+CurrentValue = getgenv().running_enabled or false,
 Flag = "SpeedCoilAlt",
 Callback = function(state)
-    getgenv().runningEnabled = state
+    getgenv().running_enabled = state
     if state then
-        getgenv().setup_shift_to_run()
+        setup_shift_to_run()
     else
-        getgenv().disable_shift_to_run()
+        disable_shift_to_run()
     end
 end,})
 
@@ -1736,7 +1805,7 @@ for name, _ in pairs(carNames) do
 end
 wait()
 local vehicle_selected = nil
-
+local dropdown_ready = false
 getgenv().Spawn_Vehicle_Plr = Tab3:CreateDropdown({
 Name = "Spawn A Vehicle",
 Options = Owned_Vehicle_Slots,
@@ -1744,12 +1813,24 @@ CurrentOption = Owned_Vehicle_Slots[1] or "",
 MultipleOptions = false,
 Flag = "vehicle_slot",
 Callback = function(vehicle_slot_picker)
+    if not dropdown_ready then
+        dropdown_ready = true
+        return
+    end
+
     if typeof(vehicle_slot_picker) == "table" then
         vehicle_slot_picker = vehicle_slot_picker[1]
     end
 
+    if not vehicle_slot_picker or vehicle_slot_picker == "" then return end
+
     vehicle_selected = carNames[vehicle_slot_picker]
-    task.wait(.3)
+
+    if not vehicle_selected then
+        return notify("Error", "No vehicle found for: " .. tostring(vehicle_slot_picker), 5)
+    end
+
+    task.wait(0.3)
     spawn_vehicle(vehicle_slot_picker)
 end,})
 
@@ -1874,6 +1955,22 @@ Callback = function()
         getgenv().notify("Success", "Successfully claimed 60 minute reward!", 5)
     end
 end,})
+
+local function get_tuning_module(module_name)
+    local current_vehicle = retrieve_vehicle()
+    if not current_vehicle then return nil end
+    local chassis = current_vehicle:FindFirstChild("Chassis: Core")
+    if not chassis then return nil end
+    local tuning = chassis:FindFirstChild("Tuning Components")
+    if not tuning then return nil end
+    local module = tuning:FindFirstChild(module_name)
+    if not module then return nil end
+    return require(module)
+end
+
+local sliders_ready = false
+task.wait(0.5)
+sliders_ready = true
 
 if executor_Name ~= "Solara" and executor_Name ~= "Xeno" then
     if not string.find(executor_Name, "JJSploit") then
