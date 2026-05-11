@@ -1,4 +1,5 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
+local g = getgenv()
 local scriptstoload = {
     ["Tower Of Misery"] = {
         id = 4954752502,
@@ -58,10 +59,10 @@ local scriptstoload = {
     }
 }
 
-getgenv().Game = cloneref and cloneref(game) or game
-local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/main/Notification_Lib.lua"))()
+g.Game = cloneref and cloneref(game) or game
+local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Notify_Lib.lua"))()
 wait(0.2)
-getgenv().notify = getgenv().notify or function(notif_type, msg, duration)
+g.notify = g.notify or function(notif_type, msg, duration)
     NotifyLib:External_Notification(tostring(notif_type), tostring(msg), tonumber(duration))
 end
 
@@ -100,7 +101,7 @@ for name, all_scripts in pairs(scriptstoload) do
     end
 end
 
-local rf = loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/GetUILibrary"))()
+local rf = loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Rayfield_UI.lua"))()
 wait(0.1)
 local window = rf:CreateWindow({
     Name = "Flames Hub | 🏠 Script Hub Loader 🏠",
@@ -128,7 +129,7 @@ local window = rf:CreateWindow({
     }
 })
 wait(0.1)
-getgenv().Buttons = getgenv().Buttons or {}
+g.Buttons = g.Buttons or {}
 
 local Tab1 = window:CreateTab("🏡 Scripts 🏡", 0)
 local Section1 = Tab1:CreateSection("| 🏡 Scripts Section 🏡 |")
@@ -138,13 +139,19 @@ wait(0.2)
 getgenv().FlamesHubUniversal = Tab1:CreateButton({
 Name = "Flames Hub (Universal)",
 Callback = function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/retrieve_branch_version.lua"))()
+    if g.notify then
+        return g.notify("Error", "This will be added back soon.", 5)
+    else
+        return
+    end
+    --loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/retrieve_branch_version.lua"))()
 end,})
 
 getgenv().FlamesHubUniversal = Tab1:CreateButton({
 Name = "Condo Games Destroyer",
 Callback = function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/CondoGamesRuiner.lua"))()
+    if g.notify then return g.notify("Success", "Condo games don't exist anymore lol.", 5) else return end
+    --loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/CondoGamesRuiner.lua"))()
 end,})
 
 for name, dude in pairs(scriptstoload) do
