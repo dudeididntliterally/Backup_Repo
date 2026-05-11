@@ -7323,8 +7323,8 @@ g.night_vision = function(toggle)
    end
 end
 
-g.Net = find_module_s("Net") or require(g.Core:FindFirstChild("Net"))
-g.owner_joined = function(Name) -- so when I update the script I can update the message below dynamically
+g.Net = getgenv().Net or find_module_s("Net") or require(g.Core:FindFirstChild("Net"))
+g.owner_joined = function(Name) -- so when I update the script I can update the message below dynamically.
    notify("Success", "Flames Hub | Owner has joined this server ("..tostring(Name).."), this is my current and only account right now, so come to me if you need help/assistance.", 45)
 end
 
@@ -7435,47 +7435,6 @@ g.workspace_editor_script_GUI = function()
    end
    fw(0.1)
    loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Workspace_Editor.lua'))()
-end
-
-local chats = {
-   "yo",
-   "bro",
-   "wait",
-   "nicee",
-   "holdon",
-   "we here",
-   "no wayy",
-   "lets gooo",
-   "aigh bru",
-   "almost there",
-   "that was wild",
-   "aigh bro we here",
-   "yo that was wild fr",
-   "cant believe that just happened"
-}
-
-local function random_decimal(min, max) return min + (max - min) * math.random() end
-local function send_safe(channel, msg)
-   channel:SendAsync(msg)
-
-   if math.random() < 0.3 then
-      wait(1)
-      channel:SendAsync("yo")
-   end
-end
-
-g.advertise_command_send_chats = function()
-   local textchatservice = g.TextChatService
-   local channel = textchatservice:FindFirstChild("RBXGeneral", true) or textchatservice:FindFirstChild("TextChannels"):FindFirstChild("RBXGeneral")
-   if not channel then return end
-   local msg = chats[math.random(1, #chats)]
-   if will_tag(msg) then
-      return g.notify("Warning", "Saved from hashtags! Message was going to filter.", 5)
-   end
-   wait(random_decimal(0.01, 0.9))
-   pcall(function()
-      send_safe(channel, msg)
-   end)
 end
 
 g.is_localplayer_server_owner = function()
