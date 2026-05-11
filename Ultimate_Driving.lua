@@ -82,6 +82,47 @@ g.Service_Wrap = g.Service_Wrap or function(name)
     return svc
 end
 
+local function find_blocked_music_folder()
+    local cache = getgenv().blocked_music_folder_found
+    if cache and cache.Parent and cache:IsA("Folder") and cache:IsDescendantOf(getgenv().ReplicatedStorage) then
+        return cache
+    end
+
+    for _, v in ipairs(getgenv().ReplicatedStorage:GetDescendants()) do
+        if v:IsA("Folder") and v.Name:lower():find("block") and v.Name:lower():find("music") then
+            getgenv().blocked_music_folder_found = v
+            return v
+        end
+    end
+
+    return nil
+end
+
+if not getgenv().blocked_music_folder_found then pcall(find_blocked_music_folder) end
+task.wait(0.1)
+g.clear_folder_children = function()
+    local folder = getgenv().blocked_music_folder_found
+    if not folder then return end
+    for _, v in ipairs(folder:GetChildren()) do
+        if v:IsA("NumberValue") or v:IsA("IntValue") or v:IsA("StringValue") then
+            pcall(function() v.Parent = nil end)
+        end
+    end
+end
+task.wait(0.25)
+g.clear_folder_children()
+
+local debounce = false
+getgenv().FlamesLibrary.connect("folder_cleanup_added", getgenv().blocked_music_folder_found.ChildAdded:Connect(function(v)
+    if not (v:IsA("NumberValue") or v:IsA("IntValue") or v:IsA("StringValue")) then return end
+    if debounce then return end
+    debounce = true
+    task.defer(function()
+        g.clear_folder_children()
+        debounce = false
+    end)
+end))
+
 local function getExecutor()
     local name
     if identifyexecutor then
@@ -942,9 +983,14 @@ Callback = function(inf_stamina)
     end
 end,})
 
+local function has_disabled_property(instance)
+    local ok, result = pcall(function() return typeof(instance.Disabled) == "boolean" end)
+    return ok and result
+end
+
 local function disable_script(script_instance, target_parent)
     if not script_instance then return end
-    if script_instance:IsA("LocalScript") or (typeof(script_instance.Disabled) == "boolean") then
+    if script_instance:IsA("LocalScript") or has_disabled_property(script_instance) then
         script_instance.Disabled = true
     end
     script_instance.Parent = target_parent
@@ -958,9 +1004,9 @@ local function apply_anti_ragdoll()
         char:FindFirstChild("RagdollConstraints"):Destroy()
     end
 
-    local ragdoll_client_scripts = getgenv().LocalPlayer.PlayerScripts:FindFirstChild("RagdollClient")
-    if ragdoll_client_scripts then
-        disable_script(ragdoll_client_scripts, getgenv().SoundService)
+    local ragdoll_client = getgenv().LocalPlayer.PlayerScripts:FindFirstChild("RagdollClient")
+    if ragdoll_client then
+        disable_script(ragdoll_client, getgenv().SoundService)
     end
 
     local starter_ragdoll_client = getgenv().StarterPlayer.StarterPlayerScripts:FindFirstChild("RagdollClient")
@@ -971,27 +1017,15 @@ local function apply_anti_ragdoll()
     if getgenv().ReplicatedStorage:FindFirstChild("WeaponsSystem")
         and getgenv().ReplicatedStorage.WeaponsSystem:FindFirstChild("Libraries")
         and getgenv().ReplicatedStorage.WeaponsSystem.Libraries:FindFirstChild("Ragdoll") then
-        local ragdoll_module = getgenv().ReplicatedStorage.WeaponsSystem.Libraries.Ragdoll
-        if ragdoll_module:IsA("LocalScript") or (typeof(ragdoll_module.Disabled) == "boolean") then
-            ragdoll_module.Disabled = true
-        end
-        ragdoll_module.Parent = game:GetService("ReplicatedFirst")
+        disable_script(getgenv().ReplicatedStorage.WeaponsSystem.Libraries.Ragdoll, game:GetService("ReplicatedFirst"))
     end
 
     if Modules:FindFirstChild("Ragdoll") then
-        local ragdoll_mod = Modules.Ragdoll
-        if ragdoll_mod:IsA("LocalScript") or (typeof(ragdoll_mod.Disabled) == "boolean") then
-            ragdoll_mod.Disabled = true
-        end
-        ragdoll_mod.Parent = getgenv().AssetService
+        disable_script(Modules.Ragdoll, getgenv().AssetService)
     end
 
     if getgenv().ReplicatedFirst:FindFirstChild("Ragdoll") then
-        local rf_ragdoll = getgenv().ReplicatedFirst.Ragdoll
-        if rf_ragdoll:IsA("LocalScript") or (typeof(rf_ragdoll.Disabled) == "boolean") then
-            rf_ragdoll.Disabled = true
-        end
-        rf_ragdoll.Parent = getgenv().AssetService
+        disable_script(getgenv().ReplicatedFirst.Ragdoll, getgenv().AssetService)
     end
 end
 
@@ -1010,7 +1044,7 @@ local function revert_anti_ragdoll()
 
     if getgenv().AssetService:FindFirstChild("Ragdoll") then
         local s = getgenv().AssetService.Ragdoll
-        if typeof(s.Disabled) == "boolean" then
+        if has_disabled_property(s) then
             s.Disabled = false
         end
         s.Parent = Modules
@@ -1048,6 +1082,31 @@ Callback = function(anti_ragdoll)
     end
 end,})
 
+if not getgenv().WalkSpeed_Has_Been_Applied then
+    getgenv().WalkSpeed_Has_Been_Applied = true
+    local lp = g.Players.LocalPlayer
+    getgenv().hooks = {
+        walkspeed = 16,
+        jumppower = 50
+    }
+    local index
+    local newindex
+
+    index = hookmetamethod(game, "__index", function(self, property)
+        if not checkcaller() and self:IsA("Humanoid") and self:IsDescendantOf(lp.Character) and getgenv().hooks[property:lower()] then
+            return getgenv().hooks[property:lower()]
+        end
+        return index(self, property)
+    end)
+
+    newindex = hookmetamethod(game, "__newindex", function(self, property, value)
+        if not checkcaller() and self:IsA("Humanoid") and self:IsDescendantOf(lp.Character) and getgenv().hooks[property:lower()] then
+            return
+        end
+        return newindex(self, property, value)
+    end)
+end
+
 getgenv().run_shift_speed = getgenv().run_shift_speed or 50
 getgenv().walk_speed = getgenv().walk_speed or 16
 getgenv().running_enabled = getgenv().running_enabled or false
@@ -1058,51 +1117,45 @@ local function get_human_here(plr)
 end
 
 local function setup_shift_to_run()
-    getgenv().FlamesLibrary.disconnect("shift_heartbeat")
     getgenv().FlamesLibrary.disconnect("shift_input_began")
     getgenv().FlamesLibrary.disconnect("shift_input_end")
     getgenv().FlamesLibrary.disconnect("shift_char_added")
 
     local shift_held = false
-    local hum = get_human_here(getgenv().LocalPlayer)
-    getgenv().FlamesLibrary.connect("shift_heartbeat", getgenv().RunService.Heartbeat:Connect(function()
-        if not getgenv().running_enabled then return end
-        hum = get_human_here(getgenv().LocalPlayer)
-        if not hum then return end
-        hum.WalkSpeed = shift_held and getgenv().run_shift_speed or getgenv().walk_speed
-    end))
 
-    getgenv().FlamesLibrary.connect("shift_input_began", getgenv().UserInputService.InputBegan:Connect(function(i, g)
-        if g or not getgenv().running_enabled then return end
+    getgenv().FlamesLibrary.connect("shift_input_began", getgenv().UserInputService.InputBegan:Connect(function(i, gp)
+        if gp or not getgenv().running_enabled then return end
         if i.KeyCode == Enum.KeyCode.LeftShift then
             shift_held = true
+            getgenv().hooks.walkspeed = getgenv().run_shift_speed
+            local hum = get_human_here(getgenv().LocalPlayer)
+            if hum then hum.WalkSpeed = getgenv().run_shift_speed end
         end
     end))
 
-    getgenv().FlamesLibrary.connect("shift_input_end", getgenv().UserInputService.InputEnded:Connect(function(i, g)
-        if g or not getgenv().running_enabled then return end
+    getgenv().FlamesLibrary.connect("shift_input_end", getgenv().UserInputService.InputEnded:Connect(function(i, gp)
+        if gp or not getgenv().running_enabled then return end
         if i.KeyCode == Enum.KeyCode.LeftShift then
             shift_held = false
+            getgenv().hooks.walkspeed = getgenv().walk_speed
+            local hum = get_human_here(getgenv().LocalPlayer)
+            if hum then hum.WalkSpeed = getgenv().walk_speed end
         end
     end))
 
     getgenv().FlamesLibrary.connect("shift_char_added", getgenv().LocalPlayer.CharacterAdded:Connect(function(new_char)
         getgenv().FlamesLibrary.spawn("shift_char_spawn", "delay", 0.3, function()
             getgenv().Character = new_char
-            hum = get_human_here(getgenv().LocalPlayer)
         end)
     end))
 end
 
 local function disable_shift_to_run()
-    getgenv().FlamesLibrary.disconnect("shift_heartbeat")
     getgenv().FlamesLibrary.disconnect("shift_input_began")
     getgenv().FlamesLibrary.disconnect("shift_input_end")
     getgenv().FlamesLibrary.disconnect("shift_char_added")
     getgenv().FlamesLibrary.disconnect("shift_char_spawn")
-
-    local hum = get_human_here(getgenv().LocalPlayer)
-    if hum then hum.WalkSpeed = getgenv().walk_speed end
+    getgenv().hooks.walkspeed = getgenv().walk_speed
 end
 
 getgenv().ShiftToRunSpeed = Tab2:CreateInput({
@@ -1111,7 +1164,12 @@ PlaceholderText = "Enter Speed",
 RemoveTextAfterFocusLost = true,
 Callback = function(get_speed)
     local s = tonumber(get_speed)
-    if s then getgenv().run_shift_speed = s end
+    if s then
+        getgenv().run_shift_speed = s
+        if getgenv().running_enabled then
+            getgenv().hooks.walkspeed = s
+        end
+    end
 end,})
 
 getgenv().ShiftToRun = Tab2:CreateToggle({
