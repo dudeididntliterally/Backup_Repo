@@ -123,6 +123,32 @@ getgenv().FlamesLibrary.connect("folder_cleanup_added", getgenv().blocked_music_
     end)
 end))
 
+getgenv().active_friends_online = getgenv().active_friends_online or true
+getgenv().FlamesLibrary.spawn("friends_online_loop", "spawn", function()
+    local Players = g.Players or cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
+    local LocalPlayer = g.LocalPlayer or Players.LocalPlayer
+    local fw = getgenv().FlamesLibrary.wait
+
+    while getgenv().active_friends_online == true do
+        pcall(function() LocalPlayer:SetAttribute("FriendsInServer", 5) end)
+        fw(0)
+    end
+end)
+
+if not getgenv().Activated_Print_Bypass_Leaderboard_Annoying_Loop then
+    getgenv().Activated_Print_Bypass_Leaderboard_Annoying_Loop = true
+    if hookfunction then
+        local old_print
+        old_print = hookfunction(print, function(...)
+            local trace = debug.traceback("", 2)
+            if trace:find("LeaderboardManager") then return end
+            old_print(...)
+        end)
+    else
+        getgenv().Activated_Print_Bypass_Leaderboard_Annoying_Loop = true
+    end
+end
+
 local function getExecutor()
     local name
     if identifyexecutor then
