@@ -172,24 +172,10 @@ local function get_or_set(global, value)
     return v
 end
 
-if not getgenv().All_Services_Initialized then
-    local function exec_ls(url)
-        local FormattedURL = tostring(url)
-
-        return loadstring(game:HttpGet(FormattedURL))()
-    end
-    wait(0.1)
-    if not getgenv().exec_ls then
-        getgenv().exec_ls = exec_ls
-    end
-    wait(0.1)
-    function exec_lib(Name)
-        local Formatted_Library = tostring(Name)
-
-        exec_ls("https://raw.githubusercontent.com/EnterpriseExperience/Script_Framework/main/"..Formatted_Library)
-    end
-    wait(0.3)
-    exec_lib("GlobalEnv_Framework.lua")
+if not g.GlobalEnvironmentFramework_Initialized then
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Global_Environment.lua"))()
+   wait(0.1)
+   g.GlobalEnvironmentFramework_Initialized = true
 end
 wait(1)
 HttpService  = get_or_set("HttpService", safe_wrap("HttpService"))
