@@ -8810,10 +8810,10 @@ if Bindable then
    end)
 end
 
-if g.get_enrolled_state == nil then
-   notify("Info", "Waiting until g.get_enrolled_state exists...", 6)
+if getgenv().get_enrolled_state == nil then
+   notify("Info", "Waiting until 'get_enrolled_state' exists...", 6)
    repeat task.wait() until g.get_enrolled_state and g.get_enrolled_state ~= nil
-   if g.get_enrolled_state then
+   if getgenv().get_enrolled_state then
       notify("Success", "Found get_enrolled_state correctly.", 5)
    end
 end
@@ -18475,7 +18475,7 @@ g.command_bar_GUI = function(forceOpen)
       end)
    end)
 
-   local ismobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+   local ismobile = UserInputService.TouchEnabled
    if ismobile then
       local mobilebtn = Instance.new("TextButton")
       mobilebtn.Parent = guiMain
