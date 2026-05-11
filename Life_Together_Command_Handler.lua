@@ -113,8 +113,6 @@ getgenv().handleCommand = function(sender, message)
       pcall(function()
          g.reset_to_original_height()
       end)
-   elseif raw_cmd == "advertise" or raw_cmd == "promote" then
-      g.advertise_command_send_chats()
    elseif raw_cmd == "flames" or raw_cmd == "flameson" or raw_cmd == "startflames" then
       if g.spamming_all_that_fire then
          return g.notify("Warning", "You're already spamming Fire!", 5)
