@@ -1185,6 +1185,124 @@ Callback = function(state)
     end
 end,})
 
+g.AntiFling_Enabled = g.AntiFling_Enabled or false
+g.antifling_parts_cache = g.antifling_parts_cache or {}
+local lib = getgenv().FlamesLibrary
+local _uid = 0
+local function make_key(prefix, inst) _uid = _uid + 1 return prefix .. "_" .. tostring(inst):gsub("[^%w]", "") .. "_" .. _uid end
+local function is_wheel_model(obj) local parent = obj.Parent return parent and (parent.Name == "Wheels" or parent.Name == "WheelsVisible") end
+local function process_part(part)
+    if not part:IsA("BasePart") then return end
+    if g.antifling_parts_cache[part] then return end
+    if is_wheel_model(part) then return end
+    part.CanCollide = false
+    g.antifling_parts_cache[part] = true
+
+    local key = make_key("AntiFling_PartCleanup", part)
+    lib.connect(key, part.AncestryChanged:Connect(function()
+        if not part:IsDescendantOf(game) then
+            g.antifling_parts_cache[part] = nil
+            lib.disconnect(key)
+        end
+    end))
+end
+
+local function process_vehicle(model)
+    if not model or not model.Parent then
+        local elapsed = 0
+        repeat task.wait(0.5) elapsed = elapsed + 0.5 until (model and model.Parent) or elapsed >= 10
+        if not model or not model.Parent then return end
+    end
+
+    for _, inst in ipairs(model:GetDescendants()) do
+        if inst:IsA("BasePart") then
+            process_part(inst)
+        end
+    end
+
+    lib.connect(make_key("AntiFling_DescAdded", model), model.DescendantAdded:Connect(function(desc)
+        if not g.AntiFling_Enabled then return end
+        if desc:IsA("BasePart") then
+            process_part(desc)
+        end
+    end))
+end
+
+local function setup_vehicles_folder(folder)
+    for _, child in ipairs(folder:GetChildren()) do
+        if child:IsA("Model") then
+            process_vehicle(child)
+        elseif child:IsA("BasePart") then
+            process_part(child)
+        end
+    end
+
+    if lib.is_alive("AntiFling_ChildAdded") then
+        lib.disconnect("AntiFling_ChildAdded")
+    end
+
+    lib.connect("AntiFling_ChildAdded", folder.ChildAdded:Connect(function(child)
+        if not g.AntiFling_Enabled then return end
+        if child:IsA("Model") then
+            process_vehicle(child)
+        elseif child:IsA("BasePart") then
+            process_part(child)
+        end
+    end))
+
+    if g.notify then
+        g.notify("Success", "Flames Hub | Anti Vehicle Fling enabled.", 5)
+    end
+end
+
+local function clear_all()
+    g.AntiFling_Enabled = false
+    table.clear(g.antifling_parts_cache)
+    lib.cleanup_all()
+end
+
+g.anti_fling = function(state)
+    if state == true then
+        if g.AntiFling_Enabled then
+            return 
+        end
+
+        g.AntiFling_Enabled = true
+        table.clear(g.antifling_parts_cache)
+
+        local main = Workspace:FindFirstChild("_Main")
+        local vehicles_folder = main and main:FindFirstChild("Vehicles")
+        if vehicles_folder then
+            setup_vehicles_folder(vehicles_folder)
+        end
+
+        lib.connect("AntiFling_FolderWatch", Workspace.DescendantAdded:Connect(function(child)
+            if not g.AntiFling_Enabled then return end
+            if child.Name == "Vehicles" and child:IsA("Folder") and child.Parent and child.Parent.Name == "_Main" then
+                setup_vehicles_folder(child)
+            end
+        end))
+    elseif state == false then
+        if not g.AntiFling_Enabled then
+            return 
+        end
+
+        clear_all()
+
+        if g.notify then
+            g.notify("Success", "Flames Hub | Anti Vehicle Fling disabled.", 5)
+        end
+    end
+end
+
+getgenv().AntiFling = Tab4:CreateToggle({
+Name = "Anti Vehicle Fling",
+CurrentValue = g.AntiFling_Enabled or false,
+Flag = "AntiVehicleFling",
+Callback = function(state)
+    g.anti_fling(state)
+end,})
+
 getgenv().Rainbow_FE_Car = Tab4:CreateToggle({
 Name = "Rainbow Car (FE)",
 CurrentValue = false,
