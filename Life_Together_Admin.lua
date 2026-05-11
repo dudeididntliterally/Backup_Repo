@@ -4023,7 +4023,7 @@ g.NotifyLib = g.NotifyLib or try_load({
 -- [[ you can use these, or you can modify the source code from each one and upload it to your own GitHub. ]] --
 local github_urls = {
    GlobalEnv_Framework = {
-      "https://raw.githubusercontent.com/EnterpriseExperience/Script_Framework/refs/heads/main/GlobalEnv_Framework.lua"
+      "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Global_Environment.lua"
    },
    Life_Together_Network = {
       "https://raw.githubusercontent.com/EnterpriseExperience/Script_Framework/refs/heads/main/Life_Together_Network.lua"
