@@ -16240,7 +16240,7 @@ g.forceUnequip = function(slot, id)
    end
 end
 
-g.feedback_GUI = function()
+--[[g.feedback_GUI = function()
    if g.FeedbackCooldown then
       return notify("Warning", "You must wait before sending a Feedback request again! (" .. (g.FeedbackTimeLeft or 0) .. "s left)", 5)
    end
@@ -16349,7 +16349,6 @@ g.feedback_GUI = function()
    TBcorner.CornerRadius = UDim.new(0, 8)
    TBcorner.Parent = TextBox
 
-   -- [[ for when someone sends you feedback. ]] --
    g.bad_phrases = {
       "this script is ass",
       "your script is shit",
@@ -16419,15 +16418,9 @@ g.feedback_GUI = function()
 
       local flags = {}
 
-      for _, list in ipairs({
-         { g.discordWords, "discord" },
-         { g.serverWords, "server" },
-         { g.userWords, "user" },
-         { g.offensiveWords, "offensive" }
-      }) do
+      for _, list in ipairs({{ g.discordWords, "discord" }, { g.serverWords, "server" }, { g.userWords, "user" }, { g.offensiveWords, "offensive" } }) do
          for _, word in ipairs(list[1]) do
             if message:find(word) then
-               flags[list[2]] = true
                break
             end
          end
@@ -16513,7 +16506,7 @@ g.feedback_GUI = function()
          local stroke = data.stroke
 
          if data.button == selected_button then
-            stroke.Color = Color3.fromRGB(60, 200, 120) -- green glow, for perfection lol.
+            stroke.Color = Color3.fromRGB(60, 200, 120)
             stroke.Thickness = 3
             stroke.Transparency = 0
          else
@@ -16571,7 +16564,7 @@ g.feedback_GUI = function()
    local btn3 = create_type_button(tostring(g.Flames_Emojis_Content_Stuff["Feedback_Menu_User_Report_Selection"]), Color3.fromRGB(0,0,0), 0.5, 175, "report", UDim2.new(0.25, -6, 0, 25))
    local btn4 = create_type_button(tostring(g.Flames_Emojis_Content_Stuff["Feedback_Menu_Bug_Selection"]), Color3.fromRGB(165,42,42), 0.75, 175, "bug", UDim2.new(0.239999995, -6, 0, 25))
 
-   selected_button = btn1 -- will default selection for user comfort, so they know to pick one.
+   selected_button = btn1
    update_button_visuals()
    fw(0.1)
    local SendBtn = Instance.new("TextButton")
@@ -16662,7 +16655,7 @@ g.feedback_GUI = function()
 
       ScreenGui:Destroy()
    end)
-end
+end--]]
 
 local humanoid = g.Humanoid or g.Character and g.Character:FindFirstChildOfClass("Humanoid") or get_human(LocalPlayer or game.Players.LocalPlayer)
 local applied = humanoid:GetAppliedDescription()
