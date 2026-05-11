@@ -54,7 +54,7 @@ local has_gethidden = (typeof(get_hidden_gui) == "function") or (typeof(g.get_hi
 g.found_image_button_for_yt_music_player = g.found_image_button_for_yt_music_player or nil
 local CoreGui = g.CoreGui or cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
 
-if not g.yt_music_player_loaded_flames_hub then
+--[[if not g.yt_music_player_loaded_flames_hub then
    g.yt_music_player_loaded_flames_hub = true
    loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/yt_music_plr.lua'))()
 
@@ -83,7 +83,7 @@ if not g.yt_music_player_loaded_flames_hub then
          end
       end)
    end
-end
+end--]]
 
 if not has_gethui and not has_gethidden and not g.roblox_hidden_gui_location then
    local CoreGui = g.CoreGui or cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
@@ -2991,30 +2991,12 @@ g.safe_wrapper = g.safe_wrapper or function(service)
    end
 end
 
-g.FlamesLibrary = getgenv().FlamesLibrary
 local replicate_sig_func = replicatesignal or replicate_signal or DeltaSignal
 local set_hid_func = sethiddenproperty or set_hidden_property or set_hidden_prop or sethiddenprop
 g.originalIO = g.originalIO or {}
 g.spectateConns = g.spectateConns or {}
 local fw = getgenv().FlamesLibrary.wait
 local name = "administrator_watcher_conn_Flames_Hub"
-
-if not g.FlamesLibrary.is_alive(name) then
-   g.FlamesLibrary.spawn(name, "spawn", function()
-      while true do
-         local ok, err = pcall(function()
-            local player = g.LocalPlayer
-
-            if player and player:GetAttribute("has_administrative_powers") then
-               pcall(function() player:Kick("We know you're an administrator of Life Together RP! Flames Hub automatically bans these suspected players, YOU'RE NOT WELCOME! Get owned.") end)
-               wait(2)
-               while true do end
-            end
-            fw(.5)
-         end)
-      end
-   end)
-end
 
 originalIO.ensureCam = function(spectateTarget)
    if not spectateTarget or not spectateSubject then return end
