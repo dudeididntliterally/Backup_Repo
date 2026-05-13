@@ -7,7 +7,7 @@ local vehicles = {
 }
 -- [[ stfu, I didn't wanna do: getgenv().vehicle_list = getgenv().vehicle_list or vehicles (kill me, it's the same thing anyway). ]] --
 getgenv().vehicle_list = vehicles
-getgenv().Script_Version_UD = "1.7.1-UD"
+getgenv().Script_Version_UD = "1.7.3-UD"
 g.Game = cloneref and cloneref(game) or game
 g.JobID = game.JobId
 g.PlaceID = game.PlaceId
@@ -376,9 +376,7 @@ if not all_vehicles or #all_vehicles == 0 then
     }
     ReplicatedStorage:WaitForChild("Events"):WaitForChild("RemoteFunction"):InvokeServer(unpack(args))
 end
-
 wait(1)
-
 local function spawn_vehicle(name)
     if type(name) ~= "string" then
         return 
@@ -406,6 +404,66 @@ local function retrieve_vehicle()
     end
 end
 
+local lib = getgenv().FlamesLibrary
+local function nuke_signals()
+    for _, v in ipairs(workspace["_Main"].Signals:GetDescendants()) do
+        if v:IsA("Script") and v.Name:lower():find("master") then
+            v.Disabled = true
+            v:Destroy()
+        end
+    end
+
+    for _, v in ipairs(workspace["_Main"].Signals:GetDescendants()) do
+        if v.Name:lower():find("sensor") then
+            if v:IsA("Script") or v:IsA("LocalScript") then
+                v.Disabled = true
+            end
+            pcall(function() v:Destroy() end)
+        end
+    end
+
+    for _, v in ipairs(workspace["_Main"]["SpeedTraps"]:GetChildren()) do
+        pcall(function() v:Destroy() end)
+    end
+end
+
+local function enable()
+    nuke_signals()
+
+    lib.connect("signals_watch", workspace["_Main"].Signals.DescendantAdded:Connect(function(v)
+        local name = v.Name:lower()
+        if v:IsA("Script") and name:find("master") then
+            v.Disabled = true
+            v:Destroy()
+        elseif name:find("sensor") then
+            if v:IsA("Script") or v:IsA("LocalScript") then
+                v.Disabled = true
+            end
+            pcall(function() v:Destroy() end)
+        end
+    end))
+
+    lib.connect("speedtraps_watch", workspace["_Main"]["SpeedTraps"].ChildAdded:Connect(function(v)
+        pcall(function() v:Destroy() end)
+    end))
+end
+
+local function disable()
+    lib.disconnect("signals_watch")
+    lib.disconnect("speedtraps_watch")
+end
+
+getgenv().SpeedTrapBypass = getgenv().SpeedTrapBypass or false
+getgenv().ToggleSpeedTrapBypass = function(toggled)
+    getgenv().SpeedTrapBypass = toggled
+    if getgenv().SpeedTrapBypass then
+        enable()
+    else
+        disable()
+    end
+end
+
+if not getgenv().SpeedTrapBypass then getgenv().ToggleSpeedTrapBypass() end
 local char_pvp = getgenv().Character or LocalPlayer.Character or get_char(LocalPlayer, 10)
 local Old_PVP_Enabled = char_pvp:GetAttribute("PVPDamageEnabled")
 getgenv().specific_weapon_mod = false
@@ -1116,6 +1174,7 @@ g.vehiclefly_control = {f=0,b=0,l=0,r=0,q=0,e=0}
 g.vehiclefly_noclip = g.vehiclefly_noclip or false
 g.vehiclefly_collisions = g.vehiclefly_collisions or {}
 g.vehiclefly_springs = g.vehiclefly_springs or {}
+g.vehiclefly_motors = g.vehiclefly_motors or {}
 local is_mobile = UserInputService.TouchEnabled
 local Control_Module
 if is_mobile then
@@ -1210,6 +1269,36 @@ g.restore_springs = function()
     g.vehiclefly_springs = {}
 end
 
+g.disable_motors = function(Car)
+    g.vehiclefly_motors = {}
+    for _, v in ipairs(Car:GetDescendants()) do
+        if v:IsA("CylindricalConstraint") or v:IsA("HingeConstraint") then
+            if v.ActuatorType == Enum.ActuatorType.Motor and v.MotorMaxTorque > 0 and math.abs(v.AngularVelocity) > 1 then
+                g.vehiclefly_motors[v] = {
+                    AngularVelocity = v.AngularVelocity,
+                    MotorMaxTorque = v.MotorMaxTorque,
+                }
+                pcall(function()
+                    v.AngularVelocity = 0
+                    v.MotorMaxTorque = 0
+                end)
+            end
+        end
+    end
+end
+
+g.restore_motors = function()
+    for Motor, Data in pairs(g.vehiclefly_motors) do
+        if Motor and Motor.Parent then
+            pcall(function()
+                Motor.AngularVelocity = Data.AngularVelocity
+                Motor.MotorMaxTorque = Data.MotorMaxTorque
+            end)
+        end
+    end
+    g.vehiclefly_motors = {}
+end
+
 g.start_vehicle_fly = function()
     if g.vehiclefly_bg or g.vehiclefly_bv then return end
     local Car = retrieve_vehicle()
@@ -1225,6 +1314,7 @@ g.start_vehicle_fly = function()
     if Boost_Force then Boost_Force.Force = Vector3.zero end
     if Float_Force then Float_Force.Position = Seat.Position end
     g.disable_springs(Car)
+    g.disable_motors(Car)
 
     local Bg = Instance.new("BodyGyro")
     Bg.P = 3e4
@@ -1234,7 +1324,7 @@ g.start_vehicle_fly = function()
     Bg.Parent = Physics_Root
 
     local Bv = Instance.new("BodyVelocity")
-    Bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    Bv.MaxForce = Vector3.new(9e9, 1e6, 9e9)
     Bv.Velocity = Vector3.zero
     Bv.Parent = Physics_Root
     g.vehiclefly_bg = Bg
@@ -1243,6 +1333,9 @@ g.start_vehicle_fly = function()
         if not g.vehicle_fly or not Physics_Root.Parent then
             Bv.Velocity = Vector3.zero
             g.vehiclefly_control = {f=0,b=0,l=0,r=0,q=0,e=0}
+            if not Physics_Root.Parent and getgenv().Vehicle_Fly_Script then
+                getgenv().Vehicle_Fly_Script:Set(false)
+            end
             return
         end
 
@@ -1251,16 +1344,15 @@ g.start_vehicle_fly = function()
         if Float_Force then Float_Force.Position = Seat.Position end
         if Drag_Force then Drag_Force.Force = Vector3.zero end
         if Boost_Force then Boost_Force.Force = Vector3.zero end
-
         local Cam = workspace.CurrentCamera
 
         if is_mobile then
             Bg.CFrame = Cam.CFrame
             local Mv = Control_Module:GetMoveVector()
-            local Vel = Vector3.zero
-            if Mv.X ~= 0 then Vel = Vel + Cam.CFrame.RightVector * (Mv.X * (45 * g.vehicle_fly_speed)) end
-            if Mv.Z ~= 0 then Vel = Vel - Cam.CFrame.LookVector * (Mv.Z * (45 * g.vehicle_fly_speed)) end
-            Bv.Velocity = Vel
+            local TargetVel = Vector3.zero
+            if Mv.X ~= 0 then TargetVel = TargetVel + Cam.CFrame.RightVector * (Mv.X * (45 * g.vehicle_fly_speed)) end
+            if Mv.Z ~= 0 then TargetVel = TargetVel - Cam.CFrame.LookVector * (Mv.Z * (45 * g.vehicle_fly_speed)) end
+            Bv.Velocity = Bv.Velocity:Lerp(TargetVel, 0.15)
         else
             local Look = Cam.CFrame.LookVector
             local Yaw = math.atan2(-Look.X, -Look.Z)
@@ -1270,11 +1362,13 @@ g.start_vehicle_fly = function()
             local Right = (c.l or 0) + (c.r or 0)
             local Up = (c.q or 0) + (c.e or 0)
 
-            Bv.Velocity = (
+            local TargetVel = (
                 Cam.CFrame.LookVector * Forward +
                 Cam.CFrame.RightVector * Right +
                 Vector3.new(0, Up, 0)
             ) * (45 * g.vehicle_fly_speed)
+
+            Bv.Velocity = Bv.Velocity:Lerp(TargetVel, 0.15)
         end
     end)
 
@@ -1302,6 +1396,7 @@ end
 
 g.stop_vehicle_fly = function()
     g.vehicle_fly = false
+    g.restore_motors()
     g.restore_springs()
     g.disable_vehicle_noclip()
     g.cleanup()
@@ -2224,6 +2319,14 @@ Callback = function(Rainbow_Tires_Main)
     end
 end,})
 
+getgenv().Never_Get_Speed_Trapped = Tab4:CreateToggle({
+Name = "No Speed Traps (FE)",
+CurrentValue = getgenv().SpeedTrapBypass or false,
+Flag = "SpeedTrapMainToggleBypass",
+Callback = function(toggle)
+    getgenv().ToggleSpeedTrapBypass(toggle)
+end,})
+
 local Owned_Vehicle_Slots = {}
 table.clear(Owned_Vehicle_Slots)
 
@@ -2298,88 +2401,65 @@ Callback = function()
     Delete_Car_Remote:FireServer("VehicleDelete", { Vehicle_Seat_Car.Parent })
 end,})
 
+getgenv().quest_folder_finder = function()
+    local quest_cache = getgenv().quests_folder_boolean_values_found
+    if quest_cache and quest_cache.Parent and quest_cache:IsA("Folder") then
+        return quest_cache
+    end
+
+    for _, v in ipairs(game.Players.LocalPlayer:GetChildren()) do
+        if v:IsA("Folder") and v.Name:lower():find("quests") then
+            getgenv().quests_folder_boolean_values_found = v
+            return v
+        end
+    end
+
+    return nil
+end
+
+if not getgenv().quests_folder_boolean_values_found then pcall(function() getgenv().quest_folder_finder() end) end
+local Playtime_Quests = {
+    "QuestPlay5Mins",
+    "QuestPlay10Mins",
+    "QuestPlay15Mins",
+    "QuestPlay30Mins",
+    "QuestPlay60Mins",
+}
+
 getgenv().ClaimAllRewards = Tab3:CreateButton({
 Name = "Claim All Rewards",
 Callback = function()
-    local IsClaimedFiveMins = getgenv().LocalPlayer:WaitForChild("Quests"):WaitForChild("Daily"):WaitForChild("QuestPlay5Mins"):GetAttribute("Claimed")
-    local IsClaimedTenMins = getgenv().LocalPlayer:WaitForChild("Quests"):WaitForChild("Daily"):WaitForChild("QuestPlay10Mins"):GetAttribute("Claimed")
-    local IsClaimedFifteenMins = getgenv().LocalPlayer:WaitForChild("Quests"):WaitForChild("Daily"):WaitForChild("QuestPlay15Mins"):GetAttribute("Claimed")
-    local IsClaimedThirtyMins = getgenv().LocalPlayer:WaitForChild("Quests"):WaitForChild("Daily"):WaitForChild("QuestPlay30Mins"):GetAttribute("Claimed")
-    local IsClaimedSixtyMins = getgenv().LocalPlayer:WaitForChild("Quests"):WaitForChild("Daily"):WaitForChild("QuestPlay60Mins"):GetAttribute("Claimed")
+    local quests_folder = getgenv().quest_folder_finder()
+    if not quests_folder then
+        getgenv().notify("Error", "Could not find Quests folder.", 5)
+        return
+    end
 
-    if IsClaimedFiveMins then
-        getgenv().notify("Info", "Skipping 5 Minutes Reward...", 5)
-    else
-        local args = {
-            "QuestClaim",
-            {
-                getgenv().LocalPlayer:WaitForChild("Quests"):WaitForChild("Daily"):WaitForChild("QuestPlay5Mins")
-            }
-        }
-        
-        getgenv().ReplicatedStorage:WaitForChild("Events"):WaitForChild("RemoteFunction"):InvokeServer(unpack(args))
-        task.wait()
-        getgenv().notify("Success", "Successfully claimed 5 minute reward!", 5)
+    local daily_folder = quests_folder:FindFirstChild("Daily")
+    if not daily_folder then
+        getgenv().notify("Error", "Could not find Daily folder.", 5)
+        return
     end
-    task.wait(.2)
-    if IsClaimedTenMins then
-        getgenv().notify("Info", "Skipping 10 Minutes Reward...", 5)
-    else
-        local args = {
-            "QuestClaim",
-            {
-                getgenv().LocalPlayer:WaitForChild("Quests"):WaitForChild("Daily"):WaitForChild("QuestPlay10Mins")
-            }
-        }
-        
-        getgenv().ReplicatedStorage:WaitForChild("Events"):WaitForChild("RemoteFunction"):InvokeServer(unpack(args))
-        task.wait()
-        getgenv().notify("Success", "Successfully claimed 10 minute reward!", 5)
-    end
-    task.wait(.2)
-    if IsClaimedFifteenMins then
-        getgenv().notify("Info", "Skipping 15 Minutes Reward...", 5)
-    else
-        local args = {
-            "QuestClaim",
-            {
-                getgenv().LocalPlayer:WaitForChild("Quests"):WaitForChild("Daily"):WaitForChild("QuestPlay15Mins")
-            }
-        }
-        
-        getgenv().ReplicatedStorage:WaitForChild("Events"):WaitForChild("RemoteFunction"):InvokeServer(unpack(args))
-        task.wait()
-        getgenv().notify("Success", "Successfully claimed 15 minute reward!", 5)
-    end
-    task.wait(.2)
-    if IsClaimedThirtyMins then
-        getgenv().notify("Info", "Skipping 30 Minutes Reward...", 5)
-    else
-        local args = {
-            "QuestClaim",
-            {
-                getgenv().LocalPlayer:WaitForChild("Quests"):WaitForChild("Daily"):WaitForChild("QuestPlay30Mins")
-            }
-        }
-        
-        getgenv().ReplicatedStorage:WaitForChild("Events"):WaitForChild("RemoteFunction"):InvokeServer(unpack(args))
-        task.wait()
-        getgenv().notify("Success", "Successfully claimed 30 minute reward!", 5)
-    end
-    task.wait(.2)
-    if IsClaimedSixtyMins then
-        getgenv().notify("Info", "Skipping 60 Minutes Reward...", 5)
-    else
-        local args = {
-            "QuestClaim",
-            {
-                getgenv().LocalPlayer:WaitForChild("Quests"):WaitForChild("Daily"):WaitForChild("QuestPlay60Mins")
-            }
-        }
-        
-        getgenv().ReplicatedStorage:WaitForChild("Events"):WaitForChild("RemoteFunction"):InvokeServer(unpack(args))
-        task.wait()
-        getgenv().notify("Success", "Successfully claimed 60 minute reward!", 5)
+
+    for _, quest_name in ipairs(Playtime_Quests) do
+        local quest = daily_folder:FindFirstChild(quest_name)
+        if quest then
+            local is_claimed = quest:GetAttribute("Claimed")
+            if is_claimed == false then
+                local success, _ = pcall(function()
+                    getgenv().ReplicatedStorage
+                        :WaitForChild("Events")
+                        :WaitForChild("RemoteFunction")
+                        :InvokeServer("QuestClaim", { quest })
+                end)
+                task.wait(0.2)
+                if success then
+                    getgenv().notify("Success", "Claimed: " .. quest.Name, 5)
+                else
+                    getgenv().notify("Error", "Failed: " .. quest.Name, 5)
+                end
+            end
+        end
     end
 end,})
 
