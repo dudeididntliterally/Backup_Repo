@@ -1,28 +1,17 @@
 local Release = "Prerelease Beta 6.1"
-local Luna = { 
-	Folder = "Luna", 
-	Options = {}, 
-	ThemeGradient = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(117, 164, 206)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(123, 201, 201)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(224, 138, 175))} 
-}
-
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
+local Luna = {Folder = "Luna", Options = {}, ThemeGradient = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(117, 164, 206)), ColorSequenceKeypoint.new(0.50, Color3.fromRGB(123, 201, 201)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(224, 138, 175))}}
+local UserInputService = cloneref and cloneref(game:GetService("UserInputService")) or game:GetService("UserInputService")
+local TweenService = cloneref and cloneref(game:GetService("TweenService")) or game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local Localization = game:GetService("LocalizationService")
-local Players = game:GetService("Players")
+local Players = cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
 local Player = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-local CoreGui = game:GetService("CoreGui")
-
+local CoreGui = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
 local isStudio
 local website = "github.com/Nebula-Softworks"
-
-if RunService:IsStudio() then
-	isStudio = true
-end
-
--- Credits To Latte Softworks And qweery for Lucide And Material Icons Respectively.
+if RunService:IsStudio() then isStudio = true end
 local IconModule = {
 	Lucide = nil,
 	Material = {
@@ -1532,7 +1521,6 @@ local function GetIcon(icon, source)
 	if source == "Custom" then
 		return "rbxassetid://" .. icon
 	elseif source == "Lucide" then
-		-- full credit to latte softworks :)
 		local iconData = not isStudio and game:HttpGet("https://raw.githubusercontent.com/latte-soft/lucide-roblox/refs/heads/master/lib/Icons.luau")
 		local icons = isStudio and IconModule.Lucide or loadstring(iconData)()
 		if not isStudio then
@@ -2057,7 +2045,7 @@ local function Draggable(Bar, Window, enableTaptic, tapticOffset)
 	end)
 end
 
-function Luna:Notification(data) -- action e.g open messages
+function Luna:Notification(data)
 	task.spawn(function()
 		data = Kwargify({
 			Title = "Missing Title",
@@ -2066,20 +2054,15 @@ function Luna:Notification(data) -- action e.g open messages
 			ImageSource = "Material"
 		}, data or {})
 
-		-- Notification Object Creation
 		local newNotification = Notifications.Template:Clone()
 		newNotification.Name = data.Title
 		newNotification.Parent = Notifications
 		newNotification.LayoutOrder = #Notifications:GetChildren()
 		newNotification.Visible = false
 		BlurModule(newNotification)
-
-		-- Set Data
 		newNotification.Title.Text = data.Title
-		newNotification.Description.Text = data.Content 
-		newNotification.Icon.Image = GetIcon(data.Icon, data.ImageSource)
-
-		-- Set initial transparency values
+		newNotification.Description.Text = data.Content
+		newNotification.Icon.Image = "0"
 		newNotification.BackgroundTransparency = 1
 		newNotification.Title.TextTransparency = 1
 		newNotification.Description.TextTransparency = 1
@@ -2087,17 +2070,11 @@ function Luna:Notification(data) -- action e.g open messages
 		newNotification.Shadow.ImageTransparency = 1
 		newNotification.Icon.ImageTransparency = 1
 		newNotification.Icon.BackgroundTransparency = 1
-
 		task.wait()
-
-		-- Calculate textbounds and set initial values
 		newNotification.Size = UDim2.new(1, 0, 0, -Notifications:FindFirstChild("UIListLayout").Padding.Offset)
-
 		newNotification.Icon.Size = UDim2.new(0, 28, 0, 28)
 		newNotification.Icon.Position = UDim2.new(0, 16, 0.5, -1)
-
 		newNotification.Visible = true
-
 		newNotification.Description.Size = UDim2.new(1, -65, 0, math.huge)
 		local bounds = newNotification.Description.TextBounds.Y + 55
 		newNotification.Description.Size = UDim2.new(1,-65,0, bounds - 35)
