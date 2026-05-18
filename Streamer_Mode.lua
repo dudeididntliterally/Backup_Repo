@@ -1,9 +1,10 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
 wait(0.3)
+local g = getgenv()
 if not getgenv().GlobalEnvironmentFramework_Initialized then
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Global_Environment.lua"))()
-    wait(0.1)
-    getgenv().GlobalEnvironmentFramework_Initialized = true
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Global_Environment.lua"))()
+   wait(0.1)
+   getgenv().GlobalEnvironmentFramework_Initialized = true
 end
 
 if getgenv().hidden_loaded then
@@ -13,10 +14,8 @@ if getgenv().hidden_loaded then
         return warn("Streamer-Mode V1.5 is already loaded.")
     end
 end
+
 getgenv().hidden_loaded = true
-
-local g = getgenv()
-
 getgenv().flowrgb = getgenv().flowrgb or function(connname,speed,obj,toggle)
     local ts=game:GetService("TweenService")
     local rs=game:GetService("RunService")
