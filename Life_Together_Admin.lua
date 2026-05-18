@@ -17988,38 +17988,29 @@ local function print_bytes(label, s)
    print(label .. ": " .. table.concat(bytes, ","))
 end
 local function clean(s) return s:gsub("[%c%z%s]", ""):gsub("[^\32-\126]", "") end
-local script_url = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Life_Together_Admin.lua" -- or what ever you want it to be.
+local script_url = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Life_Together_Admin.lua"
+local version_url = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Script_Versions_JSON.json"
 local function ws_get_version()
-   if not g.ws_main_reactor_connector then return nil end
-   local result = nil
-   local done = false
-   local connection
-   connection = g.ws_main_reactor_connector.OnMessage:Connect(function(msg)
-      if done then return end
-      local ok, data = pcall(g.HttpService.JSONDecode, g.HttpService, msg)
-      if ok and type(data) == "table" and data.type == "version_response" then
-         if data.version then
-            result = tostring(data.version):gsub("%s+", "")
-         end
-         done = true
-         connection:Disconnect()
-      end
+   local http_req = request or http_request or (syn and syn.request) or (http and http.request) or (fluxus and fluxus.request)
+   if not http_req then return nil end
+
+   local ok, result = pcall(function()
+      return http_req({
+         Url = version_url .. "?cache=" .. tostring(os.clock()),
+         Method = "GET",
+         Headers = { ["Content-Type"] = "application/json" }
+      })
    end)
 
-   g.ws_main_reactor_connector:Send(g.HttpService:JSONEncode({
-      type = "get_version"
-   }))
+   if not ok or not result or result.StatusCode ~= 200 then return nil end
 
-   local start = os.clock()
-   while not done and (os.clock() - start) < 8 do
-      task.wait(0.05)
-   end
+   local ok2, data = pcall(function() return game:GetService("HttpService"):JSONDecode(result.Body) end)
+   if not ok2 or type(data) ~= "table" then return nil end
 
-   if not done then
-      pcall(function() connection:Disconnect() end)
-   end
+   local version = data.version or data.Version
+   if not version then return nil end
 
-   return result
+   return tostring(version):gsub("%s+", "")
 end
 
 local function Notify(msg, dur)
@@ -18084,7 +18075,7 @@ if not g.lta_updater_running then
 
    task.spawn(function()
       while g.lta_updater_running and thread_id == g.lta_updater_thread_id do
-         task.wait(5)
+         task.wait(20)
          local local_version = tostring(g.Script_Version or ""):gsub("^V", ""):gsub("%s+", "")
          if local_version == "" then
             print("Script_Version not set yet, skipping...")
