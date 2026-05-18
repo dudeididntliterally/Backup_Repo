@@ -8901,161 +8901,22 @@ g.save_outfits_GUI = function()
       return notify("Warning", "You're already running Outfits Manager!", 5)
    end
 
-   local FIREBASE_PROJECT = "user-outfits-backup"
    local PLAYER_NAME = LocalPlayer.Name
    local cached_outfits = {}
    local ui_refs = {}
-   local function firestore_url(document) return "https://firestore.googleapis.com/v1/projects/" .. FIREBASE_PROJECT .. "/databases/(default)/documents/outfits/" .. document .. "?key=" .. FIREBASE_KEY end
    local Send, Get = g.Send, g.Get
-   local ws_ref = g.ws_conn
    local pending_callbacks = {}
    local FolderName = "lifetogether_admin_savedoutfits"
-   local outfit_msg_conn
-   outfit_msg_conn = ws_ref.OnMessage:Connect(function(raw)
-      local ok, data = pcall(function() return HttpService:JSONDecode(raw) end)
-      if not ok or type(data) ~= "table" then return end
-      local cb = pending_callbacks[data.type]
-      if cb then
-         pending_callbacks[data.type] = nil
-         cb(data)
-      end
-   end)
-
-   local function to_firestore(val)
-      local t = type(val)
-      if t == "string" then return {stringValue = val} end
-      if t == "number" then return {doubleValue = val} end
-      if t == "boolean" then return {booleanValue = val} end
-      if t == "table" then
-         if #val > 0 then
-            local values = {}
-            for _, v in ipairs(val) do table.insert(values, to_firestore(v)) end
-            return {arrayValue = {values = values}}
-         else
-            local fields = {}
-            for k, v in pairs(val) do fields[k] = to_firestore(v) end
-            return {mapValue = {fields = fields}}
-         end
-      end
-      return {nullValue = nil}
-   end
-
-   local function from_firestore(val)
-      if val.stringValue ~= nil then return val.stringValue end
-      if val.doubleValue ~= nil then return val.doubleValue end
-      if val.integerValue ~= nil then return tonumber(val.integerValue) end
-      if val.booleanValue ~= nil then return val.booleanValue end
-      if val.nullValue ~= nil then return nil end
-      if val.arrayValue then
-         local out = {}
-         for _, v in ipairs(val.arrayValue.values or {}) do
-            table.insert(out, from_firestore(v))
-         end
-         return out
-      end
-      if val.mapValue then
-         local out = {}
-         for k, v in pairs(val.mapValue.fields or {}) do
-            out[k] = from_firestore(v)
-         end
-         return out
-      end
-      return nil
-   end
-
-   local function fetch_outfits_from_firebase(callback)
-      local http_req = request or http_request or (syn and syn.request) or (http and http.request) or (fluxus and fluxus.request)
-      if not http_req then
-         g.notify("Error", "No HTTP request function available!", 4)
-         callback(false)
-         return
-      end
-
-      local url = firestore_url(PLAYER_NAME)
-      local ok, result = pcall(function()
-         return http_req({
-            Url = url,
-            Method = "GET",
-            Headers = {["Content-Type"] = "application/json"}
-         })
-      end)
-
-      if not ok or not result or result.StatusCode ~= 200 then
-         print("[FIREBASE] Fetch failed:", tostring(result and result.StatusCode), tostring(result and result.Body))
-         callback(false)
-         return
-      end
-
-      local ok2, data = pcall(function() return HttpService:JSONDecode(result.Body) end)
-      if not ok2 or not data or not data.fields then
-         callback(true)
-         return
-      end
-
-      cached_outfits = {}
-      for name, val in pairs(data.fields) do
-         cached_outfits[name] = from_firestore(val)
-      end
-      callback(true)
-   end
-
-   local function save_outfits_to_firebase(callback)
-      local http_req = request or http_request or (syn and syn.request) or (http and http.request) or (fluxus and fluxus.request)
-      if not http_req then
-         if callback then callback(false) end
-         return
-      end
-
-      local fields = {}
-      for name, outfit in pairs(cached_outfits) do
-         fields[name] = to_firestore(outfit)
-      end
-
-      local ok, result = pcall(function()
-         return http_req({
-            Url = firestore_url(PLAYER_NAME),
-            Method = "PATCH",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = HttpService:JSONEncode({fields = fields})
-         })
-      end)
-
-      if callback then callback(ok and result and result.StatusCode == 200) end
-   end
-
-   local function server_request(payload, response_type, callback)
-      pending_callbacks[response_type] = callback
-      ws_ref:Send(HttpService:JSONEncode(payload))
-   end
-
-   local function save_outfit_to_server(name, outfit, callback)
-      server_request({ type = "outfit_save", name = name, outfit = outfit }, "outfit_save_result", function(data)
-         if data.success then cached_outfits[name] = outfit end
-         if callback then callback(data.success, data.reason) end
-      end)
-   end
-
-   local function delete_outfit_from_server(name, callback)
-      server_request({ type = "outfit_delete", name = name }, "outfit_delete_result", function(data)
-         if data.success then cached_outfits[name] = nil end
-         if callback then callback(data.success, data.reason) end
-      end)
-   end
-
-   local function rename_outfit_on_server(old_name, new_name, callback)
-      server_request({ type = "outfit_rename", old_name = old_name, new_name = new_name }, "outfit_rename_result", function(data)
-         if data.success then
-            cached_outfits[new_name] = cached_outfits[old_name]
-            cached_outfits[old_name] = nil
-         end
-         if callback then callback(data.success, data.reason) end
-      end)
-   end
-
    local function save_outfit(name, outfit, callback)
       if not isfolder(FolderName) then makefolder(FolderName) end
+      local filePath = FolderName .. "/" .. name .. ".json"
+      if isfile(filePath) then
+         cached_outfits[name] = outfit
+         if callback then callback(true) end
+         return
+      end
       local ok, err = pcall(function()
-         writefile(FolderName .. "/" .. name .. ".json", HttpService:JSONEncode(outfit))
+         writefile(filePath, HttpService:JSONEncode(outfit))
       end)
       cached_outfits[name] = outfit
       if callback then callback(ok) end
@@ -9114,76 +8975,6 @@ g.save_outfits_GUI = function()
          end
       end
       if callback then callback(true) end
-   end
-
-   local function migrate_local_outfits(on_done)
-      if not isfolder(FolderName) then
-         on_done()
-         return
-      end
-
-      local files = {}
-      for _, f in ipairs(listfiles(FolderName)) do
-         if f:match("%.json$") then
-            table.insert(files, f)
-         end
-      end
-
-      if #files == 0 then
-         pcall(function()
-            if isfolder(FolderName) then
-               delfolder(FolderName)
-            end
-         end)
-         on_done()
-         return
-      end
-
-      g.notify("Info", "Migrating " .. #files .. " local outfit(s) to server...", 5)
-
-      local index = 0
-      local function migrate_next()
-         index = index + 1
-         if index > #files then
-            pcall(function()
-               if isfolder(FolderName) then
-                  delfolder(FolderName)
-               end
-            end)
-            on_done()
-            return
-         end
-
-         local file = files[index]
-         local name = file:match("([^/\\]+)%.json$")
-         local ok, content = pcall(readfile, file)
-         if not ok or not content or #content == 0 then
-            migrate_next()
-            return
-         end
-
-         local success, data = pcall(function() return HttpService:JSONDecode(content) end)
-         if not success or type(data) ~= "table" then
-            migrate_next()
-            return
-         end
-
-         if cached_outfits[name] then
-            migrate_next()
-            return
-         end
-
-         save_outfit(name, data, function(saved)
-            if saved then
-               pcall(function()
-                  if isfile(file) then delfile(file) end
-               end)
-            end
-            migrate_next()
-         end)
-      end
-
-      migrate_next()
    end
 
    local function buildBatchPayload(data)
@@ -9532,7 +9323,6 @@ g.save_outfits_GUI = function()
    Instance.new("UICorner", CloseButton)
 
    CloseButton.MouseButton1Click:Connect(function()
-      outfit_msg_conn:Disconnect()
       ScreenGui:Destroy()
       g.LoadedOutfit_Manager_GUI = false
    end)
@@ -9707,10 +9497,6 @@ g.save_outfits_GUI = function()
          g.notify("Error", "Could not load outfits.", 5)
          return
       end
-      migrate_local_outfits(function()
-         refreshOutfitList()
-         g.notify("Success", "[Outfit Manager UI V2]: Loaded.", 6)
-      end)
    end)
 end
 
