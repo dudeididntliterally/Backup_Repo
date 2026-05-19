@@ -415,7 +415,7 @@ local function StopAnim()
 	end
 end
 
-local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/Notification_Lib.lua"))()
+local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Notify_Lib.lua"))()
 local valid_titles = {success="Success",info="Info",warning="Warning",error="Error",succes="Success",sucess="Success",eror="Error",erorr="Error",warnin="Warning"}
 local function format_title(str)
    if typeof(str) ~= "string" then
@@ -834,7 +834,7 @@ Announce_Label.BorderSizePixel = 0
 Announce_Label.Position = UDim2.new(0, 25, 0, 150)
 Announce_Label.Size = UDim2.new(0, 350, 0, 150)
 Announce_Label.Font = Enum.Font.SourceSans
-Announce_Label.Text = loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/SystemBroken/refs/heads/main/announce"))()
+Announce_Label.Text = loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/System_Broken_Announce"))()
 Announce_Label.TextColor3 = Color3.fromRGB(56, 56, 56)
 Announce_Label.TextSize = 24.000
 Announce_Label.TextWrapped = true
@@ -2879,22 +2879,38 @@ end)--]]
 --ANIMATIONS
 
 VampireAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
-	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=1083445855"
-	Animate.idle.Animation2.AnimationId = "http://www.roblox.com/asset/?id=1083450166"
-	Animate.walk.WalkAnim.AnimationId = "http://www.roblox.com/asset/?id=1083473930"
-	Animate.run.RunAnim.AnimationId = "http://www.roblox.com/asset/?id=1083462077"
-	Animate.jump.JumpAnim.AnimationId = "http://www.roblox.com/asset/?id=1083455352"
-	Animate.climb.ClimbAnim.AnimationId = "http://www.roblox.com/asset/?id=1083439238"
-	Animate.fall.FallAnim.AnimationId = "http://www.roblox.com/asset/?id=1083443587"
-	plr.Character.Humanoid:ChangeState(3)
+	if Animate:FindFirstChild("idle") then
+		Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=1083445855"
+		Animate.idle.Animation2.AnimationId = "http://www.roblox.com/asset/?id=1083450166"
+	end
+	if Animate:FindFirstChild("walk") then
+		Animate.walk.WalkAnim.AnimationId = "http://www.roblox.com/asset/?id=1083473930"
+	end
+	if Animate:FindFirstChild("run") then
+		Animate.run.RunAnim.AnimationId = "http://www.roblox.com/asset/?id=1083462077"
+	end
+	if Animate:FindFirstChild("jump") then
+		Animate.jump.JumpAnim.AnimationId = "http://www.roblox.com/asset/?id=1083455352"
+	end
+	if Animate:FindFirstChild("climb") then
+		Animate.climb.ClimbAnim.AnimationId = "http://www.roblox.com/asset/?id=1083439238"
+	end
+	if Animate:FindFirstChild("fall") then
+		Animate.fall.FallAnim.AnimationId = "http://www.roblox.com/asset/?id=1083443587"
+	end
+	if plr.Character:FindFirstChildOfClass("Humanoid") then
+		plr.Character:WaitForChild("Humanoid"):ChangeState(3)
+	end
 	Animate.Disabled = false
 end)
 
 HeroAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=616111295"
@@ -2938,7 +2954,8 @@ RobotAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 ZombieClassicAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=616158929"
@@ -2953,7 +2970,8 @@ ZombieClassicAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 MageAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=707742142"
@@ -2968,7 +2986,8 @@ MageAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 GhostAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=616006778"
@@ -2983,7 +3002,8 @@ GhostAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 ElderAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=845397899"
@@ -2998,7 +3018,8 @@ ElderAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 LevitationAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=616006778"
@@ -3013,7 +3034,8 @@ LevitationAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 AstronautAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=891621366"
@@ -3028,7 +3050,8 @@ AstronautAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 NinjaAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=656117400"
@@ -3043,7 +3066,8 @@ NinjaAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 WerewolfAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=1083195517"
@@ -3058,7 +3082,8 @@ WerewolfAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 CartoonAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=742637544"
@@ -3073,7 +3098,8 @@ CartoonAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 PirateAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=750781874"
@@ -3088,7 +3114,8 @@ PirateAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 SneakyAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=1132473842"
@@ -3103,7 +3130,8 @@ SneakyAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 ToyAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=782841498"
@@ -3118,7 +3146,8 @@ ToyAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 KnightAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=657595757"
@@ -3134,7 +3163,8 @@ end)
 
 --NEWS
 ConfidentAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=1069977950"
@@ -3149,7 +3179,8 @@ ConfidentAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 PopstarAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=1212900985"
@@ -3164,7 +3195,8 @@ PopstarAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 PrincessAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=941003647"
@@ -3179,7 +3211,8 @@ PrincessAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 CowboyAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=1014390418"
@@ -3194,7 +3227,8 @@ CowboyAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 PatrolAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=1149612882"
@@ -3209,7 +3243,8 @@ PatrolAnim_Button.MouseButton1Click:Connect(function()
 end)
 
 ZombieFEAnim_Button.MouseButton1Click:Connect(function()
-	local Animate = plr.Character.Animate
+	local Animate = plr.Character.Animate or plr.Character:FindFirstChild("Animate") or plr.Character:WaitForChild("Animate", 10)
+	if not Animate then return end
 	Animate.Disabled = true
 	StopAnim()
 	Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=3489171152"
@@ -3661,7 +3696,7 @@ Explode_Button.MouseButton1Click:Connect(function()
 end)
 
 FreeEmotes_Button.MouseButton1Click:Connect(function()
-	if g.FreeEmotesEnabled then
+	if getgenv().FreeEmotesEnabled then
 		return 
 	end
 	if getgenv().run_service_gaze_emotes_check then
@@ -3669,7 +3704,7 @@ FreeEmotes_Button.MouseButton1Click:Connect(function()
 	end
 
 	if not g.FreeEmotesEnabled then
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/flames_emotes_gui_new.lua"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Emotes_Backup.lua"))()
 	end
 end)
 
@@ -3700,7 +3735,7 @@ CopyInvite_Button.MouseButton1Click:Connect(function()
 	everyClipboard = setclipboard or toclipboard or set_clipboard or (Clipboard and Clipboard.set)
 
 	if everyClipboard then
-		everyClipboard("https://github.com/EnterpriseExperience/MicUpSource/wiki")
+		everyClipboard("https://github.com/dudeididntliterally/Backup_Repo")
 	else
 		return SendNotify("Warning", "This executor does not support setclipboard.", 5)
 	end
