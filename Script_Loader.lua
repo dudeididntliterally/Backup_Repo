@@ -27,7 +27,7 @@ local scriptstoload = {
     },
     ["The Lanes"] = {
         id = 1333478699,
-        link = "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/The_Lanes.lua"
+        link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/The_Lanes.lua"
     },
     ["Player or AI"] = {
         id = 95217169945642,
@@ -55,7 +55,7 @@ local scriptstoload = {
     },
     ["Catalog Avatar Creator"] = {
         id = 7041939546,
-        link = "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/CatalogAvatarCreator.lua"
+        link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/CatalogAvatarCreator.lua"
     }
 }
 
