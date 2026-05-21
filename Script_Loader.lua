@@ -13,10 +13,6 @@ local scriptstoload = {
         id = {13967668166, 99644611200703, 99154507657228},
         link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Life_Together_Admin.lua"
     },
-    ["LifeTogether Admin Commands (FE)"] = {
-        id = {13967668166, 99644611200703, 99154507657228}, -- bora bora & ski resort.
-        link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Life_Together_Admin.lua"
-    },
     ["Hide And Seek Extreme"] = {
         id = 205224386,
         link = "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/Hide_And_Seek_Extreme.lua"
@@ -56,6 +52,10 @@ local scriptstoload = {
     ["Catalog Avatar Creator"] = {
         id = 7041939546,
         link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/CatalogAvatarCreator.lua"
+    },
+    ["Tower Of Hell"] = {
+        id = 0,
+        link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Tower_Of_Hell_Script_Hub.lua"
     }
 }
 
@@ -90,9 +90,9 @@ for name, all_scripts in pairs(scriptstoload) do
     if matcheswhat(all_scripts.id, game.PlaceId) then
         if matcheswhat(scriptstoload["LifeTogether RP"].id, game.PlaceId) then
             if not getgenv().LifeTogetherRP_Admin then
-                return load_str(scriptstoload["LifeTogether Admin Commands (FE)"].link)
+                return load_str(scriptstoload["LifeTogether RP"].link)
             else
-                return getgenv().notify("Warning", "You have already loaded the Life Together Admin commands.", 10)
+                return getgenv().notify("Warning", "You have already loaded the Life Together script.", 10)
             end
         end
 
