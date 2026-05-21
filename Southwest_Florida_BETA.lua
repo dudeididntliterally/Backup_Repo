@@ -4,13 +4,13 @@ end
 repeat task.wait() until game.Players and game.Players.LocalPlayer
 
 if not getgenv().GlobalEnvironmentFramework_Initialized then
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/Script_Framework/refs/heads/main/GlobalEnv_Framework.lua"))()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Global_Environment.lua"))()
    wait(0.1)
    getgenv().GlobalEnvironmentFramework_Initialized = true
 end
 wait(0.2)
-local Flames_API = loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/Flame_Hubs_API.lua"))()
-local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/Notification_Lib.lua"))()
+local Flames_API = loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Flames_Hub_API.lua"))()
+local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Notify_Lib.lua"))()
 local Workspace, VirtualUser, HttpService, AssetService, Players, SoundService, ReplicatedStorage, Teams, vc_internal, vc_service
 local Script_Version = "V2.2.7-SWFL"
 local g = getgenv()
@@ -595,7 +595,7 @@ for _, team in pairs(Teams:GetChildren()) do
     table.insert(getgenv().All_Teams, team.Name)
 end
 wait(0.3)
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/GetUILibrary'))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 getgenv().job_hooked = getgenv().job_hooked or false
 getgenv().job_hook_map = getgenv().job_hook_map or {}
 getgenv().job_respawn_conn = getgenv().job_respawn_conn or nil
@@ -2301,7 +2301,7 @@ Callback = function()
         return getgenv().notify("Error", "You already have Infinite Yield (regular) running, you cannot run this.", 10)
     end
 
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/main/InfYieldOther.lua', true))()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Infinite_Premium.lua', true))()
 end,})
 
 getgenv().FOV_Slider = Tab5:CreateSlider({
@@ -2397,7 +2397,7 @@ task.spawn(function()
         task.wait(1)
 
         local success, latestVersionInfo = pcall(function()
-            local versionJson = game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/main/Script_Versions_JSON?cachebust=" .. tick())
+            local versionJson = game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Script_Versions_JSON.json?cachebust=" .. tick())
             return HttpService:JSONDecode(versionJson)
         end)
 
@@ -2407,7 +2407,7 @@ task.spawn(function()
                 Notify("[SWFL HUB]: do NOT rejoin! An update is now out! Update version: "..tostring(latestVersionInfo.Southwest_Florida_Hub_Version).." | re-executing automatically...", 30)
                 getgenv().SouthwestFlorida_Hub_Executed = false
                 wait(3)
-                loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/Southwest_Florida.lua'))()
+                loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Southwest_Florida_BETA.lua'))()
                 break
             end
         end
