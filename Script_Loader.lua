@@ -54,7 +54,7 @@ local scriptstoload = {
         link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/CatalogAvatarCreator.lua"
     },
     ["Tower Of Hell"] = {
-        id = 0,
+        id = 1962086868,
         link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Tower_Of_Hell_Script_Hub.lua"
     }
 }
