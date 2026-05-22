@@ -10142,11 +10142,15 @@ getgenv().hook_seats_character_for_no_sit_inf_yield = function(character)
 	end
 	local humanoid = getgenv().Humanoid or character:WaitForChild("Humanoid")
 	local seated_connection
-	seated_connection = humanoid.Seated:Connect(function(active)
+	seated_connection = humanoid.Seated:Connect(function(active, seat)
 		if not getgenv().anti_sit_enabled then return end
 		if active then
 			humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
 			task.spawn(function()
+				if seat then
+					local weld = seat:FindFirstChildWhichIsA("Weld")
+					if weld then weld:Destroy() end
+				end
 				for _ = 1, 5 do
 					task.wait()
 					humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
