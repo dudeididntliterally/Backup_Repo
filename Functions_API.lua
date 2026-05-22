@@ -30,7 +30,6 @@ g.Announcement_Banner_Notification_Emoji = g.Announcement_Banner_Notification_Em
 g.Chat_UI_Table_Stuff = {
    ["Owner_Chat_Tag"] = "😉🤫😈 | OWNER | ⚔️👑⭐",
    ["Staff_Chat_Tag"] = "⚔️ | STAFF | ⚔️",
-   ["Wife_Chat_Tag"] = "💘 | WIFEY | 💘",
 }
 g.Title_System_Texts_With_Emojis = {
    "⭐ Flames Hub | Settings ⭐"
