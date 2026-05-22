@@ -10134,26 +10134,29 @@ getgenv().anti_sit_enabled = getgenv().anti_sit_enabled or false
 local local_player = getgenv().LocalPlayer or Players.LocalPlayer
 local tag_name = "anti_sit_system"
 getgenv().hook_seats_character_for_no_sit_inf_yield = function(character)
-   if not character or not character:FindFirstChild("HumanoidRootPart") then character:WaitForChild("HumanoidRootPart") end
-   local humanoid = getgenv().Humanoid or character:WaitForChild("Humanoid")
-   local seated_connection
-   seated_connection = humanoid.Seated:Connect(function(active)
-      if not getgenv().anti_sit_enabled then
-         return 
-      end
-
+   if not character or character == nil then
+		character = local_player.CharacterAdded:Wait()
+	end
+	if not character:FindFirstChild("HumanoidRootPart") then
+		character:WaitForChild("HumanoidRootPart")
+	end
+	local humanoid = getgenv().Humanoid or character:WaitForChild("Humanoid")
+	local seated_connection
+	seated_connection = humanoid.Seated:Connect(function(active)
+		if not getgenv().anti_sit_enabled then return end
 		if active then
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
 			task.spawn(function()
 				for _ = 1, 5 do
 					task.wait()
 					humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 					humanoid.Sit = false
 				end
+				humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
 			end)
 		end
-   end)
-
-   getgenv().FlamesLibrary.connect(tag_name, seated_connection)
+	end)
+	getgenv().FlamesLibrary.connect(tag_name, seated_connection)
 end
 
 local function start_anti_sit()
