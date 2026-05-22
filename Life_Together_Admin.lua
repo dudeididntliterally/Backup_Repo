@@ -5016,7 +5016,6 @@ if not g.Flames_Hub_Owner_Title_Animated_Initialized then
    local role_to_tag = {
       ["Owner"] = "Owner_Chat_Tag",
       ["Staff"] = "Staff_Chat_Tag",
-      ["Wifey"] = "Wife_Chat_Tag",
    }
 
    local function resolve_title(player)
