@@ -10117,6 +10117,202 @@ addcmd("sitwalk", {}, function(args, speaker)
 	speaker.Character:FindFirstChildWhichIsA("Humanoid").HipHeight = not r15(speaker) and -1.5 or 0.5
 end)
 
+getgenv().get_or_set = getgenv().get_or_set or function(name, value)
+	if rawget and rawset then
+		local existing = rawget(getgenv(), name)
+		if existing == nil then
+			rawset(getgenv(), name, value)
+			return value
+		end
+		return existing
+	end
+
+	local existing = getgenv()[name]
+
+	if existing == nil then
+		getgenv()[name] = value
+		return value
+	end
+
+	return existing
+end
+
+local function wait_for_datamodel(inst)
+	if not inst then return false end
+
+	local attempts = 0
+	local maximum_attempts = 300
+
+	while attempts < maximum_attempts do
+		if inst.Parent and inst:IsDescendantOf(workspace) then
+			return true
+		end
+		task.wait(0.1)
+		attempts += 1
+	end
+
+	return false
+end
+wait(0.1)
+get_or_set("wait_for_datamodel", wait_for_datamodel)
+
+local function wait_for_child(parent, name)
+	if not parent then return nil end
+	local existing = parent:FindFirstChild(name)
+	if existing then return existing end
+	local ok, obj = pcall(function()
+		return parent:WaitForChild(name, math.huge)
+	end)
+
+	return ok and obj or nil
+end
+wait(0.1)
+get_or_set("wait_for_child", wait_for_child)
+
+local function wait_for_descendant(parent, name)
+	if not parent then return nil end
+	local found = parent:FindFirstChild(name, true)
+	if found then return found end
+	local conn
+	local result = nil
+
+	conn = parent.DescendantAdded:Connect(function(d)
+		if d.Name == name then
+			result = d
+			conn:Disconnect()
+		end
+	end)
+
+	while not result do
+		local check = parent:FindFirstChild(name, true)
+		if check then
+			result = check
+			conn:Disconnect()
+			break
+		end
+		task.wait()
+	end
+
+	return result
+end
+wait(0.1)
+get_or_set("wait_for_descendant", wait_for_descendant)
+
+local function wait_for_child_safe(parent, name)
+	if not parent then return nil end
+	local ok, obj = pcall(function()
+		return parent:WaitForChild(name, 9e9)
+	end)
+
+	if ok and obj then
+		return obj
+	end
+
+	return nil
+end
+wait(0.1)
+get_or_set("wait_for_child_safe", wait_for_child_safe)
+
+local function retry_find(func, retries, delay)
+	for _ = 1, retries do
+		local ok, result = pcall(func)
+		if ok and result then
+			return result
+		end
+		task.wait(delay)
+	end
+	return nil
+end
+wait(0.1)
+get_or_set("retry_find", retry_find)
+
+local function wait_character(player, timeout)
+	timeout = timeout or 10
+	local start = os.clock()
+
+	while os.clock() - start < timeout do
+		local char = player.Character
+		if char and char.Parent then
+			return char
+		end
+		task.wait()
+	end
+
+	return nil
+end
+
+local function wait_instance(parent, resolver, timeout)
+	timeout = timeout or 10
+	local start_time = os.clock()
+	local inst = resolver()
+	if inst then
+		return inst
+	end
+
+	local conn
+	conn = parent.ChildAdded:Connect(function()
+		inst = resolver()
+	end)
+
+	while not inst and os.clock() - start_time < timeout do
+		hb()
+	end
+
+	if conn then
+		conn:Disconnect()
+	end
+
+	return inst
+end
+
+getgenv().return_char = function(Player, timeout)
+	if not Player or not Player:IsA("Player") then return nil end
+	timeout = tonumber(timeout) or 10
+	local start = os.clock()
+
+	while os.clock() - start < timeout do
+		local char = Player.Character
+
+		if char and char.Parent and char:IsDescendantOf(game) then
+			local hum = char:FindFirstChildOfClass("Humanoid")
+
+			if hum and hum.Health > 0 then
+				return char
+			end
+		end
+
+		task.wait()
+	end
+
+	return nil
+end
+
+getgenv().get_char = getgenv().get_char or function(player, time_out)
+	time_out = tonumber(time_out) or 10
+	if not player or not player:IsA("Player") then return nil end
+	return wait_character(player, time_out)
+end
+
+getgenv().get_root = getgenv().get_root or function(player, time_out)
+	time_out = time_out and tonumber(time_out) or 5
+	local char = wait_character(player, time_out)
+	if not char then return nil end
+	return wait_instance(char, function()
+		return char:FindFirstChild("HumanoidRootPart")
+			or char:FindFirstChild("UpperTorso")
+			or char:FindFirstChild("Torso")
+	end, time_out)
+end
+
+getgenv().get_human = getgenv().get_human or function(player, time_out)
+	time_out = tonumber(time_out) or 5
+	local char = wait_character(player, time_out)
+	if not char then return nil end
+	return wait_instance(char, function()
+		return char:FindFirstChildWhichIsA("Humanoid")
+	end, time_out)
+end
+
 getgenv().hasProp = getgenv().hasProp or function(inst, prop)
    return inst and isProperty(inst, prop) ~= nil
 end
@@ -10131,25 +10327,40 @@ getgenv().safeSet = getgenv().safeSet or function(inst, prop, val)
 end
 
 getgenv().anti_sit_enabled = getgenv().anti_sit_enabled or false
-local local_player = getgenv().LocalPlayer or Players.LocalPlayer
-local tag_name = "anti_sit_system"
-getgenv().hook_seats_character_for_no_sit_inf_yield = function(character)
-   if not character or character == nil then
-		character = local_player.CharacterAdded:Wait()
+getgenv().anti_sit_connections = getgenv().anti_sit_connections or {}
+local local_player = speaker or game.Players.LocalPlayer or cloneref and cloneref(game:GetService("Players")).LocalPlayer or game:GetService("Players").LocalPlayer
+local function cleanup_connections()
+	for _, conn in pairs(getgenv().anti_sit_connections) do
+		if conn and conn.Connected then
+			conn:Disconnect()
+		end
 	end
+	getgenv().anti_sit_connections = {}
+end
+
+local function hook_character(character)
+	if not character then
+		character = get_char(local_player, 10)
+	end
+	if not character then return end
 	if not character:FindFirstChild("HumanoidRootPart") then
 		character:WaitForChild("HumanoidRootPart")
 	end
-	local humanoid = getgenv().Humanoid or character:WaitForChild("Humanoid")
-	local seated_connection
-	seated_connection = humanoid.Seated:Connect(function(active, seat)
+	local humanoid = get_human(local_player, 10)
+	if not humanoid then return end
+	local conn
+	conn = humanoid:GetPropertyChangedSignal("Sit"):Connect(function()
 		if not getgenv().anti_sit_enabled then return end
-		if active then
+		if humanoid.Sit then
 			humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
 			task.spawn(function()
-				if seat then
-					local weld = seat:FindFirstChildWhichIsA("Weld")
+				if humanoid.SeatPart then
+					local weld = humanoid.SeatPart:FindFirstChildOfClass("Weld")
 					if weld then weld:Destroy() end
+					local prox = humanoid.SeatPart:FindFirstChildOfClass("ProximityPrompt")
+					if prox and prox.Enabled == false then
+						prox.Enabled = true
+					end
 				end
 				for _ = 1, 5 do
 					task.wait()
@@ -10160,49 +10371,37 @@ getgenv().hook_seats_character_for_no_sit_inf_yield = function(character)
 			end)
 		end
 	end)
-	getgenv().FlamesLibrary.connect(tag_name, seated_connection)
+	table.insert(getgenv().anti_sit_connections, conn)
 end
 
 local function start_anti_sit()
-   if getgenv().FlamesLibrary.is_alive(tag_name) then
-      return 
-   end
-
-   if local_player.Character then
-      getgenv().hook_seats_character_for_no_sit_inf_yield(local_player.Character)
-   end
-
-   local char_connection = local_player.CharacterAdded:Connect(function(character)
-      getgenv().hook_seats_character_for_no_sit_inf_yield(character)
-   end)
-
-   getgenv().FlamesLibrary.connect(tag_name, char_connection)
+	if #getgenv().anti_sit_connections > 0 then return end
+	hook_character(local_player.Character)
+	local char_conn = local_player.CharacterAdded:Connect(function(character)
+		hook_character(character)
+	end)
+	table.insert(getgenv().anti_sit_connections, char_conn)
 end
 
 local function stop_anti_sit()
-   if not getgenv().FlamesLibrary.is_alive(tag_name) then
-      return 
-   end
-
-   getgenv().FlamesLibrary.disconnect(tag_name)
+   cleanup_connections()
 end
 
 getgenv().toggle_anti_sit = function(state)
-   getgenv().anti_sit_enabled = state
-
-   if state then
-      start_anti_sit()
-   else
-      stop_anti_sit()
-   end
+	getgenv().anti_sit_enabled = state
+	if state then
+		start_anti_sit()
+	else
+		stop_anti_sit()
+	end
 end
 
 addcmd("nosit", {"antisit"}, function(args, speaker)
-   getgenv().toggle_anti_sit(true)
+	getgenv().toggle_anti_sit(true)
 end)
 
 addcmd("unnosit", {}, function(args, speaker)
-   getgenv().toggle_anti_sit(false)
+	getgenv().toggle_anti_sit(false)
 end)
 
 addcmd("jump", {}, function(args, speaker)
