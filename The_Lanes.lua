@@ -6,7 +6,7 @@ if getgenv().TheLanesScript_Hub_Loaded then
         return warn("The Lanes | Script Hub is already loaded.")
     end
 end
-wait()
+
 getgenv().TheLanesScript_Hub_Loaded = true
 local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Notify_Lib.lua"))()
 getgenv().notify = getgenv().notify or function(notif_type, msg, duration) NotifyLib:External_Notification(tostring(notif_type), tostring(msg), tonumber(duration)) end
@@ -17,6 +17,7 @@ if game.PlaceId ~= 1333478699 then
         return warn("This is not The Lanes!")
     end
 end
+
 if not getgenv().GlobalEnvironmentFramework_Initialized then
    loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Global_Environment.lua"))()
    wait(0.1)
@@ -33,10 +34,7 @@ getgenv().safe_func = function(...)
     return function() end
 end
 
-local function function_exists(func)
-    return typeof(func) == "function"
-end
-wait(0.3)
+local function function_exists(func) return typeof(func) == "function" end
 local TextChatService = getgenv().TextChatService or cloneref and cloneref(game:GetService("TextChatService")) or game:GetService("TextChatService")
 local Workspace = getgenv().Workspace or cloneref and cloneref(game:GetService("Workspace")) or game:GetService("Workspace")
 local Players = getgenv().Players or cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
