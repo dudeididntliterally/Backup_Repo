@@ -261,10 +261,11 @@ local function get_stages_folder_workspace()
 end
 
 local HUD_Gui = getgenv().PlayerGui:FindFirstChild("HUD", true)
-local MFO_Gui = getgenv().PlayerGui:FindFirstChild("MFO_UI", true)
+local MFO_Gui = getgenv().PlayerGui:FindFirstChild("MFO2", true)
 local Groundbar_Frame
 local Prompt_Skip_Frame
 
+if HUD_Gui and HUD_Gui:IsA("Screen")
 for _, v in ipairs(HUD_Gui:GetChildren()) do
     if v:IsA("ImageLabel") then
         local find_name = v.Name:lower()
@@ -275,12 +276,14 @@ for _, v in ipairs(HUD_Gui:GetChildren()) do
     end
 end
 
-for _, v in ipairs(MFO_Gui:GetChildren()) do
-    if v:IsA("ImageLabel") then
-        local find_name = v.Name:lower()
+if MFO_Gui and MFO_Gui:IsA("Frame") then
+    for _, v in ipairs(MFO_Gui:GetChildren()) do
+        if v:IsA("ImageLabel") then
+            local find_name = v.Name:lower()
 
-        if find_name:find("promptskip") or find_name:find("prompt") or find_name:find("skip") then
-            Prompt_Skip_Frame = v
+            if find_name:find("promptskip") or find_name:find("prompt") or find_name:find("skip") then
+                Prompt_Skip_Frame = v
+            end
         end
     end
 end
