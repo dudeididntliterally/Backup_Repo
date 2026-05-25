@@ -362,7 +362,7 @@ getgenv().start_stageupdate = function()
     getgenv().CurrentStageValue = tonumber(stage_obj.Value) or 0
 
     if not getgenv().stage_connection_init then
-        stage_obj:GetPropertyChangedSignal("Value"):Connect(function()
+        stage_obj.Changed:Connect(function()
             getgenv().CurrentStageValue = tonumber(stage_obj.Value) or 0
             if getgenv().stage_label then
                 getgenv().stage_label:Set(
