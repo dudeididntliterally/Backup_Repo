@@ -1013,10 +1013,10 @@ function collect_all_coins(method)
 
     for _, obj in Game_Objects:GetDescendants() do
         local isCoin = obj.Name == "Credit" or obj:FindFirstChildOfClass("TouchTransmitter")
-        if not isCoin then print("") end
+        if not isCoin then continue end
 
         local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
-        if not part then print("") end
+        if not part then continue end
 
         if use_touch then
             local ok = pcall(function()
