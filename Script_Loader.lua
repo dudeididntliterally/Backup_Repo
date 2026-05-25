@@ -47,7 +47,7 @@ local scriptstoload = {
     },
     ["Mega Fun Obby"] = {
         id = 12996397,
-        link = "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/MegaFunObby.lua"
+        link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Mega_Fun_Obby.lua"
     },
     ["Catalog Avatar Creator"] = {
         id = 7041939546,
