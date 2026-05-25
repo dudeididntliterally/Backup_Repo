@@ -15,7 +15,7 @@ local scriptstoload = {
     },
     ["Hide And Seek Extreme"] = {
         id = 205224386,
-        link = "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/Hide_And_Seek_Extreme.lua"
+        link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Hide_And_Seek_Extreme.lua"
     },
     ["Apartment Hangout Spot"] = {
         id = 108873247414429,
