@@ -443,7 +443,7 @@ function skip_stage()
             while true do
                 local liveStage = tonumber(getgenv().CurrentStageValue)
                 if liveStage and liveStage >= target_stage then
-                    task.cancel(getgenv()[thread_key])
+                    if getgenv()[thread_key] then pcall(function() task.cancel(getgenv()[thread_key]) end) end
                     getgenv()[thread_key] = nil
                     break
                 end
