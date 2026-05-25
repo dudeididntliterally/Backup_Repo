@@ -265,13 +265,14 @@ local MFO_Gui = getgenv().PlayerGui:FindFirstChild("MFO2", true)
 local Groundbar_Frame
 local Prompt_Skip_Frame
 
-if HUD_Gui and HUD_Gui:IsA("Screen")
-for _, v in ipairs(HUD_Gui:GetChildren()) do
-    if v:IsA("ImageLabel") then
-        local find_name = v.Name:lower()
+if HUD_Gui and HUD_Gui:IsA("ScreenGui") then
+    for _, v in ipairs(HUD_Gui:GetChildren()) do
+        if v:IsA("ImageLabel") then
+            local find_name = v.Name:lower()
 
-        if find_name:find("groundbar") or find_name:find("ground") or find_name:find("bar") then
-            Groundbar_Frame = v
+            if find_name:find("groundbar") or find_name:find("ground") or find_name:find("bar") then
+                Groundbar_Frame = v
+            end
         end
     end
 end
