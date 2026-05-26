@@ -5714,13 +5714,12 @@ getgenv().execCmd = getgenv().execCmd or function(cmdStr,speaker,store)
 end	
 
 function addcmd(name,alias,func,plgn)
-	cmds[#cmds+1]=
-		{
-			NAME=name;
-			ALIAS=alias or {};
-			FUNC=func;
-			PLUGIN=plgn;
-		}
+	cmds[#cmds+1]= {
+		NAME=name;
+		ALIAS=alias or {};
+		FUNC=func;
+		PLUGIN=plgn;
+	}
 end
 
 function removecmd(cmd)
@@ -5742,26 +5741,24 @@ function removecmd(cmd)
 end
 
 function overridecmd(name, func)
-    local cmd = findCmd(name)
-    if cmd and cmd.FUNC then cmd.FUNC = func end
+	local cmd = findCmd(name)
+	if cmd and cmd.FUNC then cmd.FUNC = func end
 end
 
 function addbind(cmd,key,iskeyup,toggle)
 	if toggle then
-		binds[#binds+1]=
-			{
-				COMMAND=cmd;
-				KEY=key;
-				ISKEYUP=iskeyup;
-				TOGGLE = toggle;
-			}
+		binds[#binds+1]= {
+			COMMAND=cmd;
+			KEY=key;
+			ISKEYUP=iskeyup;
+			TOGGLE = toggle;
+		}
 	else
-		binds[#binds+1]=
-			{
-				COMMAND=cmd;
-				KEY=key;
-				ISKEYUP=iskeyup;
-			}
+		binds[#binds+1]= {
+			COMMAND=cmd;
+			KEY=key;
+			ISKEYUP=iskeyup;
+		}
 	end
 end
 
@@ -10401,9 +10398,7 @@ end
 local function start_anti_sit()
 	if #getgenv().anti_sit_connections > 0 then return end
 	hook_character(local_player.Character)
-	local char_conn = local_player.CharacterAdded:Connect(function(character)
-		hook_character(character)
-	end)
+	local char_conn = local_player.CharacterAdded:Connect(function(character) hook_character(character) end)
 	table.insert(getgenv().anti_sit_connections, char_conn)
 end
 
@@ -10421,6 +10416,7 @@ getgenv().toggle_anti_sit = function(state)
 end
 
 addcmd("nosit", {"antisit"}, function(args, speaker)
+	if getgenv().anti_sit_enabled then return end
 	getgenv().toggle_anti_sit(true)
 end)
 
@@ -10432,24 +10428,32 @@ addcmd("jump", {}, function(args, speaker)
 	speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
 end)
 
-local infJump
-infJumpDebounce = false
+local inf_jump
+inf_jump_debounce = false
 addcmd("infjump", {"infinitejump"}, function(args, speaker)
-	if infJump then infJump:Disconnect() end
-	infJumpDebounce = false
-	infJump = UserInputService.JumpRequest:Connect(function()
-		if not infJumpDebounce then
-			infJumpDebounce = true
-			speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-			wait()
-			infJumpDebounce = false
+	if inf_jump then inf_jump:Disconnect() end
+	inf_jump_debounce = false
+	inf_jump = UserInputService.JumpRequest:Connect(function()
+		if not inf_jump_debounce then
+			inf_jump_debounce = true
+
+			local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+			if humanoid then
+				repeat
+					humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+					task.wait(0.15)
+				until not UserInputService:IsKeyDown(Enum.KeyCode.Space)
+					and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping
+			end
+
+			inf_jump_debounce = false
 		end
 	end)
 end)
 
 addcmd("uninfjump", {"uninfinitejump", "noinfjump", "noinfinitejump"}, function(args, speaker)
-	if infJump then infJump:Disconnect() end
-	infJumpDebounce = false
+	if inf_jump then inf_jump:Disconnect() end
+	inf_jump_debounce = false
 end)
 
 local flyjump
@@ -10533,8 +10537,9 @@ addcmd("team", {}, function(args, speaker)
 		end
 	end
 	if not team then
-		return Notify_InfP("Invalid Team", teamName .. " is not a valid team")
+		return Notify_InfP("Invalid Team", teamName.." is not a valid team")
 	end
+
 	if root and firetouchinterest then
 		for _, v in ipairs(workspace:GetDescendants()) do
 			if v:IsA("SpawnLocation") and v.BrickColor == team.TeamColor and v.AllowTeamChangeOnTouch == true then
