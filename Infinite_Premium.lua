@@ -2234,9 +2234,28 @@ function vtype(o, t)
 	return type(o) == t
 end
 
+getgenv().get_or_set = getgenv().get_or_set or function(name, value)
+	if rawget and rawset then
+		local existing = rawget(getgenv(), name)
+		if existing == nil then
+			rawset(getgenv(), name, value)
+			return value
+		end
+		return existing
+	end
+
+	local existing = getgenv()[name]
+
+	if existing == nil then
+		getgenv()[name] = value
+		return value
+	end
+
+	return existing
+end
+
 function hb()
 	local rs = cloneref and cloneref(game:GetService("RunService")) or game:GetService("RunService")
-
 	rs.Heartbeat:Wait()
 end
 
@@ -2389,11 +2408,37 @@ end
 
 function getRoot(char)
 	char = char or game.Players.LocalPlayer.Character or get_char(speaker or game.Players.LocalPlayer, 10)
-	if not char then return nil end
-	return char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
+
+	if not char then
+		local attempts = 0
+		repeat
+			task.wait(0.15)
+			attempts = attempts + 1
+			char = game.Players.LocalPlayer.Character
+		until char or attempts >= 5
+		if not char then
+			return nil
+		end
+	end
+
+	local root
+	local attempts = 0
+
+	repeat
+		root = char:FindFirstChild('HumanoidRootPart')
+			or char:FindFirstChild('Torso')
+			or char:FindFirstChild('UpperTorso')
+
+		if not root then
+			task.wait(0.5)
+			attempts = attempts + 1
+		end
+	until root or attempts >= 5
+
+	return root
 end
 wait(0.1)
-getgenv().getRoot = getgenv().getRoot or getRoot
+getgenv().getRoot = getRoot
 
 function tools(plr)
 	if plr:FindFirstChildOfClass("Backpack"):FindFirstChildOfClass('Tool') or plr.Character:FindFirstChildOfClass('Tool') then
@@ -10266,182 +10311,12 @@ addcmd("sitwalk", {}, function(args, speaker)
 	speaker.Character:FindFirstChildWhichIsA("Humanoid").HipHeight = not r15(speaker) and -1.5 or 0.5
 end)
 
-getgenv().get_or_set = getgenv().get_or_set or function(name, value)
-	if rawget and rawset then
-		local existing = rawget(getgenv(), name)
-		if existing == nil then
-			rawset(getgenv(), name, value)
-			return value
-		end
-		return existing
-	end
-
-	local existing = getgenv()[name]
-
-	if existing == nil then
-		getgenv()[name] = value
-		return value
-	end
-
-	return existing
-end
-
-local function wait_for_datamodel(inst)
-	if not inst then return false end
-
-	local attempts = 0
-	local maximum_attempts = 300
-
-	while attempts < maximum_attempts do
-		if inst.Parent and inst:IsDescendantOf(workspace) then
-			return true
-		end
-		task.wait(0.1)
-		attempts += 1
-	end
-
-	return false
-end
-wait(0.1)
 get_or_set("wait_for_datamodel", wait_for_datamodel)
-
-local function wait_for_child(parent, name)
-	if not parent then return nil end
-	local existing = parent:FindFirstChild(name)
-	if existing then return existing end
-	local ok, obj = pcall(function()
-		return parent:WaitForChild(name, math.huge)
-	end)
-
-	return ok and obj or nil
-end
-wait(0.1)
 get_or_set("wait_for_child", wait_for_child)
-
-local function wait_for_descendant(parent, name)
-	if not parent then return nil end
-	local found = parent:FindFirstChild(name, true)
-	if found then return found end
-	local conn
-	local result = nil
-
-	conn = parent.DescendantAdded:Connect(function(d)
-		if d.Name == name then
-			result = d
-			conn:Disconnect()
-		end
-	end)
-
-	while not result do
-		local check = parent:FindFirstChild(name, true)
-		if check then
-			result = check
-			conn:Disconnect()
-			break
-		end
-		task.wait()
-	end
-
-	return result
-end
-wait(0.1)
 get_or_set("wait_for_descendant", wait_for_descendant)
-
-local function wait_for_child_safe(parent, name)
-	if not parent then return nil end
-	local ok, obj = pcall(function()
-		return parent:WaitForChild(name, 9e9)
-	end)
-
-	if ok and obj then
-		return obj
-	end
-
-	return nil
-end
-wait(0.1)
 get_or_set("wait_for_child_safe", wait_for_child_safe)
-
-local function retry_find(func, retries, delay)
-	for _ = 1, retries do
-		local ok, result = pcall(func)
-		if ok and result then
-			return result
-		end
-		task.wait(delay)
-	end
-	return nil
-end
-wait(0.1)
+get_or_set("wait_instance", wait_instance)
 get_or_set("retry_find", retry_find)
-
-local function wait_character(player, timeout)
-	timeout = timeout or 10
-	local start = os.clock()
-
-	while os.clock() - start < timeout do
-		local char = player.Character
-		if char and char.Parent then
-			return char
-		end
-		task.wait()
-	end
-
-	return nil
-end
-
-local function wait_instance(parent, resolver, timeout)
-	timeout = timeout or 10
-	local start_time = os.clock()
-	local inst = resolver()
-	if inst then
-		return inst
-	end
-
-	local conn
-	conn = parent.ChildAdded:Connect(function()
-		inst = resolver()
-	end)
-
-	while not inst and os.clock() - start_time < timeout do
-		hb()
-	end
-
-	if conn then
-		conn:Disconnect()
-	end
-
-	return inst
-end
-
-getgenv().return_char = function(Player, timeout)
-	if not Player or not Player:IsA("Player") then return nil end
-	timeout = tonumber(timeout) or 10
-	local start = os.clock()
-
-	while os.clock() - start < timeout do
-		local char = Player.Character
-
-		if char and char.Parent and char:IsDescendantOf(game) then
-			local hum = char:FindFirstChildOfClass("Humanoid")
-
-			if hum and hum.Health > 0 then
-				return char
-			end
-		end
-
-		task.wait()
-	end
-
-	return nil
-end
-
-getgenv().get_char = getgenv().get_char or function(player, time_out)
-	time_out = tonumber(time_out) or 10
-	if not player or not player:IsA("Player") then return nil end
-	return wait_character(player, time_out)
-end
-
 getgenv().get_root = getgenv().get_root or function(player, time_out)
 	time_out = time_out and tonumber(time_out) or 5
 	local char = wait_character(player, time_out)
@@ -10617,9 +10492,8 @@ addcmd('unautojump',{'noautojump', 'noajump', 'unajump'},function(args, speaker)
 end)
 
 addcmd('edgejump',{'ejump'},function(args, speaker)
-	local Char = speaker.Character
+	local Char = speaker.Character or get_char(speaker, 5)
 	local Human = Char and Char:FindFirstChildWhichIsA("Humanoid")
-	-- Full credit to NoelGamer06 @V3rmillion
 	local state
 	local laststate
 	local lastcf
@@ -10649,29 +10523,29 @@ addcmd('unedgejump',{'noedgejump', 'noejump', 'unejump'},function(args, speaker)
 end)
 
 addcmd("team", {}, function(args, speaker)
-    local teamName = getstring(1)
-    local team = nil
-    local root = speaker.Character and getRoot(speaker.Character)
-    for _, v in ipairs(Teams:GetChildren()) do
-        if v.Name:lower():match(teamName:lower()) then
-            team = v
-            break
-        end
-    end
-    if not team then
-        return Notify_InfP("Invalid Team", teamName .. " is not a valid team")
-    end
-    if root and firetouchinterest then
-        for _, v in ipairs(workspace:GetDescendants()) do
-            if v:IsA("SpawnLocation") and v.BrickColor == team.TeamColor and v.AllowTeamChangeOnTouch == true then
-                firetouchinterest(v, root, 0)
-                firetouchinterest(v, root, 1)
-                break
-            end
-        end
-    else
-        speaker.Team = team
-    end
+	local teamName = getstring(1)
+	local team = nil
+	local root = speaker.Character and getRoot(speaker.Character)
+	for _, v in ipairs(Teams:GetChildren()) do
+		if v.Name:lower():match(teamName:lower()) then
+			team = v
+			break
+		end
+	end
+	if not team then
+		return Notify_InfP("Invalid Team", teamName .. " is not a valid team")
+	end
+	if root and firetouchinterest then
+		for _, v in ipairs(workspace:GetDescendants()) do
+			if v:IsA("SpawnLocation") and v.BrickColor == team.TeamColor and v.AllowTeamChangeOnTouch == true then
+				firetouchinterest(v, root, 0)
+				firetouchinterest(v, root, 1)
+				break
+			end
+		end
+	else
+		speaker.Team = team
+	end
 end)
 
 addcmd('nobgui',{'unbgui','nobillboardgui','unbillboardgui','noname','rohg'},function(args, speaker)
