@@ -2388,7 +2388,7 @@ function get_char(player, time_out)
 end
 
 function getRoot(char)
-	char = speaker.Character or game.Players.LocalPlayer.Character or get_char(speaker or game.Players.LocalPlayer, 10)
+	char = char or game.Players.LocalPlayer.Character or get_char(speaker or game.Players.LocalPlayer, 10)
 	if not char then return nil end
 	return char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
 end
