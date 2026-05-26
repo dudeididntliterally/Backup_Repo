@@ -4951,7 +4951,7 @@ end
 
 -- [[ Announcement System ]] --
 -- [[ change to what ever you want. ]] --
-local Announcement_Message = "I am quitting development for Flames Hub, I don't have enough time to work on it, I have work work, bye all! I have released the source code."
+local Announcement_Message = "[discord.gg/MTYKxQfpNJ]: I am quitting development for Flames Hub, I don't have enough time to work on it, I have work work, bye all! I have released the source code."
 g.displayTimeMax = 60
 g.Script_Loaded_Correctly_LifeTogether_Admin_Flames_Hub = g.Script_Loaded_Correctly_LifeTogether_Admin_Flames_Hub or false
 g.Script_Version_GlobalGenv = Script_Version -- also keep it like this so it can over-write new version properly.
