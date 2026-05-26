@@ -2234,9 +2234,163 @@ function vtype(o, t)
 	return type(o) == t
 end
 
+function hb()
+	local rs = cloneref and cloneref(game:GetService("RunService")) or game:GetService("RunService")
+
+	rs.Heartbeat:Wait()
+end
+
+local function wait_for_datamodel(inst)
+	if not inst then return false end
+	local attempts = 0
+	local maximum_attempts = 300
+
+	while attempts < maximum_attempts do
+		if inst.Parent and inst:IsDescendantOf(workspace) then
+			return true
+		end
+		task.wait(0.1)
+		attempts += 1
+	end
+
+	return false
+end
+
+local function wait_for_child(parent, name)
+	if not parent then return nil end
+	local existing = parent:FindFirstChild(name)
+	if existing then return existing end
+	local ok, obj = pcall(function()
+		return parent:WaitForChild(name, math.huge)
+	end)
+
+	return ok and obj or nil
+end
+
+local function wait_for_descendant(parent, name)
+	if not parent then return nil end
+	local found = parent:FindFirstChild(name, true)
+	if found then return found end
+	local conn
+	local result = nil
+
+	conn = parent.DescendantAdded:Connect(function(d)
+		if d.Name == name then
+			result = d
+			conn:Disconnect()
+		end
+	end)
+
+	while not result do
+		local check = parent:FindFirstChild(name, true)
+		if check then
+			result = check
+			conn:Disconnect()
+			break
+		end
+		task.wait()
+	end
+
+	return result
+end
+
+local function wait_for_child_safe(parent, name)
+	if not parent then return nil end
+
+	local ok, obj = pcall(function()
+		return parent:WaitForChild(name, 9e9)
+	end)
+
+	if ok and obj then
+		return obj
+	end
+
+	return nil
+end
+
+local function retry_find(func, retries, delay)
+	for _ = 1, retries do
+		local ok, result = pcall(func)
+		if ok and result then
+			return result
+		end
+		task.wait(delay)
+	end
+	return nil
+end
+
+local function wait_character(player, timeout)
+	timeout = timeout or 10
+	local start = os.clock()
+
+	while os.clock() - start < timeout do
+		local char = player.Character
+		if char and char.Parent then
+			return char
+		end
+		hb()
+	end
+
+	return nil
+end
+
+local function wait_instance(parent, resolver, timeout)
+	timeout = timeout or 10
+	local start_time = os.clock()
+	local inst = resolver()
+	if inst then
+		return inst
+	end
+
+	local conn
+	conn = parent.ChildAdded:Connect(function()
+		inst = resolver()
+	end)
+
+	while not inst and os.clock() - start_time < timeout do
+		hb()
+	end
+
+	if conn then
+		conn:Disconnect()
+	end
+
+	return inst
+end
+
+getgenv().return_char = getgenv().return_char or function(Player, timeout)
+	if not Player or not Player:IsA("Player") then return nil end
+
+	timeout = tonumber(timeout) or 5
+	local start = os.clock()
+
+	while os.clock() - start < timeout do
+		local char = Player.Character
+
+		if char and char.Parent and char:IsDescendantOf(game) then -- neat.
+			local hum = char:FindFirstChildOfClass("Humanoid")
+
+			if hum and hum.Health > 0 then
+				return char
+			end
+		end
+
+		task.wait()
+	end
+
+	return nil
+end
+
+function get_char(player, time_out)
+	time_out = tonumber(time_out) or 5
+	if not player or not player:IsA("Player") then return nil end
+	return wait_character(player, time_out)
+end
+
 function getRoot(char)
-	local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
-	return rootPart
+	char = speaker.Character or game.Players.LocalPlayer.Character or get_char(speaker or game.Players.LocalPlayer, 10)
+	if not char then return nil end
+	return char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
 end
 wait(0.1)
 getgenv().getRoot = getgenv().getRoot or getRoot
@@ -2347,12 +2501,7 @@ getgenv().vehiclefly_control_inf_premium_tbl = getgenv().vehiclefly_control_inf_
 getgenv().vehiclefly_noclip_inf_premium_toggled = getgenv().vehiclefly_noclip_inf_premium_toggled or false
 getgenv().vehiclefly_collisions_tbl_infinite_premium = getgenv().vehiclefly_collisions_tbl_infinite_premium or {}
 local controlModule
-if UserInputService.TouchEnabled then
-	controlModule = require(
-		game.Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule")
-	)
-end
-
+if UserInputService.TouchEnabled then controlModule = require(game.Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule")) end
 getgenv().cleanup_vehicle_fly_main_inf_premium = function()
 	for _, c in pairs(getgenv().vehiclefly_conns_infinite_premium) do
 		pcall(function() c:Disconnect() end)
