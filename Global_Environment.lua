@@ -7,10 +7,8 @@ local g = getgenv()
 local game_ref = game
 local Players = g.Players or cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
 if not getgenv().Players then getgenv().Players = Players end
-
 g.wait_until = function(condition, interval, max_tries)
     interval = tonumber(interval) or 0.05
-
     if typeof(max_tries) == "string" then
         local lower = max_tries:lower()
         -- [[ cannot be more obvious lol ]] --
@@ -40,32 +38,18 @@ g.wait_until = function(condition, interval, max_tries)
         task.wait(interval)
         tries += 1
     until condition() or tries >= max_tries
-
     return condition() and true or false
 end
 
 getgenv().type_chooser = function(value)
-    local ok, result = pcall(function()
-        return typeof(value)
-    end)
-
-    if ok and result then
-        return result
-    end
-
-    local ok2, result2 = pcall(function()
-        return type(value)
-    end)
-
-    if ok2 and result2 then
-        return result2
-    end
-
+    local ok, result = pcall(function() return typeof(value) end)
+    if ok and result then return result end
+    local ok2, result2 = pcall(function() return type(value) end)
+    if ok2 and result2 then return result2 end
     return nil
 end
 wait(0.1)
 getgenv().service_cache = getgenv().service_cache or {}
-
 local aliases = {
     rs = "ReplicatedStorage",
     rf = "ReplicatedFirst",
@@ -78,30 +62,16 @@ local aliases = {
     uis = "UserInputService"
 }
 
-local virtuals = {
-    lp = true,
-    localplayer = true,
-    localplr = true
-}
-
+local virtuals = {lp = true, localplayer = true, localplr = true}
 local function levenshtein(a, b)
     a = a:lower()
     b = b:lower()
-
     local len_a, len_b = #a, #b
     if len_a == 0 then return len_b end
     if len_b == 0 then return len_a end
-
     local matrix = {}
-
-    for i = 0, len_a do
-        matrix[i] = {[0] = i}
-    end
-
-    for j = 0, len_b do
-        matrix[0][j] = j
-    end
-
+    for i = 0, len_a do matrix[i] = {[0] = i} end
+    for j = 0, len_b do matrix[0][j] = j end
     for i = 1, len_a do
         for j = 1, len_b do
         local cost = (a:sub(i,i) == b:sub(j,j)) and 0 or 1
@@ -118,18 +88,13 @@ end
 
 local function resolve_service(input)
     if not input then return nil end
-
     local lowered = tostring(input):lower()
-
-    if aliases[lowered] then
-        return aliases[lowered]
-    end
-
+    if aliases[lowered] then return aliases[lowered] end
     local children = game:GetChildren()
 
     for _, svc in ipairs(children) do
         if svc.Name:lower() == lowered then
-        return svc.Name
+            return svc.Name
         end
     end
 
@@ -150,53 +115,27 @@ local function resolve_service(input)
         end
     end
 
-    if best_score <= 4 then
-        return best_name
-    end
-
+    if best_score <= 4 then return best_name end
     return nil
 end
 
 local function fetch_value(name)
     if not name then return nil end
-
     local lowered = tostring(name):lower()
 
     if virtuals[lowered] then
-        local ok, players = pcall(function()
-            return getgenv().service_cache["Players"].LocalPlayer
-        end)
-
-        if not ok or not players then
-            return nil
-        end
-
+        local ok, players = pcall(function() return getgenv().service_cache["Players"].LocalPlayer end)
+        if not ok or not players then return nil end
         local lp = players.LocalPlayer
-        if lp then
-            return lowered, lp
-        end
-
+        if lp then return lowered, lp end
         return nil
     end
 
     local resolved = resolve_service(name)
     if not resolved then return nil end
-
-    local ok, svc = pcall(function()
-        return game:GetService(resolved)
-    end)
-
+    local ok, svc = pcall(function() return game:GetService(resolved) end)
     if not ok or not svc then return nil end
-
-    if cloneref then
-        local success, cloned = pcall(function()
-            return cloneref(svc)
-        end)
-        if success and cloned then
-            svc = cloned
-        end
-    end
-
+    if cloneref then local success, cloned = pcall(function() return cloneref(svc) end) if success and cloned then svc = cloned end end
     return resolved, svc
 end
 
@@ -204,26 +143,14 @@ if setmetatable and getmetatable and rawget and rawset then
     if not getmetatable(getgenv().service_cache) then
         setmetatable(getgenv().service_cache, {
         __index = function(self, key)
-
             local existing = rawget(self, key)
-            if existing then
-                return existing
-            end
-
+            if existing then return existing end
             local resolved_key, value = fetch_value(key)
-            if not value then
-                return nil
-            end
-
+            if not value then return nil end
             rawset(self, key, value)
-
-            if resolved_key and resolved_key ~= key then
-                rawset(self, resolved_key, value)
-            end
-
+            if resolved_key and resolved_key ~= key then rawset(self, resolved_key, value) end
             return value
-        end
-        })
+        end})
     end
 
     getgenv().safe_wrapper = function(name)
@@ -233,20 +160,11 @@ if setmetatable and getmetatable and rawget and rawset then
 else
     getgenv().safe_wrapper = function(name)
         if not name then return nil end
-
-        if getgenv().service_cache[name] then
-        return getgenv().service_cache[name]
-        end
-
+        if getgenv().service_cache[name] then return getgenv().service_cache[name] end
         local resolved_key, value = fetch_value(name)
         if not value then return nil end
-
         getgenv().service_cache[name] = value
-
-        if resolved_key and resolved_key ~= name then
-        getgenv().service_cache[resolved_key] = value
-        end
-
+        if resolved_key and resolved_key ~= name then getgenv().service_cache[resolved_key] = value end
         return value
     end
 end
@@ -351,10 +269,7 @@ end
 getgenv().FlamesLibrary.is_alive = function(name)
     local lib = getgenv().FlamesLibrary
     local list = lib._connections[name]
-
-    if not list then
-        return false
-    end
+    if not list then return false end
 
     for _, item in ipairs(list) do
         if typeof(item) == "RBXScriptConnection" then
@@ -385,22 +300,12 @@ end
 
 -- [[ safer wait functionality. ]] --
 getgenv().FlamesLibrary.wait = function(t)
-    if not t or t <= 0 then
-        safe_wrapper("RunService").Heartbeat:Wait()
-        return
-    end
+    if not t or t <= 0 then safe_wrapper("RunService").Heartbeat:Wait() return end
     local ok = pcall(task.wait, t)
-    if not ok then
-        safe_wrapper("RunService").Heartbeat:Wait()
-    end
+    if not ok then safe_wrapper("RunService").Heartbeat:Wait() end
 end
 
-getgenv().FlamesLibrary.cleanup_all = function()
-	for name in pairs(getgenv().FlamesLibrary._connections) do
-		getgenv().FlamesLibrary.disconnect(name)
-	end
-end
-
+getgenv().FlamesLibrary.cleanup_all = function() for name in pairs(getgenv().FlamesLibrary._connections) do getgenv().FlamesLibrary.disconnect(name) end end
 if not g.blank then g.blank = function(...) return ... end end
 if not g.blankfunction then g.blankfunction = function(...) return ... end end
 
@@ -420,17 +325,12 @@ end
 
 -- [[ not sure if it works correctly, but this is a BETA function checker I've implemented for now I plan to use later. ]] --
 g._function_cache = g._function_cache or {}
-
 g.check_function = function(func) -- might get rid of this.
     if typeof(func) == "function" then return func end
     if typeof(func) ~= "string" then return false end
-
     local name = func:lower()
     local cached = g._function_cache[name]
-    if cached ~= nil then
-        return cached or false
-    end
-
+    if cached ~= nil then return cached or false end
     local genv = getgenv()
     for k, v in pairs(genv) do
         if typeof(v) == "function" and tostring(k):lower() == name then
@@ -462,35 +362,12 @@ end
 g.Game = game_ref
 g.JobID = game_ref.JobId
 g.PlaceID = game_ref.PlaceId
-
-pcall(function()
-    g.set_fps(999999) -- actually rewritten to be the global function.
-end)
-
-g.AllClipboards = g.AllClipboards or getgenv().FlamesLibrary.safe_func(
-    setclipboard,
-    toclipboard,
-    set_clipboard,
-    Clipboard and Clipboard.set
-)
-
-g.httprequest_Init = g.httprequest_Init or getgenv().FlamesLibrary.safe_func(
-    syn and syn.request,
-    http and http.request,
-    http_request,
-    fluxus and fluxus.request,
-    request
-)
-
+pcall(function() g.set_fps(360) end)
+g.AllClipboards = g.AllClipboards or getgenv().FlamesLibrary.safe_func(setclipboard, toclipboard, set_clipboard, Clipboard and Clipboard.set)
+g.httprequest_Init = g.httprequest_Init or getgenv().FlamesLibrary.safe_func(syn and syn.request, http and http.request, http_request, fluxus and fluxus.request, request)
 g.get_http = g.httprequest_Init
-g.queueteleport = g.queueteleport or getgenv().FlamesLibrary.safe_func(
-    syn and syn.queue_on_teleport,
-    queue_on_teleport,
-    fluxus and fluxus.queue_on_teleport
-)
-
+g.queueteleport = g.queueteleport or getgenv().FlamesLibrary.safe_func(syn and syn.queue_on_teleport, queue_on_teleport, fluxus and fluxus.queue_on_teleport)
 queueteleport = g.queueteleport
-
 g.get_or_set = g.get_or_set or function(name, value)
     if rawget and rawset then
         local existing = rawget(g, name)
@@ -526,8 +403,8 @@ do
     local MIN_DELTA  = 2
     local function cancel_tween()
         if active_tween then
-        pcall(function() active_tween:Cancel() end)
-        active_tween = nil
+            pcall(function() active_tween:Cancel() end)
+            active_tween = nil
         end
     end
 
@@ -621,18 +498,12 @@ local function format_title(str)
    local key=str:lower()
    return valid_titles[key] or "Info"
 end
-getgenv().notify=getgenv().notify or function(title,msg,dur)
-   local fixed_title=format_title(title)
-   NotifyLib:External_Notification(fixed_title,tostring(msg),tonumber(dur))
-end
+getgenv().notify=getgenv().notify or function(title,msg,dur) local fixed_title=format_title(title) NotifyLib:External_Notification(fixed_title,tostring(msg),tonumber(dur)) end
 g.Characters = g.Characters or {}
-g.CharacterSystemLoaded = g.CharacterSystemLoaded or false
 
 if not getgenv().Initialized_Flames_All_Characters_Global_System then
     getgenv().Initialized_Flames_All_Characters_Global_System = true
-    g.CharacterSystemLoaded = true
-
-    local function wait_character(player)
+    getgenv().wait_character = function(player)
         local char
         repeat
             char = player.Character
@@ -641,7 +512,9 @@ if not getgenv().Initialized_Flames_All_Characters_Global_System then
         return char
     end
 
-    local function wait_instance(parent, resolver)
+    getgenv().wait_instance = function(parent, resolver, timeout)
+        timeout = timeout or 10
+        local start_time = os.clock()
         local inst = resolver()
         if inst then return inst end
 
@@ -650,11 +523,11 @@ if not getgenv().Initialized_Flames_All_Characters_Global_System then
             inst = resolver()
         end)
 
-        while not inst do
+        while not inst and os.clock() - start_time < timeout do
             hb()
         end
 
-        if conn then conn:Disconnect() end
+        conn:Disconnect()
         return inst
     end
 
@@ -664,39 +537,19 @@ if not getgenv().Initialized_Flames_All_Characters_Global_System then
         if getgenv().char_currently_building[player] then return end
         getgenv().char_currently_building[player] = true
         local entry = g.Characters[player] or {}
-
         entry.character = character
-
-        entry.humanoid = wait_instance(character, function()
-            return character:FindFirstChildWhichIsA("Humanoid")
-        end)
-
-        entry.root = wait_instance(character, function()
-            return character:FindFirstChild("HumanoidRootPart")
-                or character:FindFirstChild("UpperTorso")
-                or character:FindFirstChild("Torso")
-        end)
-
-        entry.head = wait_instance(character, function()
-            return character:FindFirstChild("Head")
-        end)
-
+        entry.humanoid = wait_instance(character, function() return character:FindFirstChildWhichIsA("Humanoid") end)
+        entry.root = wait_instance(character, function() return character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("UpperTorso") or character:FindFirstChild("Torso") end)
+        entry.head = wait_instance(character, function() return character:FindFirstChild("Head") end)
         g.Characters[player] = entry
         getgenv().char_currently_building[player] = nil
     end
 
     local function hook_player(player)
-        if player.Character and player.Character.Parent then
-            task.spawn(function()
-                build_entry(player, player.Character)
-            end)
-        end
-
+        if player.Character and player.Character.Parent then task.spawn(function() build_entry(player, player.Character) end) end
         player.CharacterAdded:Connect(function(char)
             task.spawn(function()
-                while not char or not char.Parent do
-                    hb()
-                end
+                while not char or not char.Parent do hb() end
                 build_entry(player, char)
             end)
         end)
@@ -711,33 +564,22 @@ if not getgenv().Initialized_Flames_All_Characters_Global_System then
     Players.PlayerAdded:Connect(hook_player)
     Players.PlayerRemoving:Connect(function(player)
         g.Characters[player] = nil
+        getgenv().char_currently_building[player] = nil
     end)
 end
 
 local function retrieve_executor()
     local f = identifyexecutor
-    if type(f) == "function" then
-        return { Name = f() }
-    end
+    if type(f) == "function" then return { Name = f() } end
     return { Name = tostring(f or "Unknown Executor") }
 end
 
-local function identify_executor_clean()
-    return tostring(retrieve_executor().Name)
-end
-
+local function identify_executor_clean() return tostring(retrieve_executor().Name) end
 local executor_string = identify_executor_clean()
-
-local function executor_contains(substr)
-    if type(executor_string) ~= "string" then return false end
-    return string.find(executor_string:lower(), substr:lower(), 1, true) ~= nil
-end
-
+local function executor_contains(substr) if type(executor_string) ~= "string" then return false end return string.find(executor_string:lower(), substr:lower(), 1, true) ~= nil end
 executor_contains = g.get_or_set("executor_contains", executor_contains)
-
 local function wait_for_datamodel(inst)
     if not inst then return false end
-
     local attempts = 0
     local maximum_attempts = 300
 
@@ -753,7 +595,6 @@ local function wait_for_datamodel(inst)
 end
 wait(0.1)
 get_or_set("wait_for_datamodel", wait_for_datamodel)
-
 local function wait_for_child(parent, name)
     if not parent then return nil end
 
@@ -768,13 +609,10 @@ local function wait_for_child(parent, name)
 end
 wait(0.1)
 get_or_set("wait_for_child", wait_for_child)
-
 local function wait_for_descendant(parent, name)
     if not parent then return nil end
-
     local found = parent:FindFirstChild(name, true)
     if found then return found end
-
     local conn
     local result = nil
 
@@ -799,23 +637,14 @@ local function wait_for_descendant(parent, name)
 end
 wait(0.1)
 get_or_set("wait_for_descendant", wait_for_descendant)
-
 local function wait_for_child_safe(parent, name)
     if not parent then return nil end
-
-    local ok, obj = pcall(function()
-        return parent:WaitForChild(name, 9e9)
-    end)
-
-    if ok and obj then
-        return obj
-    end
-
+    local ok, obj = pcall(function() return parent:WaitForChild(name, 9e9) end)
+    if ok and obj then return obj end
     return nil
 end
 wait(0.1)
 get_or_set("wait_for_child_safe", wait_for_child_safe)
-
 local function retry_find(func, retries, delay)
     for _ = 1, retries do
         local ok, result = pcall(func)
@@ -829,62 +658,13 @@ end
 wait(0.1)
 get_or_set("retry_find", retry_find)
 
-local function wait_character(player, timeout)
-	timeout = timeout or 10
-	local start = os.clock()
-
-	while os.clock() - start < timeout do
-		local char = player.Character
-		if char and char.Parent then
-			return char
-		end
-		hb()
-	end
-
-	return nil
-end
-
-local function wait_instance(parent, resolver, timeout)
-	timeout = timeout or 10
-	local start_time = os.clock()
-	local inst = resolver()
-	if inst then
-		return inst
-	end
-
-	local conn
-	conn = parent.ChildAdded:Connect(function()
-		inst = resolver()
-	end)
-
-	while not inst and os.clock() - start_time < timeout do
-		hb()
-	end
-
-	if conn then
-		conn:Disconnect()
-	end
-
-	return inst
-end
-
 getgenv().return_char = function(Player, timeout)
 	if not Player or not Player:IsA("Player") then return nil end
-
 	timeout = tonumber(timeout) or 5
 	local start = os.clock()
-
 	while os.clock() - start < timeout do
 		local char = Player.Character
-
-		if char and char.Parent and char:IsDescendantOf(game) then -- neat.
-			local hum = char:FindFirstChildOfClass("Humanoid")
-
-			if hum and hum.Health > 0 then
-				return char
-			end
-		end
-
+		if char and char.Parent and char:IsDescendantOf(game) then local hum = char:FindFirstChildOfClass("Humanoid") if hum and hum.Health > 0 then return char end end
 		task.wait()
 	end
 
@@ -901,60 +681,35 @@ g.get_human = function(player, time_out)
 	time_out = tonumber(time_out) or 5
 	local char = wait_character(player, time_out)
 	if not char then return nil end
-	return wait_instance(char, function()
-		return char:FindFirstChildWhichIsA("Humanoid")
-	end, time_out)
+	return wait_instance(char, function() return char:FindFirstChildWhichIsA("Humanoid") end, time_out)
 end
 
 g.get_root = function(player, time_out)
 	time_out = time_out and tonumber(time_out) or 5
 	local char = wait_character(player, time_out)
 	if not char then return nil end
-	return wait_instance(char, function()
-		return char:FindFirstChild("HumanoidRootPart")
-			or char:FindFirstChild("UpperTorso")
-			or char:FindFirstChild("Torso")
-	end, time_out)
+	return wait_instance(char, function() return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") end, time_out)
 end
 
 g.get_head = function(player, time_out)
 	time_out = time_out and tonumber(time_out) or 5
 	local char = wait_character(player, time_out)
 	if not char then return nil end
-	return wait_instance(char, function()
-		return char:FindFirstChild("Head")
-	end, time_out)
+	return wait_instance(char, function() return char:FindFirstChild("Head") end, time_out)
 end
-
 wait(0.1)
 getgenv().service_cache = getgenv().service_cache or {}
 g.Service_Wrap = g.Service_Wrap or function(name)
     local cache = getgenv().service_cache
-    if cache[name] then
-        return cache[name]
-    end
-
-    local ok, svc = pcall(function()
-        local s = game:GetService(name)
-        return cloneref and cloneref(s) or s
-    end)
-
-    if not ok or not svc then
-        return nil
-    end
-
-    if rawset then
-        rawset(cache, name, svc)
-    else
-        cache[name] = svc
-    end
-
+    if cache[name] then return cache[name] end
+    local ok, svc = pcall(function() local s = game:GetService(name) return cloneref and cloneref(s) or s end)
+    if not ok or not svc then return nil end
+    if rawset then rawset(cache, name, svc) else cache[name] = svc end
     return svc
 end
 
 local tries = 0
 local max_tries = 100
-
 if not g.Service_Wrap then
     repeat
         task.wait()
@@ -965,7 +720,6 @@ end
 local function init_services()
     if getgenv().__services_init then return end
     getgenv().__services_init = true
-
     for _, name in ipairs({
         "Players","Workspace","Lighting","ReplicatedStorage","TweenService","RunService",
         "MaterialService","ReplicatedFirst","Teams","StarterPack","StarterPlayer",
@@ -982,26 +736,16 @@ local function init_services()
         end
     end
 
-    local players = getgenv().Players
-    if players then
-        while not players.LocalPlayer do
-            task.wait()
-        end
-        getgenv().LocalPlayer = players.LocalPlayer
-    end
-
+    local players = getgenv().Players or cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
+    if players then while not players.LocalPlayer do task.wait() end getgenv().LocalPlayer = players.LocalPlayer end
     local sp = getgenv().StarterPlayer
-    if sp then
-        getgenv().StarterPlayerScripts = sp:FindFirstChildOfClass("StarterPlayerScripts")
-        getgenv().StarterCharacterScripts = sp:FindFirstChildOfClass("StarterCharacterScripts")
-    end
+    if sp then getgenv().StarterPlayerScripts = sp:FindFirstChildOfClass("StarterPlayerScripts") getgenv().StarterCharacterScripts = sp:FindFirstChildOfClass("StarterCharacterScripts") end
 end
 wait(0.1)
 init_services()
 
 local cmdp = cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
 local cmdlp = cmdp.LocalPlayer
-
 getgenv().Character = getgenv().LocalPlayer.Character or game.Players.LocalPlayer.Character
 getgenv().Humanoid = Character and (Character:FindFirstChild("Humanoid") or Character:FindFirstChildOfClass("Humanoid")) or Character and Character:WaitForChild("Humanoid", 10)
 getgenv().HumanoidRootPart = Character and (Character:FindFirstChild("HumanoidRootPart") or Character and Character:WaitForChild("HumanoidRootPart", 10))
@@ -1009,11 +753,7 @@ getgenv().Head = Character and (Character:FindFirstChild("Head") or Character an
 
 g.findplr = g.findplr or function(args)
     local tbl = cmdp:GetPlayers()
-
-    if args == "me" or args == cmdlp.Name or args == cmdlp.DisplayName or args == cmdlp then
-        return 
-    end
-
+    if args == "me" or args == cmdlp.Name or args == cmdlp.DisplayName or args == cmdlp then return end
     if args == "random" then
         local validPlayers = {}
         for _, v in pairs(tbl) do
@@ -1128,10 +868,7 @@ g.findplr = g.findplr or function(args)
         return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
     end
 
-    if typeof(args) ~= "string" or args == "" then
-        return nil
-    end
-
+    if typeof(args) ~= "string" or args == "" then return nil end
     for _, v in pairs(tbl) do
         if v ~= cmdlp then
             local name, display = v.Name:lower(), v.DisplayName:lower()
@@ -1145,9 +882,7 @@ end
 g.randomString = g.randomString or function()
     local length = math.random(10,20)
     local array = {}
-    for i = 1, length do
-        array[i] = string.char(math.random(32, 126))
-    end
+    for i = 1, length do array[i] = string.char(math.random(32, 126)) end
     return table.concat(array)
 end
 
@@ -1222,26 +957,12 @@ end
 
 g.findinstance = g.findinstance or function(class)
     class = tostring(class):lower()
-
-    if class == "camera" and Workspace.CurrentCamera then
-        return Workspace.CurrentCamera
-    end
-    if class == "terrain" and Workspace.Terrain then
-        return Workspace.Terrain
-    end
-
+    if class == "camera" and Workspace.CurrentCamera then return Workspace.CurrentCamera or workspace:FindFirstChildOfClass("Camera") end
+    if class == "terrain" and Workspace.Terrain then return Workspace.Terrain end
     local canon = class:sub(1,1):upper() .. class:sub(2)
     local child = Workspace:FindFirstChild(canon)
-    if child then
-        return child
-    end
-
-    for _, obj in ipairs(Workspace:GetChildren()) do
-        if obj.ClassName:lower() == class then
-            return obj
-        end
-    end
-
+    if child then return child end
+    for _, obj in ipairs(Workspace:GetChildren()) do if obj.ClassName:lower() == class then return obj end end
     return nil
 end
 
@@ -1259,7 +980,6 @@ get_or_set("get_player_backpack", Backpack)
 
 if not getgenv().Anti_Idle_Controller_Loaded then
     getgenv().Anti_Idle_Controller_Loaded = true
-
     if getconnections or get_signal_cons then
         local gc = getconnections or get_signal_cons
         local idle = lp.Idled
@@ -1277,42 +997,22 @@ if not getgenv().Anti_Idle_Controller_Loaded then
     end
 end
 
-getgenv().getRoot = function(char)
-	local hum = char:FindFirstChildOfClass("Humanoid")
-	if hum and hum.RootPart then
-		return hum.RootPart
-	end
-
-	return char:FindFirstChild("HumanoidRootPart")
-		or char:FindFirstChild("UpperTorso")
-		or char:FindFirstChild("Torso")
+getgenv().getRoot = getgenv().getRoot or function(char)
+    local name_of_char = tostring(char.Name)
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if hum and hum.RootPart then return hum.RootPart end
+	return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") or get_root(Players:FindFirstChild(name_of_char), 5)
 end
 
 getgenv().resolve_character = function(character, timeout)
 	local start = tick()
-
 	while tick() - start < timeout do
-		if not character or not character.Parent then
-			return nil
-		end
-
+		if not character or not character.Parent then return nil end
 		local humanoid = character:FindFirstChildOfClass("Humanoid")
 		local head = character:FindFirstChild("Head")
 		local root = getRoot(character)
-
-		if root and root.Parent ~= character then
-			root = nil
-		end
-
-		if humanoid and head and root then
-			return {
-				character = character,
-				humanoid = humanoid,
-				head = head,
-				root = root
-			}
-		end
-
+		if root and root.Parent ~= character then root = nil end
+		if humanoid and head and root then return {character = character, humanoid = humanoid, head = head, root = root} end
 		task.wait(0.03)
 	end
 
@@ -1333,14 +1033,8 @@ end
 getgenv().setup_local_character = function()
 	local player = Players.LocalPlayer
 	if not player then return end
-
-	if player.Character then
-		task.spawn(getgenv().register_character, player.Character)
-	end
-
-	player.CharacterAdded:Connect(function(character)
-		task.spawn(getgenv().register_character, character)
-	end)
+	if player.Character then task.spawn(getgenv().register_character, player.Character) end
+	player.CharacterAdded:Connect(function(character) task.spawn(getgenv().register_character, character) end)
 end
 
 getgenv().setup_local_character()
