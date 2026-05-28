@@ -9684,7 +9684,7 @@ g.start_vehicle_fly = function()
       end
    end)
 
-   if not is_mobile then
+   if not isMobile then
       g.vehiclefly_conns.down = UserInputService.InputBegan:Connect(function(i, g)
          if g then return end
          if i.KeyCode == Enum.KeyCode.W then g.vehiclefly_control.f = 1  end
