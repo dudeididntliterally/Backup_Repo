@@ -462,7 +462,6 @@ local function StartStream()
         StatusData.PassIndex = PassIndex
         local Character = LocalPlayer.Character
         local Origin = Character and Character:GetPivot().Position or Vector3.new(0, 50, 0)
-
         UpdateStatus("Generating grid...")
         local TotalJobs = BuildQueue(Origin)
         ResetStatusCounters(TotalJobs)
@@ -479,7 +478,7 @@ local function StartStream()
 
         task.spawn(ProcessQueue)
         repeat task.wait(0.1) until not IsRunning or StopRequested
-        if Character and Character.PrimaryPart then Character:PivotTo(Origin) end
+        if Character and Character.PrimaryPart then Character:PivotTo(CFrame.new(Origin)) end
         if StopRequested then break end
     end
 
