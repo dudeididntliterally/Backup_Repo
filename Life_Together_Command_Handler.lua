@@ -988,18 +988,7 @@ getgenv().handleCommand = function(sender, message)
          return g.notify("Error", "You can't copy this player's avatar!", 5)
       end
 
-      g.notify("Info", "Checking Anti Outfit Stealer status...", 3)
-      check_anti_stealer(Target.Name, function(is_protected, timed_out)
-         if timed_out then
-            g.notify("Error", "Couldn't verify Anti Stealer status, try again (timed out?).", 5)
-            return
-         end
-         if is_protected then
-            return g.notify("Warning", "This player has Anti Outfit Stealer on!", 7)
-         end
-
-         copy_plr_avatar(Target)
-      end)
+      copy_plr_avatar(Target)
    elseif raw_cmd == "noclip" then
       if g.Noclip_Enabled then
          return g.notify("Error", "Noclip is already enabled!", 5)
