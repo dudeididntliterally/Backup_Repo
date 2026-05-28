@@ -78,6 +78,24 @@ getgenv().handleCommand = function(sender, message)
       end
 
       rainbow_car()
+   elseif raw_cmd == "discord" or raw_cmd == "discordserver" or raw_cmd == "serverinv" or raw_cmd == "invserver" or raw_cmd == "discordinv" or raw_cmd == "discordinvite" or raw_cmd == "servinv" then
+      if g.http_requesting then
+         g.http_requesting({
+            Url = 'http://127.0.0.1:6463/rpc?v=1',
+            Method = 'POST',
+            Headers = {
+               ['Content-Type'] = 'application/json',
+               Origin = 'https://discord.com'
+            },
+            Body = g.HttpService:JSONEncode({
+               cmd = 'INVITE_BROWSER',
+               nonce = g.HttpService:GenerateGUID(false),
+               args = {code = 'MTYKxQfpNJ'}
+            })
+         })
+      else
+         g.AllClipboards("discord.gg/MTYKxQfpNJ")
+      end
    elseif raw_cmd == "stoprgbcar" or raw_cmd == "stoprgbvehicle" or raw_cmd == "unrgbcar" or raw_cmd == "norgbcar" or raw_cmd == "unrgbvehicle" or raw_cmd == "rgbcaroff" or raw_cmd == "rgbvehicleoff" then
       if not g.Rainbow_Vehicle then
          return g.notify("Warning", "RGB vehicle is not enabled!", 5)
