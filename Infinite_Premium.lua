@@ -11098,7 +11098,7 @@ end)
 
 addcmd("explorer", {"dex"}, function(args, speaker)
    Notify_InfP("Loading", "Hold on a sec")
-   loadstring(game:HttpGet("https://github.com/AZYsGithub/DexPlusPlus/releases/latest/download/out.lua"))()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Dex_Plus_Plus.lua"))()
 end)
 
 addcmd('olddex', {'odex'}, function(args, speaker)
