@@ -999,7 +999,7 @@ if not getgenv().Delete_Vehicle_Remote_Event then getgenv().delete_currently_spa
 wait(0.15)
 -- [[ this game will NOT be able to break this system. 😭😭🙏🥀💔 ]] --
 getgenv().Delete_Currently_Spawned_Vehicle_Button = Home_Tab:CreateButton({
-Name = "Delete Current Vehicle",
+Name = "Delete Current Vehicle (FE)",
 Description = "Detects and deletes your currently spawned Vehicle.",
 Callback = function()
     if getgenv().delete_vehicle_running then return getgenv().notify("Warning", "Already attempting to delete vehicle.", 3) end
@@ -1051,7 +1051,7 @@ Callback = function()
 end})
 
 getgenv().Apply_Best_Vehicle_Settings = Home_Tab:CreateToggle({
-Name = "Better Speed System",
+Name = "Better Speed System (FE)",
 Description = "Applies the best & fastest Vehicle settings.",
 CurrentValue = getgenv().vehicle_speed_boost_active or false,
 Callback = function(toggled)
@@ -1063,7 +1063,7 @@ Callback = function(toggled)
 end}, "Apply_Best_Vehicle_Settings_Toggle")
 
 getgenv().Set_System_Forward_Speed = Home_Tab:CreateSlider({
-Name = "Set 'Better System' Forward Speed",
+Name = "Set 'Better System' Forward Speed (FE)",
 Range = {50, 550},
 Increment = 10,
 CurrentValue = getgenv().vehicle_speed_boost_max_forward or 300,
@@ -1072,7 +1072,7 @@ Callback = function(new_forward_speed)
 end}, "Slider_Value_Forward_Speed")
 
 getgenv().Set_System_Backward_Speed = Home_Tab:CreateSlider({
-Name = "Set 'Better System' Backward Speed",
+Name = "Set 'Better System' Backward Speed (FE)",
 Range = {50, 175},
 Increment = 10,
 CurrentValue = getgenv().vehicle_speed_boost_max_backward or 125,
@@ -1081,7 +1081,7 @@ Callback = function(new_backward_speed)
 end}, "Slider_Value_Backward_Speed")
 
 getgenv().Set_System_Acceleration = Home_Tab:CreateSlider({
-Name = "Set 'Better System' Acceleration",
+Name = "Set 'Better System' Acceleration (FE)",
 Range = {10, 100},
 Increment = 10,
 CurrentValue = getgenv().vehicle_speed_boost_acceleration or 10,
