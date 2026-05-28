@@ -384,6 +384,7 @@ end
 g.cmdsString = [[
    {prefix}rgbcar - Enables RGB/Rainbow Vehicle (FE Rainbow Vehicle).
    {prefix}unrgbcar - Disables RGB/Rainbow Vehicle (FE, Rainbow Vehicle).
+   {prefix}serverinv - Gives you our invite to our Discord server.
    {prefix}twotonecar (🔥 NEW 🔥) - Enables Two Tone Vehicle (flashes two colors, FE).
    {prefix}untwotonecar (🔥 NEW 🔥) - Disables Two Tone Vehicle (flashes two colors, FE).
    {prefix}infpremium - Executes Infinite Premium.
