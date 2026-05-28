@@ -56,6 +56,10 @@ local scriptstoload = {
     ["Tower Of Hell"] = {
         id = 1962086868,
         link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Tower_Of_Hell_Script_Hub.lua"
+    },
+    ["Car Driving Ultimate"] = {
+        id = 11145865512,
+        link = "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Car_Driving_Ultimate.lua"
     }
 }
 
@@ -102,7 +106,6 @@ for name, all_scripts in pairs(scriptstoload) do
 end
 
 local rf = loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Rayfield_UI.lua"))()
-wait(0.1)
 local window = rf:CreateWindow({
     Name = "Flames Hub | 🏠 Script Hub Loader 🏠",
     LoadingTitle = "Welcome, "..tostring(game.Players.LocalPlayer),
@@ -130,7 +133,6 @@ local window = rf:CreateWindow({
 })
 wait(0.1)
 g.Buttons = g.Buttons or {}
-
 local Tab1 = window:CreateTab("🏡 Scripts 🏡", 0)
 local Section1 = Tab1:CreateSection("| 🏡 Scripts Section 🏡 |")
 local Tab2 = window:CreateTab("🎮 Game TPs 🎮", 0)
