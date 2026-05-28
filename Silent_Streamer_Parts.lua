@@ -1,4 +1,3 @@
--- [[ Allows you to silently stream-in parts without the GUI, is optional though. ]] --
 local function safe_service(s)
     if cloneref then
         return cloneref(game:GetService(s))
@@ -391,6 +390,7 @@ local function ProcessQueue()
                     Job.Visual.Transparency = 0.9
                     Debris:AddItem(Job.Visual, 5)
                 end
+                getgenv().Streaming_Parts_In_Has_Finished = true
                 Finalize("success")
                 return
             end
