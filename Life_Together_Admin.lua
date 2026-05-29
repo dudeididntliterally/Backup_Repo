@@ -54,7 +54,7 @@ local has_gethidden = (typeof(get_hidden_gui) == "function") or (typeof(g.get_hi
 g.found_image_button_for_yt_music_player = g.found_image_button_for_yt_music_player or nil
 local CoreGui = g.CoreGui or cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
 
---[[if not g.yt_music_player_loaded_flames_hub then
+if not g.yt_music_player_loaded_flames_hub then
    g.yt_music_player_loaded_flames_hub = true
    loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/yt_music_plr.lua'))()
 
@@ -83,7 +83,7 @@ local CoreGui = g.CoreGui or cloneref and cloneref(game:GetService("CoreGui")) o
          end
       end)
    end
-end--]]
+end
 
 if not has_gethui and not has_gethidden and not g.roblox_hidden_gui_location then
    local CoreGui = g.CoreGui or cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
@@ -15489,7 +15489,6 @@ g.copy_plr_avatar = function(Player)
    end
 
    if Player:GetAttribute("bio") == "Flames Hub Anti Stealer Is Enabled." then return g.notify("Warning", "This Player has Flames Hub | Anti Stealer on!", 5) end
-
    g.clear_avatar()
    fw(0.2)
    local accessories = {}
