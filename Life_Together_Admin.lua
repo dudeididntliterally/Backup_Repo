@@ -51,10 +51,10 @@ end
 wait(0.1)
 local has_gethui = (typeof(get_hui) == "function") or (typeof(g.get_hui) == "function")
 local has_gethidden = (typeof(get_hidden_gui) == "function") or (typeof(g.get_hidden_gui) == "function")
-g.found_image_button_for_yt_music_player = g.found_image_button_for_yt_music_player or nil
+--g.found_image_button_for_yt_music_player = g.found_image_button_for_yt_music_player or nil
 local CoreGui = g.CoreGui or cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
 
-if not g.yt_music_player_loaded_flames_hub then
+--[[if not g.yt_music_player_loaded_flames_hub then
    g.yt_music_player_loaded_flames_hub = true
    loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/yt_music_plr.lua'))()
 
@@ -73,7 +73,6 @@ if not g.yt_music_player_loaded_flames_hub then
    end
 
    for _, v in ipairs(CoreGui:GetChildren()) do try_to_find_music_plr(v) end
-
    if not g.found_image_button_for_yt_music_player then
       local conn
       conn = CoreGui.ChildAdded:Connect(function(v)
@@ -83,7 +82,7 @@ if not g.yt_music_player_loaded_flames_hub then
          end
       end)
    end
-end
+end--]]
 
 if not has_gethui and not has_gethidden and not g.roblox_hidden_gui_location then
    local CoreGui = g.CoreGui or cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
@@ -2423,7 +2422,7 @@ g.wire_cutter_minigame = function()
       local left = TIME_LIMIT - time_elapsed
       if left <= 0 then
          timer_label.Text = "00:00"
-         fail("Time's up! -5 coins.")
+         fail("Time's up!.")
          return
       end
       local mins = math.floor(left / 60)
@@ -2625,7 +2624,7 @@ g.simon_says_minigame = function()
                end
             end
          else
-            fail("Wrong button! -5 coins.")
+            fail("Wrong button!.")
          end
       end)
    end
@@ -3328,7 +3327,7 @@ local localPlayer = g.LocalPlayer or playersService.LocalPlayer
 local Roblox_Replicated_Storage = cloneref and cloneref(game:GetService("RobloxReplicatedStorage")) or game:GetService("RobloxReplicatedStorage")
 local whisperChat = Roblox_Replicated_Storage:FindFirstChild("WhisperChat", true)
 local spawnFn = (g.FlamesLibrary and g.FlamesLibrary.spawn)
-local function findChannelsWithUser(userId)
+local function FindChannelsWithUser(userId)
    local channelList = {}
    for _, channel in ipairs(tcs:GetChildren()) do
       if channel:IsA("TextChannel") then
@@ -3343,7 +3342,7 @@ local function findChannelsWithUser(userId)
    return channelList
 end
 
---[[local previousChannels = findChannelsWithUser(localPlayer.UserId)
+--[[local previousChannels = FindChannelsWithUser(localPlayer.UserId)
 local newChannels = {}
 local allowedPlayers = {}
 local players = playersService:GetPlayers()
@@ -3578,7 +3577,6 @@ g.disagreed_to_flames_hub_admin_rules = g.disagreed_to_flames_hub_admin_rules or
 
 local function check_file_agreed()
    if not (isfile and isfile("flames_hub_agreement_COPY.txt")) then return end
-
    local ok, data = pcall(readfile, "flames_hub_agreement_COPY.txt")
    if not ok then return end
 
@@ -3666,11 +3664,9 @@ if not g.has_agreed_to_flames_hub_rules_boolean_val then
       local buttonBarHeight = isMobile and 52 or 60
       local rules = {
          "[1]. No harassment, bullying, or otherwise targeting towards other users/clients.",
-         "[2]. Do not pretend you're the owner of the script.",
-         "[3]. You are NOT allowed to disrespect the owner (like killing/flinging, talking shit, etc).",
-         "[4]. You ARE allowed to fling/kill/void regular people, NOT other Flames Hub users/clients.",
-         "[5]. Do not attempt to replicate, leak, or redistribute this script, you WILL be issued a DMCA.",
-         "[6]. Do not attempt to exploit loopholes in these rules — use common sense.",
+         "[2]. You are NOT allowed to disrespect the owner (like killing/flinging, talking shit, etc).",
+         "[3]. You ARE allowed to fling/kill/void regular people, NOT other Flames Hub users/clients.",
+         "[4]. Do not attempt to exploit loopholes in these rules — use common sense.",
       }
       local FlamesHubRulesGUI = Instance.new("ScreenGui")
       local FlamesHubRulesFrame = Instance.new("Frame")
