@@ -141,19 +141,13 @@ wait(0.2)
 getgenv().FlamesHubUniversal = Tab1:CreateButton({
 Name = "Flames Hub (Universal)",
 Callback = function()
-    if g.notify then
-        return g.notify("Error", "This will be added back soon.", 5)
-    else
-        return
-    end
-    --loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/retrieve_branch_version.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/retrieve_branch_version.lua"))()
 end,})
 
 getgenv().FlamesHubUniversal = Tab1:CreateButton({
 Name = "Condo Games Destroyer",
 Callback = function()
-    if g.notify then return g.notify("Success", "Condo games don't exist anymore lol.", 5) else return end
-    --loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/CondoGamesRuiner.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/CondoGamesRuiner.lua"))()
 end,})
 
 for name, dude in pairs(scriptstoload) do
