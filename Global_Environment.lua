@@ -59,7 +59,8 @@ local aliases = {
     plr = "Players",
     plrs = "Players",
     ts = "TweenService",
-    uis = "UserInputService"
+    uis = "UserInputService",
+    aes = "AvatarEditorService"
 }
 
 local virtuals = {lp = true, localplayer = true, localplr = true}
@@ -726,7 +727,7 @@ local function init_services()
         "VoiceChatInternal","VoiceChatService","CoreGui","SoundService","StarterGui",
         "MarketplaceService","TeleportService","Chat","AssetService","HttpService",
         "UserInputService","TextChatService","ContextActionService","GuiService",
-        "PhysicsService","ScriptContext"
+        "PhysicsService","ScriptContext", "AvatarEditorService"
     }) do
         if not getgenv()[name] then
             local ok, svc = pcall(getgenv().Service_Wrap, name)
@@ -738,8 +739,8 @@ local function init_services()
 
     local players = getgenv().Players or cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
     if players then while not players.LocalPlayer do task.wait() end getgenv().LocalPlayer = players.LocalPlayer end
-    local sp = getgenv().StarterPlayer
-    if sp then getgenv().StarterPlayerScripts = sp:FindFirstChildOfClass("StarterPlayerScripts") getgenv().StarterCharacterScripts = sp:FindFirstChildOfClass("StarterCharacterScripts") end
+    local sp = getgenv().StarterPlayer or cloneref and cloneref(game:GetService("StarterPlayer")) or game:GetService("StarterPlayer")
+    if sp then getgenv().StarterPlayerScripts = sp:FindFirstChildOfClass("StarterPlayerScripts") task.wait() getgenv().StarterCharacterScripts = sp:FindFirstChildOfClass("StarterCharacterScripts") end
 end
 wait(0.1)
 init_services()
