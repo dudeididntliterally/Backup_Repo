@@ -9,6 +9,7 @@ local TextChatService = g.TextChatService or cloneref and cloneref(game:GetServi
 local UserInputService = g.UserInputService or cloneref and cloneref(game:GetService("UserInputService")) or game:GetService("UserInputService")
 local CoreGui = g.CoreGui or cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
 local SoundService = g.SoundService or cloneref and cloneref(game:GetService("SoundService")) or game:GetService("SoundService")
+local avatar_editor = g.AvatarEditorService or cloneref and cloneref(game:GetService("AvatarEditorService")) or game:GetService("AvatarEditorService")
 local parent_gui = (get_hidden_gui and get_hidden_gui()) or (gethui and gethui()) or CoreGui
 local runservice = RunService
 g.Script_Creator = "👑 FLAMES HUB | LLC 👑"
@@ -1923,49 +1924,71 @@ end
 g.firehidden      = g.firehidden      or false
 g.firemanual      = g.firemanual      or false
 g.firesystem_init = g.firesystem_init or false
-local function destroy_fire_object(obj)
-   if obj:IsA("Fire")
-   or obj:IsA("Smoke")
-   or obj:IsA("Sparkles")
-   or obj:IsA("ParticleEmitter")
-   or obj:IsA("Beam") then
-      pcall(function()
+local RunService = g.RunService or cloneref and cloneref(game:GetService("RunService")) or game:GetService("RunService")
+local FireClasses = {
+   Fire           = true,
+   Smoke          = true,
+   Sparkles       = true,
+   ParticleEmitter = true,
+   Beam           = true,
+}
+
+local PendingQueue = {}
+local QueueDirty   = false
+local function is_fire_class(obj) return FireClasses[obj.ClassName] ~= nil end
+local function disable_fire_object(obj)
+   pcall(function()
+      if obj.ClassName ~= "Beam" then
          obj.Enabled = false
-         obj:Destroy()
-      end)
-   end
+      end
+      obj:Destroy()
+   end)
 end
 
 local function destroy_fire_model(model)
    for _, v in ipairs(model:GetDescendants()) do
-      destroy_fire_object(v)
+      if is_fire_class(v) then
+         disable_fire_object(v)
+      end
    end
    pcall(function() model:Destroy() end)
 end
 
+local function handle_object(obj)
+   if not obj or not obj.Parent then return end
+   if obj.ClassName == "Model" and obj.Name == "Fire" then
+      destroy_fire_model(obj)
+   elseif is_fire_class(obj) then
+      disable_fire_object(obj)
+   end
+end
+
 local function purge_all_fire()
    for _, v in ipairs(workspace:GetDescendants()) do
-      if v:IsA("Model") and v.Name == "Fire" then
+      if v.ClassName == "Model" and v.Name == "Fire" then
          destroy_fire_model(v)
-      else
-         destroy_fire_object(v)
+      elseif is_fire_class(v) then
+         disable_fire_object(v)
       end
    end
 end
 
-local function handle_object(obj)
-   if not obj or not obj.Parent then return end
-   if obj:IsA("Model") and obj.Name == "Fire" then
-      destroy_fire_model(obj)
-   else
-      destroy_fire_object(obj)
+local function flush_queue()
+   if not QueueDirty then return end
+   QueueDirty = false
+   local snapshot = PendingQueue
+   PendingQueue = {}
+   for i = 1, #snapshot do
+      handle_object(snapshot[i])
    end
 end
 
 if not g.firesystem_init then g.firesystem_init = true end
+
 g.set_fire_state = function(state)
    local lib = getgenv().FlamesLibrary
-   local key = "anti_fire_descendant_added"
+   local da_key  = "anti_fire_descendant_added"
+   local hb_key  = "anti_fire_heartbeat"
 
    if state == true then
       if g.firehidden then
@@ -1976,13 +1999,19 @@ g.set_fire_state = function(state)
       g.firehidden = true
       g.notify("Success", "Flames Hub | Anti-Fire V2 is now enabled.", 5)
       purge_all_fire()
-      if lib.is_alive(key) then lib.disconnect(key) end
+
+      if lib.is_alive(da_key) then lib.disconnect(da_key) end
+      if lib.is_alive(hb_key) then lib.disconnect(hb_key) end
       task.wait(0.25)
-      lib.connect(key, workspace.DescendantAdded:Connect(function(obj)
+      lib.connect(da_key, workspace.DescendantAdded:Connect(function(obj)
          if not g.firehidden then return end
-         task.defer(function()
-            handle_object(obj)
-         end)
+         PendingQueue[#PendingQueue + 1] = obj
+         QueueDirty = true
+      end))
+
+      lib.connect(hb_key, RunService.Heartbeat:Connect(function()
+         if not g.firehidden then return end
+         flush_queue()
       end))
    else
       if not g.firehidden then
@@ -1992,7 +2021,10 @@ g.set_fire_state = function(state)
       g.firemanual = false
       g.firehidden = false
       g.notify("Success", "Anti-Fire V2 is now disabled.", 5)
-      lib.disconnect(key)
+      lib.disconnect(da_key)
+      lib.disconnect(hb_key)
+      PendingQueue = {}
+      QueueDirty   = false
    end
 end
 
@@ -3037,12 +3069,10 @@ local Emotes = {
    tuff = {
       97505694413413,
    },
-   needydance = { -- literally an unbannable method that'll take months to get rid of / fix.
+   needydance = {
       73810609930655,
       128404559301134,
       85116004655341,
-      120145060691197,
-      81249799283292,
       117694627966105,
       111139266390945,
       128948830106383,
@@ -3319,3 +3349,69 @@ function do_emote(input)
 end
 
 g.do_emote = do_emote
+
+local function fetch_emotes(keyword, count)
+   count = count or 25
+
+   local params = CatalogSearchParams.new()
+   params.SearchKeyword = keyword or ""
+   params.CategoryFilter = Enum.CatalogCategoryFilter.None
+   params.SalesTypeFilter = Enum.SalesTypeFilter.All
+   params.AssetTypes = { Enum.AvatarAssetType.EmoteAnimation }
+   params.IncludeOffSale = true
+   params.SortType = Enum.CatalogSortType.Relevance
+   params.Limit = 10
+
+   local ok, pages = pcall(function()
+      return avatar_editor:SearchCatalog(params)
+   end)
+
+   if not ok or not pages then
+      warn("fetch failed")
+      return {}
+   end
+
+   local results = {}
+
+   while #results < count do
+      local ok2, page = pcall(function()
+         return pages:GetCurrentPage()
+      end)
+
+      if not ok2 or not page then break end
+
+      for _, item in ipairs(page) do
+         table.insert(results, {
+               id       = item.Id,
+               asset_id = item.AssetId or item.Id,
+               name     = item.Name or "Unknown",
+         })
+         if #results >= count then break end
+      end
+
+      if pages.IsFinished or #results >= count then break end
+
+      local ok3 = pcall(function()
+         pages:AdvanceToNextPageAsync()
+      end)
+
+      if not ok3 then break end
+   end
+
+   return results
+end
+
+local emotes = fetch_emotes("needy", 25)
+
+g.emote_list = emotes
+g.play_random_emote = function()
+   if #emotes == 0 then return getgenv().notify("Warning", "No emotes loaded.", 5) end
+   local emote = emotes[math.random(1, #emotes)]
+   g.playemote(emote.asset_id)
+end
+
+g.play_emote_by_index = function(index)
+   local emote = emotes[index]
+   if not emote then getgenv().notify("Error", "No emote at index: "..tostring(index), 5) return end
+   g.playemote(emote.asset_id)
+end
