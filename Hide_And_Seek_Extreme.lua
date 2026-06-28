@@ -1308,17 +1308,24 @@ Audio:Button("Stop Music", function()
 end)
 
 local table_of_ids = {
-    {id = 120784692155389, desc = "bubonic tiktok song"},
+    {id = 72957306505286, desc = "Tiki Tiki!"},
     {id = 138150862722180, desc = "AntBeale - Sunshine"},
     {id = 130978049854081, desc = "met her on the net"},
     {id = 136498380707179, desc = "Tre$o - Stars"},
-    {id = 82860499713146, desc = "Try Me (Remix)"},
-    {id = 84257907631377, desc = "unleaked (idk)"},
-    {id = 137350238118013, desc = "NUE POCOYO FUNK"},
     {id = 103606830325471, desc = "JUJU - Falls"},
-    {id = 128134028500828, desc = "Juice - Moonlight"},
     {id = 76927176566054,  desc = "ULTERIOR MOTIVES"},
     {id = 129255676311189, desc = "unleaked lol"},
+    {id = 120741970921527, desc = "Lucid Dreams (wait)"},
+    {id = 121493555077011, desc = "TayK The Race"},
+    {id = 107939777740637, desc = "Roxanne"},
+    {id = 116906212909880, desc = "EFN (BRO?!)"},
+    {id = 134270835038966, desc = "Chief Keef"},
+    {id = 125182193252186, desc = "Brainrot Rap"},
+    {id = 97905548161740, desc = "Very Loud"},
+    {id = 93329207753390, desc = "Let a N smash"},
+    {id = 74697049223758, desc = "Phonk (Sped Up)"},
+    {id = 118957335322667, desc = "Counting Stars"},
+    {id = 116207627988511, desc = "Gay Song Lol"}
 }
 
 local dropdown_items = {}
