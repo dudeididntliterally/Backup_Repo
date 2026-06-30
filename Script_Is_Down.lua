@@ -3,6 +3,8 @@ local uis = game:GetService("UserInputService")
 local core = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
 local All_Clipboards = setclipboard or toclipboard or set_clipboard or (Clipboard and Clipboard.set)
 local http_requesting = request or http_request or (syn and syn.request) or (http and http.request) or (fluxus and fluxus.request)
+if core:FindFirstChild("ScriptDownGUI") then core:FindFirstChild("ScriptDownGUI"):Destroy() end
+wait(0.25)
 local scr = Instance.new("ScreenGui")
 scr.Name = "ScriptDownGUI"
 scr.ResetOnSpawn = false
@@ -44,7 +46,7 @@ msg.Name = "MainMessage"
 msg.Size = is_mob and UDim2.new(1,-20,0,70) or UDim2.new(1,-40,0,100)
 msg.Position = is_mob and UDim2.new(0,10,0.33,-35) or UDim2.new(0,20,0.4,-60)
 msg.BackgroundTransparency = 1
-msg.Text = "The script is currently down, for more information, please join our Discord."
+msg.Text = "Our systems are currently experiencing issues & will return to normal shortly, we do not know when this will be,\n but we can ensure you that our systems will be back online within 1-3 business days at the most.\n\n We apologize for any inconvience as this came to us unexpectedly and is out of our control.\n\n For more information, please join our Discord server below, we have released an official statement regarding this issue."
 msg.TextScaled = true
 msg.Font = Enum.Font.SourceSansSemibold
 msg.TextColor3 = Color3.fromRGB(255,255,255)
