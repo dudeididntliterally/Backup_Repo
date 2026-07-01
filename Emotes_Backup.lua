@@ -1,34 +1,37 @@
-local Screen = setmetatable({}, {
-    __index= function(_, key)
-        local cam= workspace.CurrentCamera
-        local size= cam and cam.ViewportSize or Vector2.new(1920, 1080)
-
-        if key== "Width" then
-            return size.X
-        elseif key== "Height" then
-            return size.Y
-        elseif key== "Size" then
-            return size
-        end
+local g = getgenv()
+if (game.PlaceId == 13967668166 or game.PlaceId == 99154507657228 or game.PlaceId == 99644611200703)
+    and g.Flames_Hub_Base_Loader_Currently_Shown
+    and not g.LifeTogetherRP_Admin then
+    if g.notify then
+        return g.notify("Warning", "Please load the Life Together RP script first!", 5)
+    else
+        return
+    end
+end
+if getgenv().FreeEmotes_Enabled then return end
+getgenv().FreeEmotes_Enabled = true
+local view_port_size = setmetatable({}, {
+    __index = function(_, key)
+        local cam = Workspace.CurrentCamera
+        local size = cam and cam.ViewportSize or Vector2.new(1920, 1080)
+        if key == "X" then return size.X
+        elseif key == "Y" then return size.Y end
     end
 })
-local g = getgenv() or _G
 local Workspace = cloneref and cloneref(game:GetService("Workspace")) or game:GetService("Workspace")
-if not getgenv().Workspace then
-    getgenv().Workspace = Workspace
-end
-local Screen = workspace.CurrentCamera.ViewportSize
+local UserInputService = cloneref and cloneref(game:GetService("UserInputService")) or game:GetService("UserInputService")
+local cam = Workspace.CurrentCamera
+local view_port_size = cam and cam.ViewportSize or Vector2.new(1920, 1080)
 local all_clipboards = setclipboard or toclipboard or set_clipboard or (Clipboard and Clipboard.set)
-
 function scale(axis, value)
     local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
     local baseWidth, baseHeight = 1920, 1080
     local scaleFactor = isMobile and 2 or 1.5
 
     if axis == "X" then
-        return value * (Screen.X / baseWidth) * scaleFactor
+        return value * (view_port_size.X / baseWidth) * scaleFactor
     elseif axis == "Y" then
-        return value * (Screen.Y / baseHeight) * scaleFactor
+        return value * (view_port_size.Y / baseHeight) * scaleFactor
     end
 end
 
@@ -67,8 +70,6 @@ local function safe_wrapper()
         end
     }))
 end
-
-repeat task.wait() until typeof(safe_wrapper) == "function"
 
 local Services = getgenv().get_or_set("Services", setmetatable({}, {
     __index = function(_, name)
@@ -264,10 +265,10 @@ mainContainer.Draggable = true
 mainContainer.Parent = gui
 createCorner(mainContainer, 12)
 
-local g = Instance.new("UIGradient")
-g.Color = ColorSequence.new(Color3.fromRGB(255,255,255),Color3.fromRGB(255,255,255))
-g.Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0,0.05),NumberSequenceKeypoint.new(1,0.1)}
-g.Parent=mainContainer
+local color_gradient = Instance.new("UIGradient")
+color_gradient.Color = ColorSequence.new(Color3.fromRGB(255,255,255),Color3.fromRGB(255,255,255))
+color_gradient.Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0,0.05),NumberSequenceKeypoint.new(1,0.1)}
+color_gradient.Parent=mainContainer
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, scale("Y", 36))
@@ -640,14 +641,14 @@ end
 --// UNIFIED EDIT FUNCTIONS
 -- only ChatGPT uses words like "unified" 🙏.
 getgenv().EditSlider = function(targetName, newValue)
-    local apply = self._sliders[targetName]
+    local apply = getgenv().Settings._sliders[targetName]
     if apply then
         apply(newValue)
     end
 end
 
 getgenv().EditToggle = function(targetName, newValue)
-    local apply = self._toggles[targetName]
+    local apply = getgenv().Settings._toggles[targetName]
     if apply then
         getgenv().Settings[targetName] = newValue
         apply(newValue)
@@ -738,10 +739,10 @@ end
 
 saveCollisionStates()
 
+local invis_connection = nil
 if not getgenv().local_heartbeat_allow_invis_connection_watcher then
-    local connection
-
-    connection = RunService.Stepped:Connect(function() -- what the hell even is this 😭😭🙏
+    getgenv().local_heartbeat_allow_invis_connection_watcher = true
+    invis_connection = RunService.Stepped:Connect(function()
         if character and character.Parent then
             local currentFixClip = getgenv().Settings["Allow Invisible  "]
             if lastFixClipState ~= currentFixClip then
@@ -757,8 +758,8 @@ if not getgenv().local_heartbeat_allow_invis_connection_watcher then
             end
         else
             restoreCollisionStates()
-            if connection then
-                connection:Disconnect() -- ok.
+            if invis_connection then
+                invis_connection:Disconnect()
             end
         end
     end)
@@ -766,17 +767,18 @@ end
 
 if not getgenv().allow_invis_local_connection_char_added_watcher then
     getgenv().allow_invis_local_connection_char_added_watcher = true
-
     player.CharacterAdded:Connect(function(newCharacter)
         restoreCollisionStates()
         character = newCharacter
         humanoid = newCharacter:WaitForChild("Humanoid")
         saveCollisionStates()
         lastFixClipState = getgenv().Settings["Allow Invisible  "]
-        if connection then
-            connection:Disconnect()
+
+        if invis_connection then
+            invis_connection:Disconnect()
         end
-        connection = RunService.Stepped:Connect(function()
+
+        invis_connection = RunService.Stepped:Connect(function()
             if character and character.Parent then
                 local currentFixClip = getgenv().Settings["Allow Invisible  "]
                 if lastFixClipState ~= currentFixClip then
@@ -792,8 +794,8 @@ if not getgenv().allow_invis_local_connection_char_added_watcher then
                 end
             else
                 restoreCollisionStates()
-                if connection then
-                    connection:Disconnect()
+                if invis_connection then
+                    invis_connection:Disconnect()
                 end
             end
         end)
@@ -812,7 +814,6 @@ local currentSortIndex = 1
 local currentKeyword = ""
 local currentPages = nil
 local currentPageNumber = 1
-
 local function getPages(keyword)
     local params = CatalogSearchParams.new()
     params.SearchKeyword = keyword or ""
