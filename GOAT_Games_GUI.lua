@@ -56,7 +56,7 @@ end
 wait(0.1)
 getgenv().create_end_server_file()
 wait()
-local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/main/Notification_Lib.lua"))()
+local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Notify_Lib.lua"))()
 getgenv().notify = getgenv().notify or function(notif_type, msg, duration) NotifyLib:External_Notification(tostring(notif_type), tostring(msg), tonumber(duration)) end
 local TextChatService = getgenv().TextChatService or cloneref and cloneref(game:GetService("TextChatService")) or game:GetService("TextChatService")
 local Workspace = getgenv().Workspace or cloneref and cloneref(game:GetService("Workspace")) or game:GetService("Workspace")
@@ -91,7 +91,7 @@ if not getgenv().Already_Running_Flames_Teleport_Checker then
     LocalPlayer.OnTeleport:Connect(function(State)
         if (not TeleportCheck) and queue_tp then
             TeleportCheck = true
-            queue_tp("loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/CondoGamesRuiner.lua'))()")
+            queue_tp("loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/GOAT_Games_GUI.lua'))()")
         end
     end)
     if getgenv().notify then
@@ -229,7 +229,7 @@ if not low_level_executor() then
         if getgenv().InitializedAdonisAdmin_Bypass then return end
 
         if not getgenv().InitializedAdonisAdmin_Bypass then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/Adonis_Bypass_BACKUP.lua",true))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Adonis_Bypass_Backup.lua",true))()
             wait(0.1)
             getgenv().InitializedAdonisAdmin_Bypass = true
         end
@@ -343,7 +343,7 @@ end
 if not getgenv().IY_LOADED and not getgenv().GET_LOADED_IY then
     task.spawn(function()
         local ok, err = pcall(function()
-            loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/crazyDawg/main/InfYieldOther.lua'))()
+            loadstring(game:HttpGet('https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Infinite_Premium.lua'))()
         end)
         if not ok then
             warn("IY Load failed: " .. tostring(err))
@@ -354,7 +354,7 @@ task.wait(0.2)
 if not getgenv().performance_stats then
     task.spawn(function()
         local ok, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/OrionLibraryReWrittenCelery/refs/heads/main/grab_file_performance"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Performance_Statistics.lua"))()
         end)
         if not ok then
             warn("Performance stats load failed: " .. tostring(err))
@@ -440,7 +440,7 @@ end
 
 for attempt = 1, MAX_ATTEMPTS do
     local success, result = pcall(function()
-        return loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/GetUILibrary"))()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Rayfield_UI.lua"))()
     end)
 
     if success and result then
@@ -2881,14 +2881,14 @@ end
 
 local github_urls = {
     Condo_Games_Ruiner_LUA_U = {
-        "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/CondoGamesRuiner.lua"
+        "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/GOAT_Games_GUI.lua"
     }
 }
 
 local fallback_urls = {
     Condo_Games_Ruiner_LUA_U = {
-        "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/CondoGamesRuiner.lua",
-        "https://raw.githubusercontent.com/EnterpriseExperience/MicUpSource/refs/heads/main/CondoGamesRuiner.lua",
+        "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/GOAT_Games_GUI.lua",
+        "https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/GOAT_Games_GUI.lua",
     }
 }
 
