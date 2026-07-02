@@ -810,6 +810,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
         workareamain.Size = UDim2.new(0, 422, 0, 512)
         workareamain.ZIndex = 3
         workareamain.CanvasSize = UDim2.new(0, 0, 0, 0)
+        workareamain.AutomaticCanvasSize = Enum.AutomaticSize.Y
         workareamain.ScrollBarThickness = 2
         workareamain.Visible = false
 
