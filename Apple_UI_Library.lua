@@ -806,8 +806,8 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
         workareamain.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         workareamain.BackgroundTransparency = 1
         workareamain.BorderSizePixel = 0
-        workareamain.Position = UDim2.new(0.0393013097, 0, 0.0958904102, 0)
-        workareamain.Size = UDim2.new(0, 422, 0, 512)
+        workareamain.Position = UDim2.new(0.0393013097, 0, 0, 100)
+        workareamain.Size = UDim2.new(0, 422, 0, 468)
         workareamain.ZIndex = 3
         workareamain.CanvasSize = UDim2.new(0, 0, 0, 0)
         workareamain.AutomaticCanvasSize = Enum.AutomaticSize.Y
