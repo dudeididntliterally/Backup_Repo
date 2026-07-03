@@ -1307,7 +1307,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             Frame.Parent = toggleswitch
             Frame.Position = UDim2.new(0.832535863, 0, 0.0270270277, 0)
             Frame.Size = UDim2.new(0, 70, 0, 36)
-            Frame.Text=""
+            Frame.Text = ""
             Frame.AutoButtonColor = false
 
             local uc_4 = Instance.new("UICorner")
@@ -1325,37 +1325,45 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             uc_5.CornerRadius = UDim.new(5, 0)
             uc_5.Parent = TextButton
 
-            if defaultmode == false then
-                TextButton.Position = UDim2.new(0, 1, 0, 1)
-                Frame.BackgroundColor3 = Color3.fromRGB(216, 216, 216)
-            else
-                TextButton.Position = UDim2.new(0, 35, 0, 1)
-                Frame.BackgroundColor3 = Color3.fromRGB(21, 103, 251)
-            end
-
-            Frame.MouseButton1Click:Connect(function()
-                mode = not mode
+            local function apply(new_mode, fireCallback, animate)
+                mode = new_mode
                 if mode then
-                    TextButton:TweenPosition(UDim2.new(0, 35, 0, 1), "In", "Sine", 0.1, true)
+                    if animate then
+                        TextButton:TweenPosition(UDim2.new(0, 35, 0, 1), "In", "Sine", 0.1, true)
+                    else
+                        TextButton.Position = UDim2.new(0, 35, 0, 1)
+                    end
                     Frame.BackgroundColor3 = Color3.fromRGB(21, 103, 251)
                 else
-                    TextButton:TweenPosition(UDim2.new(0,1,0,1), "In", "Sine", 0.1, true)
+                    if animate then
+                        TextButton:TweenPosition(UDim2.new(0, 1, 0, 1), "In", "Sine", 0.1, true)
+                    else
+                        TextButton.Position = UDim2.new(0, 1, 0, 1)
+                    end
                     Frame.BackgroundColor3 = Color3.fromRGB(216, 216, 216)
                 end
-                if callback then task.spawn(callback, mode) end
+                if fireCallback and callback then
+                    task.spawn(callback, mode)
+                end
+            end
+
+            apply(defaultmode, false, false)
+            Frame.MouseButton1Click:Connect(function()
+                apply(not mode, true, true)
             end)
 
             TextButton.MouseButton1Click:Connect(function()
-                mode = not mode
-                if mode then
-                    TextButton:TweenPosition(UDim2.new(0, 35, 0, 1), "In", "Sine", 0.1, true)
-                    Frame.BackgroundColor3 = Color3.fromRGB(21, 103, 251)
-                else
-                    TextButton:TweenPosition(UDim2.new(0,1,0,1), "In", "Sine", 0.1, true)
-                    Frame.BackgroundColor3 = Color3.fromRGB(216, 216, 216)
-                end
-                if callback then task.spawn(callback, mode) end
+                apply(not mode, true, true)
             end)
+
+            local switchObject = {}
+            function switchObject:Set(new_mode, fireCallback)
+                if fireCallback == nil then fireCallback = true end
+                apply(new_mode, fireCallback, true)
+            end
+
+            function switchObject:Get() return mode end
+            return switchObject
         end
 
         function sec:TextField(name, placeholder, callback)
