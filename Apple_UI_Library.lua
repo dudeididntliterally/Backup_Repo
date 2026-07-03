@@ -155,13 +155,17 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
     
     main.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            if input.Target and (input.Target:IsA("TextButton") or input.Target:IsA("TextBox") or input.Target:IsA("ImageButton")) then
-                return
+            local pos = input.Position
+            local objectsAtPos = UserInputService:GetGuiObjectsAtPosition(pos.X, pos.Y)
+            for _, obj in ipairs(objectsAtPos) do
+                if obj:IsA("TextButton") or obj:IsA("TextBox") or obj:IsA("ImageButton") then
+                    return
+                end
             end
             dragging = true
             dragStart = input.Position
             startPos = main.Position
-            
+
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
