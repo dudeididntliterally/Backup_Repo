@@ -155,6 +155,9 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
     
     main.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            if input.Target and (input.Target:IsA("TextButton") or input.Target:IsA("TextBox") or input.Target:IsA("ImageButton")) then
+                return
+            end
             dragging = true
             dragStart = input.Position
             startPos = main.Position
