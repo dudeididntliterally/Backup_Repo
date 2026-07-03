@@ -347,7 +347,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
     title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     title.BackgroundTransparency = 1
     title.BorderSizePixel = 2
-    title.Position = UDim2.new(0.389000326, 0, 0.0351027399, 0)
+    title.Position = UDim2.new(0.389000326, 0, 0.055, 0)
     title.Size = UDim2.new(0, 400, 0, 15)
     title.Font = Enum.Font.Gotham
     title.LineHeight = 1.180
