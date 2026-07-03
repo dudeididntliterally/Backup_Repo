@@ -156,7 +156,8 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
     main.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             local pos = input.Position
-            local objectsAtPos = UserInputService:GetGuiObjectsAtPosition(pos.X, pos.Y)
+            local container = scrgui.Parent
+            local objectsAtPos = container:GetGuiObjectsAtPosition(pos.X, pos.Y)
             for _, obj in ipairs(objectsAtPos) do
                 if obj:IsA("TextButton") or obj:IsA("TextBox") or obj:IsA("ImageButton") then
                     return
