@@ -18,7 +18,11 @@ local Library = {}
 local Page = {}
 local Section = {}
 local Element = {}
-
+local existing_atlas = CoreGui:FindFirstChild("Atlas")
+if existing_atlas and existing_atlas:IsA("ScreenGui") then
+    existing_atlas:Destroy()
+    repeat task.wait() until existing_atlas.Parent == nil
+end
 Library.__index = Library
 Page.__index = Page
 Section.__index = Section
@@ -1102,15 +1106,12 @@ do
                 ["_Ignore21"] = Instance.new("BoolValue");
             }
 
-            --Properties
-
             Converted["_Atlas"].DisplayOrder = 99
             Converted["_Atlas"].IgnoreGuiInset = true
             Converted["_Atlas"].ResetOnSpawn = false
             Converted["_Atlas"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
             Converted["_Atlas"].Name = "Atlas"
             Converted["_Atlas"].Parent = game:GetService("CoreGui")
-
             Converted["_UI_Library"].Name = "UI_Library"
             Converted["_UI_Library"].Parent = Converted["_Atlas"]
 
