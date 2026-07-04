@@ -38,6 +38,462 @@ if not has_gethui and not has_gethidden and not g.roblox_hidden_gui_location the
         end
     end
 end
+
+getgenv().FlamesLibrary = getgenv().FlamesLibrary or {}
+getgenv().FlamesLibrary._connections = getgenv().FlamesLibrary._connections or {}
+getgenv().FlamesLibrary.modules = getgenv().FlamesLibrary.modules or {} -- new
+getgenv().FlamesLibrary.module_utils = getgenv().FlamesLibrary.module_utils or {} -- new
+getgenv().FlamesLibrary.connect = function(name, connection)
+    local existing = getgenv().FlamesLibrary._connections[name]
+    if existing then
+        for _, item in ipairs(existing) do
+            if typeof(item) == "RBXScriptConnection" then
+                pcall(function() item:Disconnect() end)
+            elseif type(item) == "thread" then
+                pcall(task.cancel, item)
+            end
+        end
+    end
+    getgenv().FlamesLibrary._connections[name] = {connection}
+    return connection
+end
+
+getgenv().FlamesLibrary.disconnect = function(name)
+	local list = getgenv().FlamesLibrary._connections[name]
+
+	if list then
+		for _, item in ipairs(list) do
+			if typeof(item) == "RBXScriptConnection" then
+				item:Disconnect()
+			elseif type(item) == "thread" then
+				pcall(task.cancel, item)
+			end
+		end
+		getgenv().FlamesLibrary._connections[name] = nil
+	end
+end
+
+getgenv().FlamesLibrary.spawn = function(name, mode, ...)
+	if not name or not mode then return end
+	if getgenv().FlamesLibrary._connections[name] then getgenv().FlamesLibrary.disconnect(name) end
+	getgenv().FlamesLibrary._connections[name] = {}
+
+	local thread
+	local args = {...}
+	if mode == "spawn" then
+		local func = args[1]
+		if type(func) ~= "function" then return end
+		thread = task.spawn(func, table.unpack(args, 2))
+	elseif mode == "defer" then
+		local func = args[1]
+		if type(func) ~= "function" then return end
+		thread = task.defer(func, table.unpack(args, 2))
+	elseif mode == "delay" then
+		local delay_time = args[1]
+		local func = args[2]
+		if type(delay_time) ~= "number" or type(func) ~= "function" then return end
+		thread = task.delay(delay_time, func, table.unpack(args, 3))
+	elseif mode == "wrap" then
+		local func = args[1]
+		if type(func) ~= "function" then return end
+		thread = coroutine.create(func)
+		coroutine.resume(thread, table.unpack(args, 2))
+	else
+		return
+	end
+
+	table.insert(getgenv().FlamesLibrary._connections[name], thread)
+	return thread
+end
+
+getgenv().FlamesLibrary.is_thread_alive = function(input)
+    local lib = getgenv().FlamesLibrary
+
+    if type(input) == "thread" then
+        local ok, status = pcall(coroutine.status, input)
+        if not ok then
+            return false
+        end
+        return status ~= "dead"
+    end
+
+    if type(input) == "string" then
+        local list = lib._connections[input]
+        if not list then
+            return false
+        end
+
+        for _, item in ipairs(list) do
+            if type(item) == "thread" then
+                local ok, status = pcall(coroutine.status, item)
+                if ok and status ~= "dead" then
+                    return true
+                end
+            end
+        end
+
+        return false
+    end
+
+    return false
+end
+
+getgenv().FlamesLibrary.is_alive = function(name)
+    local lib = getgenv().FlamesLibrary
+    local list = lib._connections[name]
+    if not list then return false end
+
+    for _, item in ipairs(list) do
+        if typeof(item) == "RBXScriptConnection" then
+            if item.Connected then
+                return true
+            end
+        elseif type(item) == "thread" then
+            if lib.is_thread_alive(item) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+getgenv().FlamesLibrary.safe_func = function(...)
+    for i = 1, select("#", ...) do
+        local f = select(i, ...)
+        local ok, t = pcall(typeof, f)
+        if ok and t == "function" then
+            return f
+        end
+    end
+    return function() end
+end
+
+-- [[ safer wait functionality. ]] --
+getgenv().FlamesLibrary.wait = function(t)
+    if not t or t <= 0 then safe_wrapper("RunService").Heartbeat:Wait() return end
+    local ok = pcall(task.wait, t)
+    if not ok then safe_wrapper("RunService").Heartbeat:Wait() end
+end
+
+getgenv().FlamesLibrary.cleanup_all = function() for name in pairs(getgenv().FlamesLibrary._connections) do getgenv().FlamesLibrary.disconnect(name) end end
+getgenv().FlamesLibrary.modules.chat_filter_override = {
+    enabled = false,
+    start = function(self)
+        if self.enabled then return end
+        self.enabled = true
+        local text_chat_service = cloneref and cloneref(game:GetService("TextChatService")) or game:GetService("TextChatService")
+        local players = cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
+        local chat = cloneref and cloneref(game:GetService("Chat")) or game:GetService("Chat")
+        local function will_tag(text)
+            local filtered
+            local success, response = pcall(function()
+                filtered = chat:FilterStringForBroadcast(text, players.LocalPlayer)
+            end)
+
+            if not success then
+                return true
+            end
+
+            return filtered ~= text
+        end
+
+        text_chat_service.OnIncomingMessage = function(v)
+            local prop = Instance.new("TextChatMessageProperties")
+            if v.TextSource and v.TextSource.UserId == players.LocalPlayer.UserId and will_tag(v.Text) then
+                prop.Text = "."
+                prop.PrefixText = "."
+                getgenv().FlamesLibrary.wait(0.25)
+                prop.Text = nil
+                if getgenv().notify then getgenv().notify("Warning", "That message seems to have been filtered! We have stopped you from getting banned from it.", 3) end
+                return prop
+            end
+
+            return prop
+        end
+    end,
+
+    stop = function(self)
+        if not self.enabled then return end
+        self.enabled = false
+        local text_chat_service = cloneref and cloneref(game:GetService("TextChatService")) or game:GetService("TextChatService")
+        text_chat_service.OnIncomingMessage = nil
+    end,
+
+    toggle = function(self, state)
+        if state == nil then state = not self.enabled end
+        if state then
+            self:start()
+        else
+            self:stop()
+        end
+    end
+}
+
+getgenv().FlamesLibrary.modules.disable_all = function()
+    for name, mod in pairs(getgenv().FlamesLibrary.modules) do
+        if type(mod) == "table" and mod.stop then
+            mod:stop()
+        end
+    end
+end
+
+getgenv().FlamesLibrary.modules.list_enabled = function()
+    local active = {}
+    for name, mod in pairs(getgenv().FlamesLibrary.modules) do
+        if type(mod) == "table" and mod.enabled then
+            table.insert(active, name)
+        end
+    end
+    return active
+end
+
+getgenv().FlamesLibrary.modules.list_disabled = function()
+    local inactive = {}
+    for name, mod in pairs(getgenv().FlamesLibrary.modules) do
+        if type(mod) == "table" and not mod.enabled then
+            table.insert(inactive, name)
+        end
+    end
+    return inactive
+end
+
+getgenv().FlamesLibrary.property_maps = getgenv().FlamesLibrary.property_maps or {}
+getgenv().FlamesLibrary.property_maps.humanoid = {
+    "AutoJumpEnabled",
+    "AutoRotate",
+    "AutomaticScalingEnabled",
+    "BreakJointsOnDeath",
+    "CameraOffset",
+    "CollisionType",
+    "DisplayDistanceType",
+    "DisplayName",
+    "EvaluateStateMachine",
+    "FloorMaterial",
+    "HealthDisplayDistance",
+    "HealthDisplayType",
+    "HipHeight",
+    "Jump",
+    "JumpHeight",
+    "JumpPower",
+    "LeftLeg",
+    "MaxSlopeAngle",
+    "MoveDirection",
+    "NameDisplayDistance",
+    "NameOcclusion",
+    "PlatformStand",
+    "RequiresNeck",
+    "RigType",
+    "RightLeg",
+    "RootPart",
+    "SeatPart",
+    "Sit",
+    "TargetPoint",
+    "Torso",
+    "UseJumpPower",
+    "WalkSpeed",
+    "WalkToPart",
+    "WalkToPoint",
+}
+
+getgenv().FlamesLibrary.property_maps.starter_player = {
+    "AllowCustomAnimations",
+    "AutoJumpEnabled",
+    "AvatarJointUpgrade",
+    "CameraMaxZoomDistance",
+    "CameraMinZoomDistance",
+    "CameraMode",
+    "CharacterBreakJointsOnDeath",
+    "CharacterJumpHeight",
+    "CharacterJumpPower",
+    "CharacterMaxSlopeAngle",
+    "CharacterUseJumpPower",
+    "CharacterWalkSpeed",
+    "ClassicDeath",
+    "CreateDefaultPlayerModule",
+    "DevCameraOcclusionMode",
+    "DevComputerCameraMovementMode",
+    "DevComputerMovementMode",
+    "DevTouchCameraMovementMode",
+    "DevTouchMovementMode",
+    "EnableDynamicHeads",
+    "EnableMouseLockOption",
+    "GameSettingsAssetIDFace",
+    "GameSettingsAssetIDHead",
+    "GameSettingsAssetIDLeftArm",
+    "GameSettingsAssetIDLeftLeg",
+    "GameSettingsAssetIDPants",
+    "GameSettingsAssetIDRightArm",
+    "GameSettingsAssetIDRightLeg",
+    "GameSettingsAssetIDShirt",
+    "GameSettingsAssetIDTeeShirt",
+    "GameSettingsAssetIDTorso",
+    "GameSettingsAvatar",
+    "GameSettingsR15Collision",
+    "GameSettingsScaleRangeBodyType",
+    "GameSettingsScaleRangeHead",
+    "GameSettingsScaleRangeHeight",
+    "GameSettingsScaleRangeProportion",
+    "GameSettingsScaleRangeWidth",
+    "HealthDisplayDistance",
+    "LoadCharacterAppearance",
+    "LoadCharacterLayeredClothing",
+    "LuaCharacterController",
+    "NameDisplayDistance",
+    "UserEmotesEnabled",
+}
+
+getgenv().FlamesLibrary.set_humanoid_property = function(humanoid, property, value)
+    if not humanoid or typeof(humanoid) ~= "Instance" or not humanoid:IsA("Humanoid") then
+        return false, "invalid humanoid"
+    end
+
+    local matches = resolve_property(getgenv().FlamesLibrary.property_maps.humanoid, property)
+
+    if #matches == 0 then
+        return false, "no matching humanoid property for: " .. tostring(property)
+    end
+
+    if #matches > 1 then
+        return false, "ambiguous property search: " .. tostring(property) .. " matched " .. table.concat(matches, ", ")
+    end
+
+    local resolved = matches[1]
+    local success, err = pcall(function()
+        humanoid[resolved] = value
+    end)
+
+    if not success then
+        return false, "failed to set " .. resolved .. ": " .. tostring(err)
+    end
+
+    return true, resolved
+end
+
+getgenv().FlamesLibrary.set_starter_player_property = function(property, value)
+    local starter_player = cloneref and cloneref(game:GetService("StarterPlayer")) or game:GetService("StarterPlayer")
+
+    local matches = resolve_property(getgenv().FlamesLibrary.property_maps.starter_player, property)
+
+    if #matches == 0 then
+        return false, "no matching starter_player property for: " .. tostring(property)
+    end
+
+    if #matches > 1 then
+        return false, "ambiguous property search: " .. tostring(property) .. " matched " .. table.concat(matches, ", ")
+    end
+
+    local resolved = matches[1]
+    local success, err = pcall(function()
+        starter_player[resolved] = value
+    end)
+
+    if not success then
+        return false, "failed to set " .. resolved .. ": " .. tostring(err)
+    end
+
+    return true, resolved
+end
+
+local uis = cloneref and cloneref(game:GetService("UserInputService")) or game:GetService("UserInputService")
+local ts = cloneref and cloneref(game:GetService("TweenService")) or game:GetService("TweenService")
+local rs  = cloneref and cloneref(game:GetService("RunService")) or game:GetService("RunService") or safe_wrapper("RunService")
+
+do
+    local active_frame     = nil
+    local active_drag_start = nil
+    local active_start_pos  = nil
+    local last_input_pos    = nil
+    local active_tween      = nil
+    local GLOBAL_KEY = "dragify_global"
+    local TWEEN_INFO = TweenInfo.new(0.05, Enum.EasingStyle.Linear)
+    local MIN_DELTA  = 2
+    local function cancel_tween()
+        if active_tween then
+            pcall(function() active_tween:Cancel() end)
+            active_tween = nil
+        end
+    end
+
+    local function stop_drag()
+        active_frame      = nil
+        active_drag_start = nil
+        active_start_pos  = nil
+        last_input_pos    = nil
+        cancel_tween()
+    end
+
+    local function frame_valid(f)
+        local ok, res = pcall(function()
+        return f and f.Parent and f:IsDescendantOf(game)
+        end)
+        return ok and res
+    end
+
+    getgenv().FlamesLibrary.connect(GLOBAL_KEY .. "_heartbeat", rs.Heartbeat:Connect(function()
+        if not active_frame or not last_input_pos then return end
+        if not frame_valid(active_frame) then
+            stop_drag()
+            return
+        end
+
+        local delta = last_input_pos - active_drag_start
+        if delta.Magnitude < MIN_DELTA then return end
+        local sp  = active_start_pos
+        local pos = UDim2.new(
+            sp.X.Scale,
+            sp.X.Offset + delta.X,
+            sp.Y.Scale,
+            sp.Y.Offset + delta.Y
+        )
+
+        cancel_tween()
+        active_tween = ts:Create(active_frame, TWEEN_INFO, { Position = pos })
+        active_tween:Play()
+    end))
+
+    getgenv().FlamesLibrary.connect(GLOBAL_KEY .. "_changed", uis.InputChanged:Connect(function(input)
+        if not active_frame then return end
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            last_input_pos = input.Position
+        end
+    end))
+
+    getgenv().FlamesLibrary.connect(GLOBAL_KEY .. "_ended", uis.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            stop_drag()
+        end
+    end))
+
+    getgenv().dragify = function(frame)
+        if not frame then return end
+        while not frame_valid(frame) do task.wait() end
+        local frame_key = "dragify_" .. tostring(frame) .. "_" .. tostring(frame:GetDebugId())
+        getgenv().FlamesLibrary.connect(frame_key .. "_began", frame.InputBegan:Connect(function(input)
+            if not frame_valid(frame) then return end
+            if uis:GetFocusedTextBox() then return end
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                if active_frame and active_frame ~= frame then
+                    stop_drag()
+                end
+                active_frame      = frame
+                active_drag_start = input.Position
+                active_start_pos  = frame.Position
+                last_input_pos    = input.Position
+            end
+        end))
+
+        getgenv().FlamesLibrary.connect(frame_key .. "_ancestry", frame.AncestryChanged:Connect(function(_, parent)
+            if not parent then
+                if active_frame == frame then
+                    stop_drag()
+                end
+                getgenv().FlamesLibrary.disconnect(frame_key .. "_began")
+                getgenv().FlamesLibrary.disconnect(frame_key .. "_ancestry")
+            end
+        end))
+    end
+end
 wait(0.25)
 function lib:init(ti, dosplash, visiblekey, deleteprevious)
     local function find_existing()
@@ -126,49 +582,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
     uc.CornerRadius = UDim.new(0, 18)
     uc.Parent = main
 
-    local dragging
-    local drag_input
-    local drag_start
-    local start_pos
-    local function update(input)
-        local delta = input.Position - drag_start
-        main.Position = UDim2.new(start_pos.X.Scale, start_pos.X.Offset + delta.X, start_pos.Y.Scale, start_pos.Y.Offset + delta.Y)
-    end
-
-    main.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            local pos = input.Position
-            local player_gui = game:GetService("Players").LocalPlayer:FindFirstChildOfClass("PlayerGui")
-            local objects_at_pos = player_gui and player_gui:GetGuiObjectsAtPosition(pos.X, pos.Y) or {}
-            for _, obj in ipairs(objects_at_pos) do
-                if obj:IsA("TextButton") or obj:IsA("TextBox") or obj:IsA("ImageButton") then
-                    return
-                end
-            end
-            dragging = true
-            drag_start = input.Position
-            start_pos = main.Position
-
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    main.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            drag_input = input
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input == drag_input and dragging then
-            update(input)
-        end
-    end)
-
+    if getgenv().dragify and typeof(getgenv().dragify) == "function" then getgenv().dragify(main) end
     local workarea = Instance.new("Frame")
     workarea.Name = "workarea"
     workarea.Parent = main
