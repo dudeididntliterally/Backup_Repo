@@ -359,54 +359,24 @@ getgenv().FlamesLibrary.property_maps.starter_player = {
 }
 
 getgenv().FlamesLibrary.set_humanoid_property = function(humanoid, property, value)
-    if not humanoid or typeof(humanoid) ~= "Instance" or not humanoid:IsA("Humanoid") then
-        return false, "invalid humanoid"
-    end
-
+    if not humanoid or typeof(humanoid) ~= "Instance" or not humanoid:IsA("Humanoid") then return false, "invalid humanoid" end
     local matches = resolve_property(getgenv().FlamesLibrary.property_maps.humanoid, property)
-
-    if #matches == 0 then
-        return false, "no matching humanoid property for: " .. tostring(property)
-    end
-
-    if #matches > 1 then
-        return false, "ambiguous property search: " .. tostring(property) .. " matched " .. table.concat(matches, ", ")
-    end
-
+    if #matches == 0 then return false, "no matching humanoid property for: " .. tostring(property) end
+    if #matches > 1 then return false, "ambiguous property search: " .. tostring(property) .. " matched " .. table.concat(matches, ", ") end
     local resolved = matches[1]
-    local success, err = pcall(function()
-        humanoid[resolved] = value
-    end)
-
-    if not success then
-        return false, "failed to set " .. resolved .. ": " .. tostring(err)
-    end
-
+    local success, err = pcall(function() humanoid[resolved] = value end)
+    if not success then return false, "failed to set " .. resolved .. ": " .. tostring(err) end
     return true, resolved
 end
 
 getgenv().FlamesLibrary.set_starter_player_property = function(property, value)
     local starter_player = cloneref and cloneref(game:GetService("StarterPlayer")) or game:GetService("StarterPlayer")
-
     local matches = resolve_property(getgenv().FlamesLibrary.property_maps.starter_player, property)
-
-    if #matches == 0 then
-        return false, "no matching starter_player property for: " .. tostring(property)
-    end
-
-    if #matches > 1 then
-        return false, "ambiguous property search: " .. tostring(property) .. " matched " .. table.concat(matches, ", ")
-    end
-
+    if #matches == 0 then return false, "no matching starter_player property for: " .. tostring(property) end
+    if #matches > 1 then return false, "ambiguous property search: " .. tostring(property) .. " matched " .. table.concat(matches, ", ") end
     local resolved = matches[1]
-    local success, err = pcall(function()
-        starter_player[resolved] = value
-    end)
-
-    if not success then
-        return false, "failed to set " .. resolved .. ": " .. tostring(err)
-    end
-
+    local success, err = pcall(function() starter_player[resolved] = value end)
+    if not success then return false, "failed to set " .. resolved .. ": " .. tostring(err) end
     return true, resolved
 end
 
