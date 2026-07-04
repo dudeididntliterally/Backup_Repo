@@ -10898,9 +10898,7 @@ addcmd("emote", {"emote"}, function(args, speaker)
 end)
 
 addcmd("emotesgui", {"allemotes", "emotegui"}, function(args, speaker)
-	if getgenv().FreeEmotes_Enabled then
-		return 
-	end
+	if getgenv().FreeEmotes_Enabled then return warn("Flames Emotes GUI is already loaded.") end
 
 	getgenv().FreeEmotes_Enabled = true
 	if not UserInputService.TouchEnabled then
