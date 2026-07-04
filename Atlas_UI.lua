@@ -4169,7 +4169,7 @@ do
             end)
         end
 
-        do -- toggling
+        do
             local toggle = element.Toggle
             local img = toggle.ImageLabel
 
@@ -4191,28 +4191,21 @@ do
             end)
 
             local tweenInfo = TweenInfo.new(0.1,Enum.EasingStyle.Sine,Enum.EasingDirection.In,0,false,0)
-
+            local lastFlag = nil
             local lastFlag = nil
             local con
             LPH_JIT_MAX(function()
                 con = Run.RenderStepped:Connect(function()
                     local currentFlag = _self.Flags[info.ToggleFlag]
-
                     local imageGoalSize = currentFlag and UDim2.fromScale(0.9,0.9) or UDim2.fromScale(0,0)
                     local backgroundGoalColor = currentFlag and _self.color or Color3.fromRGB(28, 28, 28)
-    
                     if lastFlag==nil then
                         toggle.BackgroundColor3 = backgroundGoalColor
                         img.Size = imageGoalSize
                     elseif lastFlag~=currentFlag then
-                        pcall(function()
-                            tween1:Disconnect()
-                            tween1:Destroy()
-                        end)
-                        pcall(function()
-                            tween2:Disconnect()
-                            tween2:Destroy()
-                        end)
+                        if tween1 then pcall(function() tween1:Cancel() end) end
+                        if tween2 then pcall(function() tween2:Cancel() end) end
+
                         tween1 = TS:Create(toggle,tweenInfo,{
                             ["BackgroundColor3"] = backgroundGoalColor
                         })
