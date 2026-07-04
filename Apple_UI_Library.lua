@@ -39,6 +39,21 @@ if not has_gethui and not has_gethidden and not g.roblox_hidden_gui_location the
     end
 end
 
+local function bind_tap(button, callback)
+    local pressed = false
+    button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            pressed = true
+        end
+    end)
+    button.InputEnded:Connect(function(input)
+        if pressed and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+            pressed = false
+            callback()
+        end
+    end)
+end
+
 getgenv().FlamesLibrary = getgenv().FlamesLibrary or {}
 getgenv().FlamesLibrary._connections = getgenv().FlamesLibrary._connections or {}
 getgenv().FlamesLibrary.modules = getgenv().FlamesLibrary.modules or {} -- new
@@ -1297,7 +1312,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             us.Thickness = 1
 
             if callback then
-                button.MouseButton1Click:Connect(function() 
+                bind_tap(button, function()
                     coroutine.wrap(function()
                         button.TextSize -= 3
                         task.wait(0.06)
@@ -1568,6 +1583,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             sv_map.Image = "rbxassetid://698052532"
             sv_map.ImageColor3 = Color3.fromHSV(hue, 1, 1)
             sv_map.ClipsDescendants = true
+            sv_map.Active = true
 
             local uc_sv = Instance.new("UICorner")
             uc_sv.CornerRadius = UDim.new(0, 7)
@@ -1594,6 +1610,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             hue_bar.ZIndex = 5
             hue_bar.Image = "rbxassetid://698053938"
             hue_bar.ClipsDescendants = true
+            hue_bar.Active = true
 
             local uc_hb = Instance.new("UICorner")
             uc_hb.CornerRadius = UDim.new(0, 7)
@@ -1626,6 +1643,20 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             uc_hx.CornerRadius = UDim.new(0, 7)
             uc_hx.Parent = hex_box
 
+            local hexTapOverlay = Instance.new("TextButton")
+            hexTapOverlay.Name = "hexTapOverlay"
+            hexTapOverlay.Parent = hex_box
+            hexTapOverlay.BackgroundTransparency = 1
+            hexTapOverlay.Size = UDim2.new(1, 0, 1, 0)
+            hexTapOverlay.Text = ""
+            hexTapOverlay.AutoButtonColor = false
+            hexTapOverlay.ZIndex = 6
+
+            bind_tap(hexTapOverlay, function()
+                hexTapOverlay.Visible = false
+                hex_box:CaptureFocus()
+            end)
+
             local function update_color()
                 picked = Color3.fromHSV(hue, sat, val)
                 swatch.BackgroundColor3 = picked
@@ -1644,17 +1675,20 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
                     dragging_sv = true
                 end
             end)
+
             hue_bar.InputBegan:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
                     dragging_hue = true
                 end
             end)
+
             UserInputService.InputEnded:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
                     dragging_sv = false
                     dragging_hue = false
                 end
             end)
+
             UserInputService.InputChanged:Connect(function(i)
                 if i.UserInputType ~= Enum.UserInputType.MouseMovement and i.UserInputType ~= Enum.UserInputType.Touch then return end
                 if dragging_sv then
@@ -1671,6 +1705,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             end)
 
             hex_box.FocusLost:Connect(function()
+                hexTapOverlay.Visible = true
                 local hex = hex_box.Text:gsub("#", "")
                 if #hex == 6 then
                     local r = tonumber(hex:sub(1,2), 16)
@@ -1684,7 +1719,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
                 end
             end)
 
-            header.MouseButton1Click:Connect(function()
+            bind_tap(header, function()
                 open = not open
                 panel.Visible = open
                 container.Size = open and UDim2.new(0, 418, 0, 37 + 152) or UDim2.new(0, 418, 0, 37)
@@ -1707,23 +1742,8 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             label.Text = name
         end
 
-function sec:Switch(name, defaultmode, callback)
+        function sec:Switch(name, defaultmode, callback)
             local mode = defaultmode
-
-            local debug_lines = {}
-            local function dbg(...)
-                local parts = {...}
-                for i, v in ipairs(parts) do
-                    parts[i] = tostring(v)
-                end
-                local line = table.concat(parts, " ")
-                table.insert(debug_lines, line)
-                print(line)
-                if setclipboard then
-                    pcall(setclipboard, table.concat(debug_lines, "\n"))
-                end
-            end
-
             local toggleswitch = Instance.new("TextLabel")
             toggleswitch.Name = "toggleswitch"
             toggleswitch.Parent = workareamain
@@ -1760,34 +1780,7 @@ function sec:Switch(name, defaultmode, callback)
             uc_5.CornerRadius = UDim.new(5, 0)
             uc_5.Parent = TextButton
 
-            dbg("[Switch]", name, "created")
-
-            task.defer(function()
-                dbg("[Switch]", name, "toggleswitch AbsSize", toggleswitch.AbsoluteSize, "AbsPos", toggleswitch.AbsolutePosition)
-                dbg("[Switch]", name, "Frame AbsSize", Frame.AbsoluteSize, "AbsPos", Frame.AbsolutePosition, "ZIndex", Frame.ZIndex)
-                dbg("[Switch]", name, "TextButton AbsSize", TextButton.AbsoluteSize, "AbsPos", TextButton.AbsolutePosition, "ZIndex", TextButton.ZIndex)
-                dbg("[Switch]", name, "workareamain Visible", workareamain.Visible, "ClipsDescendants", workareamain.ClipsDescendants)
-                dbg("[Switch]", name, "ui_scale.Scale", ui_scale and ui_scale.Scale)
-            end)
-
-            Frame.InputBegan:Connect(function(input)
-                dbg("[Switch]", name, "Frame InputBegan", input.UserInputType.Name)
-            end)
-
-            Frame.InputEnded:Connect(function(input)
-                dbg("[Switch]", name, "Frame InputEnded", input.UserInputType.Name)
-            end)
-
-            TextButton.InputBegan:Connect(function(input)
-                dbg("[Switch]", name, "TextButton InputBegan", input.UserInputType.Name)
-            end)
-
-            TextButton.InputEnded:Connect(function(input)
-                dbg("[Switch]", name, "TextButton InputEnded", input.UserInputType.Name)
-            end)
-
             local function apply(new_mode, fireCallback, animate)
-                dbg("[Switch]", name, "apply() new_mode", new_mode, "fireCallback", fireCallback, "animate", animate)
                 mode = new_mode
                 if mode then
                     if animate then
@@ -1805,29 +1798,17 @@ function sec:Switch(name, defaultmode, callback)
                     Frame.BackgroundColor3 = Color3.fromRGB(216, 216, 216)
                 end
                 if fireCallback and callback then
-                    dbg("[Switch]", name, "firing callback with", mode)
                     task.spawn(callback, mode)
                 end
             end
 
             apply(defaultmode, false, false)
-
-            Frame.MouseButton1Click:Connect(function()
-                dbg("[Switch]", name, "Frame.MouseButton1Click FIRED")
+            bind_tap(Frame, function()
                 apply(not mode, true, true)
             end)
 
-            Frame.MouseButton1Down:Connect(function()
-                dbg("[Switch]", name, "Frame.MouseButton1Down FIRED")
-            end)
-
-            TextButton.MouseButton1Click:Connect(function()
-                dbg("[Switch]", name, "TextButton.MouseButton1Click FIRED")
+            bind_tap(TextButton, function()
                 apply(not mode, true, true)
-            end)
-
-            TextButton.MouseButton1Down:Connect(function()
-                dbg("[Switch]", name, "TextButton.MouseButton1Down FIRED")
             end)
 
             local switchObject = {}
@@ -1883,12 +1864,29 @@ function sec:Switch(name, defaultmode, callback)
             TextBox.TextColor3 = Color3.fromRGB(12, 12, 12)
             TextBox.TextSize = 21
             TextBox.TextXAlignment = Enum.TextXAlignment.Left
+            TextBox.ZIndex = 1
 
-            if callback then
-                TextBox.FocusLost:Connect(function()
+            local tapOverlay = Instance.new("TextButton")
+            tapOverlay.Name = "tapOverlay"
+            tapOverlay.Parent = Frame_2
+            tapOverlay.BackgroundTransparency = 1
+            tapOverlay.Size = UDim2.new(1, 0, 1, 0)
+            tapOverlay.Position = UDim2.new(0, 0, 0, 0)
+            tapOverlay.Text = ""
+            tapOverlay.AutoButtonColor = false
+            tapOverlay.ZIndex = 2
+
+            bind_tap(tapOverlay, function()
+                tapOverlay.Visible = false
+                TextBox:CaptureFocus()
+            end)
+
+            TextBox.FocusLost:Connect(function()
+                tapOverlay.Visible = true
+                if callback then
                     callback(TextBox.Text)
-                end)
-            end
+                end
+            end)
         end
 
         sidebar2.MouseButton1Click:Connect(function()
