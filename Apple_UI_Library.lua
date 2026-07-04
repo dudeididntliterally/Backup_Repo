@@ -1707,8 +1707,23 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             label.Text = name
         end
 
-        function sec:Switch(name, defaultmode, callback)
+function sec:Switch(name, defaultmode, callback)
             local mode = defaultmode
+
+            local debug_lines = {}
+            local function dbg(...)
+                local parts = {...}
+                for i, v in ipairs(parts) do
+                    parts[i] = tostring(v)
+                end
+                local line = table.concat(parts, " ")
+                table.insert(debug_lines, line)
+                print(line)
+                if setclipboard then
+                    pcall(setclipboard, table.concat(debug_lines, "\n"))
+                end
+            end
+
             local toggleswitch = Instance.new("TextLabel")
             toggleswitch.Name = "toggleswitch"
             toggleswitch.Parent = workareamain
@@ -1745,7 +1760,34 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             uc_5.CornerRadius = UDim.new(5, 0)
             uc_5.Parent = TextButton
 
+            dbg("[Switch]", name, "created")
+
+            task.defer(function()
+                dbg("[Switch]", name, "toggleswitch AbsSize", toggleswitch.AbsoluteSize, "AbsPos", toggleswitch.AbsolutePosition)
+                dbg("[Switch]", name, "Frame AbsSize", Frame.AbsoluteSize, "AbsPos", Frame.AbsolutePosition, "ZIndex", Frame.ZIndex)
+                dbg("[Switch]", name, "TextButton AbsSize", TextButton.AbsoluteSize, "AbsPos", TextButton.AbsolutePosition, "ZIndex", TextButton.ZIndex)
+                dbg("[Switch]", name, "workareamain Visible", workareamain.Visible, "ClipsDescendants", workareamain.ClipsDescendants)
+                dbg("[Switch]", name, "ui_scale.Scale", ui_scale and ui_scale.Scale)
+            end)
+
+            Frame.InputBegan:Connect(function(input)
+                dbg("[Switch]", name, "Frame InputBegan", input.UserInputType.Name)
+            end)
+
+            Frame.InputEnded:Connect(function(input)
+                dbg("[Switch]", name, "Frame InputEnded", input.UserInputType.Name)
+            end)
+
+            TextButton.InputBegan:Connect(function(input)
+                dbg("[Switch]", name, "TextButton InputBegan", input.UserInputType.Name)
+            end)
+
+            TextButton.InputEnded:Connect(function(input)
+                dbg("[Switch]", name, "TextButton InputEnded", input.UserInputType.Name)
+            end)
+
             local function apply(new_mode, fireCallback, animate)
+                dbg("[Switch]", name, "apply() new_mode", new_mode, "fireCallback", fireCallback, "animate", animate)
                 mode = new_mode
                 if mode then
                     if animate then
@@ -1763,17 +1805,29 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
                     Frame.BackgroundColor3 = Color3.fromRGB(216, 216, 216)
                 end
                 if fireCallback and callback then
+                    dbg("[Switch]", name, "firing callback with", mode)
                     task.spawn(callback, mode)
                 end
             end
 
             apply(defaultmode, false, false)
+
             Frame.MouseButton1Click:Connect(function()
+                dbg("[Switch]", name, "Frame.MouseButton1Click FIRED")
                 apply(not mode, true, true)
             end)
 
+            Frame.MouseButton1Down:Connect(function()
+                dbg("[Switch]", name, "Frame.MouseButton1Down FIRED")
+            end)
+
             TextButton.MouseButton1Click:Connect(function()
+                dbg("[Switch]", name, "TextButton.MouseButton1Click FIRED")
                 apply(not mode, true, true)
+            end)
+
+            TextButton.MouseButton1Down:Connect(function()
+                dbg("[Switch]", name, "TextButton.MouseButton1Down FIRED")
             end)
 
             local switchObject = {}
