@@ -41,19 +41,8 @@ end
 wait(0.25)
 function lib:init(ti, dosplash, visiblekey, deleteprevious)
     local function find_existing()
-        if gethui then
-            return gethui():FindFirstChild("Apple_UI")
-        elseif get_hidden_gui then
-            return get_hidden_gui():FindFirstChild("Apple_UI")
-        else
-            local cg = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
-            local existing = cg:FindFirstChild("Apple_UI")
-            if not existing then
-                local pg = game:GetService("Players").LocalPlayer:FindFirstChildOfClass("PlayerGui")
-                existing = pg and pg:FindFirstChild("Apple_UI")
-            end
-            return existing
-        end
+        local cg = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
+        return cg:FindFirstChild("Apple_UI")
     end
 
     if deleteprevious then
@@ -69,15 +58,8 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
 
     scrgui = Instance.new("ScreenGui")
     scrgui.Name = "Apple_UI"
-
-    if gethui then
-        scrgui.Parent = gethui()
-    elseif get_hidden_gui then
-        scrgui.Parent = get_hidden_gui()
-    else
-        local cg = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
-        scrgui.Parent = cg
-    end
+    local core_gui = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
+    scrgui.Parent = core_gui
 
     if dosplash then
         local splash = Instance.new("Frame")
@@ -145,27 +127,27 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
     uc.Parent = main
 
     local dragging
-    local dragInput
-    local dragStart
-    local startPos
+    local drag_input
+    local drag_start
+    local start_pos
     local function update(input)
-        local delta = input.Position - dragStart
-        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        local delta = input.Position - drag_start
+        main.Position = UDim2.new(start_pos.X.Scale, start_pos.X.Offset + delta.X, start_pos.Y.Scale, start_pos.Y.Offset + delta.Y)
     end
-    
+
     main.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             local pos = input.Position
-            local container = scrgui.Parent
-            local objectsAtPos = container:GetGuiObjectsAtPosition(pos.X, pos.Y)
-            for _, obj in ipairs(objectsAtPos) do
+            local player_gui = game:GetService("Players").LocalPlayer:FindFirstChildOfClass("PlayerGui")
+            local objects_at_pos = player_gui and player_gui:GetGuiObjectsAtPosition(pos.X, pos.Y) or {}
+            for _, obj in ipairs(objects_at_pos) do
                 if obj:IsA("TextButton") or obj:IsA("TextBox") or obj:IsA("ImageButton") then
                     return
                 end
             end
             dragging = true
-            dragStart = input.Position
-            startPos = main.Position
+            drag_start = input.Position
+            start_pos = main.Position
 
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
@@ -174,15 +156,15 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             end)
         end
     end)
-    
+
     main.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
+            drag_input = input
         end
     end)
-    
+
     UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
+        if input == drag_input and dragging then
             update(input)
         end
     end)
@@ -205,6 +187,22 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
     workareacornerhider.BorderSizePixel = 0
     workareacornerhider.Size = UDim2.new(0, 18, 0.99895674, 0)
 
+    local ui_scale = Instance.new("UIScale")
+    ui_scale.Parent = main
+    local base_width = 721
+    local base_height = 584
+    local function update_ui_scale()
+        local camera = workspace.CurrentCamera
+        if not camera then return end
+        local viewport = camera.ViewportSize
+        local scale_x = (viewport.X * 0.92) / base_width
+        local scale_y = (viewport.Y * 0.92) / base_height
+        local scale = math.min(scale_x, scale_y, 1)
+        ui_scale.Scale = scale
+    end
+
+    update_ui_scale()
+    workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(update_ui_scale)
     local search = Instance.new("Frame")
     search.Name = "search"
     search.Parent = main
@@ -602,9 +600,9 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
 
         local toggle_btn = Instance.new("TextButton")
         toggle_btn.Name = "ToggleBtn"
-        toggle_btn.Size = UDim2.new(0, 48, 0, 48)
-        toggle_btn.Position = UDim2.new(0.5, -24, 0, 8)
-        toggle_btn.AnchorPoint = Vector2.new(0, 0)
+        toggle_btn.Size = UDim2.new(0, 40, 0, 40)
+        toggle_btn.Position = UDim2.new(1, -8, 0, 8)
+        toggle_btn.AnchorPoint = Vector2.new(1, 0)
         toggle_btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         toggle_btn.BorderSizePixel = 0
         toggle_btn.Text = "Toggle AppleUI"
