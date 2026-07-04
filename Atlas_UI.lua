@@ -3120,8 +3120,7 @@ do
     function Section:CreateKeybind(...)
         return Element.CreateKeybind(self, ...)
     end
-    function Section:CreateKeyBind(...) -- alias for ::CreateParagraph as ::CreateBody was used in Artemis
-        -- do not use, this can be removed at any time without notice, use ::CreateParagraph instead
+    function Section:CreateKeyBind(...)
         return Section:CreateKeybind(...)
     end
     function Section:CreateDropdown(...)
@@ -3132,11 +3131,9 @@ do
     end
 end
 
--- ELEMENTS
 do
     function Element.CreateToggle(section,info)
         local _self = section._self
-        -- Requirements
         utility:Requirement(type(info)=="table","Info must be a table!")
         utility:Requirement(info.Name,"Missing name argument")
         utility:Requirement(info.Flag,"Missing flag argument")
@@ -3169,9 +3166,7 @@ do
         section.elementNum = section.elementNum+1
 
         local elementNum = section.elementNum
-
         local function createElement()
-            
             local Converted = {
                 ["_0_Toggle"] = Instance.new("Frame");
                 ["_UICorner"] = Instance.new("UICorner");
@@ -3204,8 +3199,6 @@ do
                 ["_UIListLayout"] = Instance.new("UIListLayout");
                 ["_Element"] = Instance.new("StringValue");
             }
-
-            --Properties
 
             Converted["_0_Toggle"].BackgroundColor3 = Color3.fromRGB(28.000000230968, 28.000000230968, 28.000000230968)
             Converted["_0_Toggle"].Size = UDim2.new(1, 0, 0, 35)
@@ -3354,7 +3347,7 @@ do
 
         local element = createElement()
 
-        do -- toggling
+        do
             local toggle = element.Toggle
             local img = toggle.ImageLabel
 
@@ -3427,10 +3420,23 @@ do
         element.Title.Main.Title.Text = info.Name
         element.Name = string.rep("_",elementNum)..info.Name
         element.Parent = section.holder.Contents
+
+        local toggle_object = {}
+        function toggle_object:Set(new_value, fire_callback)
+            if fire_callback == nil then fire_callback = true end
+            _self.Flags[info.Flag] = new_value
+            if fire_callback then
+                coroutine.wrap(info.Callback)(new_value)
+            end
+        end
+        function toggle_object:Get()
+            return _self.Flags[info.Flag]
+        end
+        return toggle_object
     end
+
     function Element.CreateSlider(section,info)
         local _self = section._self
-        -- Requirements
         utility:Requirement(type(info)=="table","Info must be a table!")
         utility:Requirement(info.Name,"Missing name argument")
         utility:Requirement(info.Flag,"Missing flag argument")
@@ -3471,9 +3477,7 @@ do
         section.elementNum = section.elementNum+1
 
         local elementNum = section.elementNum
-
         local function createElement()
-            
             local Converted = {
                 ["_1_Slider"] = Instance.new("Frame");
                 ["_UICorner"] = Instance.new("UICorner");
