@@ -21,7 +21,6 @@ local view_port_size = setmetatable({}, {
 local Workspace = cloneref and cloneref(game:GetService("Workspace")) or game:GetService("Workspace")
 local UserInputService = cloneref and cloneref(game:GetService("UserInputService")) or game:GetService("UserInputService")
 local cam = Workspace.CurrentCamera
-local view_port_size = cam and cam.ViewportSize or Vector2.new(1920, 1080)
 local all_clipboards = setclipboard or toclipboard or set_clipboard or (Clipboard and Clipboard.set)
 function scale(axis, value)
     local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
