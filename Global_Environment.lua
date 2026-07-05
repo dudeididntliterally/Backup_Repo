@@ -317,9 +317,10 @@ end
 
 -- [[ safer wait functionality. ]] --
 getgenv().FlamesLibrary.wait = function(t)
-    if not t or t <= 0 then safe_wrapper("RunService").Heartbeat:Wait() return end
+    local r_s = g.RunService or cloneref and cloneref(game:GetService("RunService")) or game:GetService("RunService")
+    if not t or t <= 0 then r_s.Heartbeat:Wait() return end
     local ok = pcall(task.wait, t)
-    if not ok then safe_wrapper("RunService").Heartbeat:Wait() end
+    if not ok then r_s.Heartbeat:Wait() end
 end
 
 getgenv().FlamesLibrary.cleanup_all = function() for name in pairs(getgenv().FlamesLibrary._connections) do getgenv().FlamesLibrary.disconnect(name) end end
