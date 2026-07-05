@@ -8,7 +8,13 @@ if (game.PlaceId == 13967668166 or game.PlaceId == 99154507657228 or game.PlaceI
         return warn("Please load the Life Together RP script first.")
     end
 end
-if getgenv().FreeEmotes_Enabled then return warn("Flames Emotes GUI is already loaded.") end
+if getgenv().FreeEmotes_Enabled then
+    if g.notify then
+        return g.notify("Warning", "You already have Flames Emotes GUI running! Wait for it to load if it hasn't already.", 6.5)
+    else
+        return warn("You already have Flames Emotes GUI running!")
+    end
+end
 getgenv().FreeEmotes_Enabled = true
 local view_port_size = setmetatable({}, {
     __index = function(_, key)
