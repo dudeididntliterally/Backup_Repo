@@ -1982,7 +1982,7 @@ do
             for i,v in pairs(flags) do
                 if type(v)=="string" then
                     if string.sub(v,1,9)=="?special|" then
-                        if string.find(v,"<$enum_type$>") then -- for enums
+                        if string.find(v,"<$enum_type$>") then
                             local semiL,_ = string.find(v,";")
                             local enumType = string.sub(v,24,semiL-1)
                             local index = string.sub(v,semiL+15,-1)
@@ -1991,16 +1991,15 @@ do
                         elseif string.find(v,"<$colorR$>") then
                             local semiL1,_ = string.find(v,";")
                             local semiL2,_ = string.find(v,";",semiL1+1)
-
                             local r = string.sub(v,21,semiL1-1)
                             local g = string.sub(v,semiL1+12,semiL2-1)
                             local b = string.sub(v,semiL2+12,-1)
-
                             flags[i] = Color3.new(tonumber(r),tonumber(g),tonumber(b))
                         end
                     end
                 end
             end
+
             saveCoroutine = coroutine.create(function()
                 LPH_JIT_MAX(function()
                     while utility:Wait() do
@@ -2764,16 +2763,27 @@ do
         notif.Parent = holder
         tweenIn()
     end
+
     function Library:Destroy()
-        self.container:Destroy()
-        for _,v in pairs(self._drag_events) do
-            v:Disconnect()
+        if self.container then
+            pcall(function() self.container:Destroy() end)
         end
-        for _,v in pairs(self._connections) do
-            v:Disconnect()
+        for _, v in pairs(self._drag_events) do
+            if v then
+                pcall(function() v:Disconnect() end)
+            end
         end
-        self._section_update:Disconnect()
-        coroutine.close(self._saveCoroutine)
+        for _, v in pairs(self._connections) do
+            if v then
+                pcall(function() v:Disconnect() end)
+            end
+        end
+        if self._section_update then
+            pcall(function() self._section_update:Disconnect() end)
+        end
+        if self._saveCoroutine then
+            pcall(function() coroutine.close(self._saveCoroutine) end)
+        end
         self = nil
         return nil
     end
