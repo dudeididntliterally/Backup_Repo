@@ -12,6 +12,9 @@ local Run = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local Core = game:GetService("CoreGui")
 local MP = game:GetService("MarketplaceService")
+local UserInputService = game:GetService("UserInputService")
+local UIS = UserInputService
+local Is_Mobile = UserInputService.TouchEnabled
 local player = Players.LocalPlayer
 local mouse = player:GetMouse()
 local Library = {}
@@ -1114,27 +1117,27 @@ do
             Converted["_Atlas"].Parent = game:GetService("CoreGui")
             Converted["_UI_Library"].Name = "UI_Library"
             Converted["_UI_Library"].Parent = Converted["_Atlas"]
-
             Converted["_Name"].Value = "Atlas UI Library"
             Converted["_Name"].Name = "Name"
             Converted["_Name"].Parent = Converted["_UI_Library"]
-
             Converted["_Creator"].Value = "RoadToGlory#9879"
             Converted["_Creator"].Name = "Creator"
             Converted["_Creator"].Parent = Converted["_UI_Library"]
-
             Converted["_Discord"].Value = "https://discord.gg/xu5dDS3Pb9"
             Converted["_Discord"].Name = "Discord"
             Converted["_Discord"].Parent = Converted["_UI_Library"]
-
+            if Is_Mobile then
+                Converted["_Main"].Position = UDim2.new(0.5, -240, 0.5, -164)
+                Converted["_Main"].Size = UDim2.new(0, 480, 0, 328)
+            else
+                Converted["_Main"].Position = UDim2.new(0.5, -320, 0.5, -219)
+                Converted["_Main"].Size = UDim2.new(0, 640, 0, 438)
+            end
             Converted["_Main"].BackgroundColor3 = Color3.fromRGB(18.000000827014446, 18.000000827014446, 18.000000827014446)
             Converted["_Main"].BackgroundTransparency = 1
-            Converted["_Main"].Position = UDim2.new(0.5, -320, 0.5, -219)
-            Converted["_Main"].Size = UDim2.new(0, 640, 0, 438)
             Converted["_Main"].ZIndex = 100
             Converted["_Main"].Name = "Main"
             Converted["_Main"].Parent = Converted["_Atlas"]
-
             Converted["_Contents"].BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Converted["_Contents"].BackgroundTransparency = 1
             Converted["_Contents"].Size = UDim2.new(1, 0, 1, 0)
@@ -1351,7 +1354,7 @@ do
             Converted["_Frame"].Parent = Converted["_Main1"]
 
             Converted["_B"].Font = Enum.Font.Gotham
-            Converted["_B"].Text = "Atlas UI Lib: RoadToGlory#9879" -- please don't remove this, this is open sourced and I leave this here so that users can know the name of the UI library if they are interested in it
+            Converted["_B"].Text = "Atlas UI Lib: https://discord.gg/MTYKxQfpNJ"
             Converted["_B"].TextColor3 = Color3.fromRGB(225.00000178813934, 225.00000178813934, 225.00000178813934)
             Converted["_B"].TextSize = 12
             Converted["_B"].AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1364,7 +1367,7 @@ do
             Converted["_B"].Parent = Converted["_Frame"]
 
             Converted["_A"].Font = Enum.Font.Gotham
-            Converted["_A"].Text = "AWP: RoadToGlory#9879"
+            Converted["_A"].Text = "AWP: https://discord.gg/MTYKxQfpNJ"
             Converted["_A"].TextColor3 = Color3.fromRGB(225.00000178813934, 225.00000178813934, 225.00000178813934)
             Converted["_A"].TextSize = 12
             Converted["_A"].AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1948,24 +1951,15 @@ do
         end
 
         local lib = makeLibrary()
-
         local _connections = {}
-
-        pcall(function() -- laziness
-            lib.Main.Contents.Contents.Page:Destroy()
-        end)
-
-        -- Temporary
+        pcall(function() lib.Main.Contents.Contents.Page:Destroy() end)
         lib.Notifications.Visible = false
         lib.Main.Visible = false
         lib.Hint.Visible = false
-
         local savedKey = nil
         local flags = {}
         local saveCoroutine
-
         if info.ConfigFolder then
-            -- load data
             local cf = info.ConfigFolder
             local config = cf.."/config.json"
             if not isfolder(cf) then
@@ -2143,7 +2137,7 @@ do
 
             TS:Create(loader,TweenInfo.new(0.3,Enum.EasingStyle.Sine,Enum.EasingDirection.In,0,false,0),{
                 ["Position"] = UDim2.new(1, -20, 1, -20)
-            }):Play() -- loader in
+            }):Play()
 
             while allGood == false do
                 utility:Wait()
@@ -2151,23 +2145,17 @@ do
 
             profile.Player.Gradient.BackgroundColor3 = info.RankColor
             profile.Player.Rank.TextLabel.Text = info.Rank
-
             profile.Player.PlayerName.TextLabel.Text = player.Name
-
             profile.Player.Thumbnail.Image = "rbxthumb://type=AvatarHeadShot&id="..player.UserId.."&w=420&h=420"
-
             profile.Player.PlayerName.ImageLabel.Visible = info.RankIcon and true
             profile.Player.PlayerName.ImageLabel.Image = info.RankIcon and "http://www.roblox.com/asset/?id="..info.RankIcon or ""
-
             local closeBtn = utility:CreateButtonObject(profile.Close)
-
             local closed = false
-
             local function doClose()
                 if closed then return else closed = true end
                 local e = TS:Create(loader,TweenInfo.new(0.3,Enum.EasingStyle.Sine,Enum.EasingDirection.In,0,false,0),{
                     ["Position"] = UDim2.new(1, 300, 1, -20)
-                }) -- loader in
+                })
                 e:Play()
                 e.Completed:Connect(function()
                     pcall(function()
@@ -2177,25 +2165,19 @@ do
             end
 
             closeBtn.Activated:Connect(doClose)
-
             allGood:Play()
-
             coroutine.resume(coroutine.create(function()
                 task.wait(3.5)
                 doClose()
             end))
         end
 
-        -- Current page
         local currentPage = Instance.new("IntValue")
         currentPage.Name = "CurrentPage"
         currentPage.Value = 1
         currentPage.Parent = lib.Main
 
-        -- Dragging
         local dragEvents = utility:InitDragging(lib.Main,lib.Main.Contents.Top.Drag)
-
-        -- Section update event
         local sectionUpdateEvent do
             local contents = lib.Main.Contents.Contents
             local categories = lib.Main.Contents.Pages.ScrollingFrame
@@ -2210,6 +2192,7 @@ do
                             end
                         end
                     end
+
                     for _,v in pairs(contents:GetChildren()) do
                         if v:IsA("Frame") then
                             local pageNum = v:FindFirstChild("PageNum")
@@ -2222,26 +2205,19 @@ do
             end)()
         end
 
-        local closePages do -- pages open and close
+        local closePages do
             local openSize = UDim2.new(0, 150, 1, 0)
             local closeSize = UDim2.new(0, 0, 1, 0)
-            
             local open = lib.Main.Contents.Top.Menu
             local close = lib.Main.Contents.Pages.Close
-
             local openBtn = utility:CreateButtonObject(open)
             local closeBtn = utility:CreateButtonObject(close)
-
             local state = false
-
             local pages = lib.Main.Contents.Pages
             local contents = lib.Main.Contents.Contents
-
             pages.Size = closeSize
-
             local tweenInfo = TweenInfo.new(0.15,Enum.EasingStyle.Sine,Enum.EasingDirection.In,0,false,0)
             local existing
-
             local function startTween(s)
                 if existing then
                     existing:Cancel()
@@ -2264,7 +2240,6 @@ do
             end)()
 
             table.insert(_connections,pagesUpdate)
-
             openBtn.Activated:Connect(function()
                 if state == false then
                     state = true
@@ -2286,7 +2261,7 @@ do
             end
         end
 
-        do -- other buttons
+        do
             local searchBtn = utility:CreateButtonObject(lib.Main.Contents.Top.Search)
             local searchBar = lib.Main.Contents.Top.SearchBar
 
@@ -2305,16 +2280,13 @@ do
             end)
         end
 
-        do -- resize
+        do
             local main = lib.Main
             local resize = main.Resize
             local button = main.ResizeArea
-
             local isResizing = false
             local offset = nil
-
             --local tweenInfo = TweenInfo.new(0.1,Enum.EasingStyle.Sine,Enum.EasingDirection.In,0,false,0)
-
             local p = resize:GetChildren()
             local p1 = p[1]
             local p2 = p[2]
@@ -2397,15 +2369,12 @@ do
             end))
         end)()
 
-        -- searching
         do
             local pages = lib.Main.Contents.Contents
             --local elementCache = {}
-
             local function doSearch(term)
                 for _,page in pairs(pages:GetChildren()) do
                     local holder = page.ScrollingFrame
-
                     for _,v in pairs(holder:GetChildren()) do
                         if v:IsA("Frame") and not utility:IsPadding(v) then
                             for _,element in pairs(v.Contents:GetChildren()) do
@@ -2415,7 +2384,6 @@ do
                                     else
                                         local existingTitle = element:FindFirstChild("Title")
                                         local title
-    
                                         if existingTitle==nil then
                                             title = element.Main.Title.Main.Title
                                         elseif existingTitle:IsA("Frame") then
@@ -2458,7 +2426,7 @@ do
         lib.Main.Contents.Top.Title.Text = info.Name
 
         for _,v in pairs(lib:GetDescendants()) do
-            if v:IsA("StringValue") and v.Name=="Theme" and v.Category.Value=="Main" then
+            if v:IsA("StringValue") and v.Name == "Theme" and v.Category.Value == "Main" then
                 v.Parent[v.Value] = info.Color
             end
         end
@@ -2466,16 +2434,12 @@ do
         lib.Notifications.Visible = true
         lib.Main.Visible = true
         lib.Hint.Visible = false
-
         local self = setmetatable({
-            -- interface
             ["Flags"] = flags or {};
-            -- hidden
             ["container"] = lib;
             ["name"] = info.Name;
             ["color"] = info.Color;
             ["toggleBind"] = info.Bind;
-            -- used internally
             ["_connections"] = _connections;
             ["_drag_events"] = dragEvents;
             ["_page_num"] = 0;
@@ -2492,16 +2456,41 @@ do
         end))
 
         local closeBtn = utility:CreateButtonObject(lib.Main.Contents.Top.Close)
-
         closeBtn.Activated:Connect(function()
             self:Toggle(false)
+            if g.notify then g.notify("Success", "Press: "..tostring(self.toggleBind).." to toggle the UI.", 1.25) else  end
         end)
+
+        if Is_Mobile then
+            local Toggle_UI_Button = Instance.new("TextButton")
+            Toggle_UI_Button.Font = Enum.Font.GothamBold
+            Toggle_UI_Button.Text = "Toggle UI"
+            Toggle_UI_Button.TextColor3 = Color3.fromRGB(225, 225, 225)
+            Toggle_UI_Button.TextSize = 14
+            Toggle_UI_Button.AnchorPoint = Vector2.new(0.5, 0)
+            Toggle_UI_Button.BackgroundColor3 = info.Color
+            Toggle_UI_Button.Position = UDim2.new(0.5, 0, 0, 10)
+            Toggle_UI_Button.Size = UDim2.new(0, 100, 0, 30)
+            Toggle_UI_Button.ZIndex = 1000
+            Toggle_UI_Button.Name = "Toggle_UI_Button"
+            Toggle_UI_Button.Parent = lib
+
+            local Toggle_UI_Corner = Instance.new("UICorner")
+            Toggle_UI_Corner.CornerRadius = UDim.new(0, 6)
+            Toggle_UI_Corner.Parent = Toggle_UI_Button
+
+            Toggle_UI_Button.Activated:Connect(function()
+                self:Toggle()
+            end)
+        end
 
         return self
     end
+
     function Library:SetToggle(keyCodeName)
         self.toggleBind = keyCodeName
     end
+
     function Library:Toggle(value)
         if value==nil then
             value = not self.container.Main.Visible
@@ -2509,6 +2498,7 @@ do
         self.container.Main.Visible = value
         return value
     end
+
     function Library:CreatePage(name)
         self._page_num = self._page_num+1
         return Page.new(self, {
@@ -2516,19 +2506,13 @@ do
             ["Name"] = name;
         })
     end
+
     function Library:Notify(info)
         utility:Requirement(info.Title,"Missing title argument")
         utility:Requirement(info.Content,"Missing content argument")
-
         info.Duration = info.Duration or 3.5
-
         info.Callback = info.Callback or utility.BlankFunction
-
         local function makeNotif()
-            
-
-            -- Instances:
-
             local Converted = {
                 ["_Notification"] = Instance.new("Frame");
                 ["_Theme"] = Instance.new("StringValue");
@@ -2558,8 +2542,6 @@ do
                 ["_Ignore5"] = Instance.new("BoolValue");
                 ["_UICorner"] = Instance.new("UICorner");
             }
-
-            -- Properties:
 
             Converted["_Notification"].BackgroundColor3 = Color3.fromRGB(28.000000230968, 28.000000230968, 28.000000230968)
             Converted["_Notification"].BackgroundTransparency = 1
@@ -2714,15 +2696,13 @@ do
 
             return Converted["_Notification"]
         end
+
         local notif = makeNotif()
         notif.Name = tostring(os.clock())
         local holder = self.container.Notifications
-
         local tween = nil
-
         local start = UDim2.fromScale(-1.5,0)
         local finish = UDim2.fromScale(0,0)
-
         local function tweenIn()
             pcall(function()
                 tween:Cancel()
@@ -2738,7 +2718,6 @@ do
         end
 
         local leaving = false
-
         local function tweenOut()
             if leaving then return else leaving = true end
             pcall(function()
@@ -2800,14 +2779,11 @@ do
     end
 end
 
--- PAGE
 do
-    function Page.new(_self,info) -- used internally and has no argument checks, use Library::CreatePage instead
+    function Page.new(_self,info)
         local container = _self.container
         local pageNum = _self._page_num
-
         local function makeSelector()
-            
             local Converted = {
                 ["_0_page"] = Instance.new("Frame");
                 ["_TextLabel"] = Instance.new("TextLabel");
@@ -2820,8 +2796,6 @@ do
                 ["_Ignore1"] = Instance.new("BoolValue");
                 ["_Button"] = Instance.new("TextButton");
             }
-
-            --Properties
 
             Converted["_0_page"].BackgroundColor3 = Color3.fromRGB(28.000000230968, 28.000000230968, 28.000000230968)
             Converted["_0_page"].BackgroundTransparency = 1
@@ -2881,7 +2855,6 @@ do
         end
 
         local function makeContents()
-            
             local Converted = {
                 ["_Page"] = Instance.new("Frame");
                 ["_ScrollingFrame"] = Instance.new("ScrollingFrame");
@@ -2892,8 +2865,6 @@ do
                 ["_Category"] = Instance.new("StringValue");
                 ["_Ignore"] = Instance.new("BoolValue");
             }
-
-            --Properties
 
             Converted["_Page"].AnchorPoint = Vector2.new(1, 0.5)
             Converted["_Page"].BackgroundColor3 = Color3.fromRGB(255, 255, 255)
