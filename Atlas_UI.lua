@@ -13,7 +13,7 @@ local UIS = game:GetService("UserInputService")
 local Core = game:GetService("CoreGui")
 local MP = game:GetService("MarketplaceService")
 local UserInputService = game:GetService("UserInputService")
-local CoreGui = game:GetService("CoreGui")
+local CoreGui = Core or game:GetService("CoreGui")
 local UIS = UserInputService
 local Is_Mobile = UserInputService.TouchEnabled
 local player = Players.LocalPlayer
@@ -22,7 +22,7 @@ local Library = {}
 local Page = {}
 local Section = {}
 local Element = {}
-local existing_atlas = CoreGui:FindFirstChild("Atlas")
+local existing_atlas = Core:FindFirstChild("Atlas")
 if existing_atlas and existing_atlas:IsA("ScreenGui") then
     existing_atlas:Destroy()
     repeat task.wait() until existing_atlas.Parent == nil
