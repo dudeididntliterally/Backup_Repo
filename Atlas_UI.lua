@@ -13,6 +13,7 @@ local UIS = game:GetService("UserInputService")
 local Core = game:GetService("CoreGui")
 local MP = game:GetService("MarketplaceService")
 local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
 local UIS = UserInputService
 local Is_Mobile = UserInputService.TouchEnabled
 local player = Players.LocalPlayer
