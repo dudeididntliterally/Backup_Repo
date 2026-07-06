@@ -2464,7 +2464,7 @@ do
         if Is_Mobile then
             local Toggle_UI_Button = Instance.new("TextButton")
             Toggle_UI_Button.Font = Enum.Font.GothamBold
-            Toggle_UI_Button.Text = "Toggle UI"
+            Toggle_UI_Button.Text = "Toggle Flames"
             Toggle_UI_Button.TextColor3 = Color3.fromRGB(225, 225, 225)
             Toggle_UI_Button.TextSize = 14
             Toggle_UI_Button.AnchorPoint = Vector2.new(0.5, 0)
