@@ -158,7 +158,6 @@ g.getholiday = g.getholiday or function()
    if m == 3 and d == 6 then return wrap("National Oreo Cookie Day", E["Holiday_Oreo"]) end
    if m == 3 and d == 7 then return wrap("National Cereal Day", E["Holiday_Cereal"]) end
    if m == 3 and d == 17 then return wrap("St Patricks Day", E["Holiday_St_Patricks"]) end
-
    local function easterdate(year)
       local a = year % 19
       local b = math.floor(year / 100)
@@ -1878,6 +1877,29 @@ g.stop_loopfling = function()
 	g.Loop_Flinging_Player_Flames_Hub = false
 	lib.disconnect("loopfling")
 	cleanup_fling_resources()
+   local Camera = workspace.CurrentCamera
+   if not Camera then
+      warn("CurrentCamera not found")
+      return
+   end
+   local Char = g.Character or (g.LocalPlayer and g.LocalPlayer.Character) or (g.get_char and g.get_char(LocalPlayer, 5))
+   if not Char then
+      warn("Char not found")
+      return
+   end
+
+   local Hum = g.Humanoid or Char:FindFirstChildWhichIsA("Humanoid") or (g.get_human and g.get_human(LocalPlayer, 5))
+   if not Hum then
+      warn("Hum not found")
+      return
+   end
+
+   if Camera.CameraSubject ~= Char and Camera.CameraSubject ~= Hum then
+      repeat
+         Camera.CameraSubject = Char or Hum
+         task.wait()
+      until Camera.CameraSubject == Char or Camera.CameraSubject == Hum
+   end
 	g.notify("Success", "Flames Hub | LoopFling-V2 is now disabled.", 5)
 end
 
@@ -1917,7 +1939,6 @@ g.start_loopfling = function(target_player)
             until not g.Loop_Flinging_Player_Flames_Hub
                or not target_player.Parent
                or (humanoid and humanoid.Health > 0 and root_part)
-
             waiting_for_respawn = false
             was_dead = false
             continue
