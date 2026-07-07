@@ -1253,7 +1253,7 @@ g.skid_fling = g.skid_fling or function(target_player)
    end
 
    local function SFBasePart(BasePart)
-      local TimeToWait = 2
+      local TimeToWait = 1
       local Time = tick()
       local Angle = 0
       local direction = 1
