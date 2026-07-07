@@ -255,36 +255,43 @@ do
         return (((r * 0.299) + (g * 0.587) + (b * 0.114)) > 150) and Color3.new(0,0,0) or Color3.new(1,1,1)
     end
 
-    function utility:InitDragging(frame,button)
+    function utility:InitDragging(frame, button)
         button = button or frame
-        assert(button and frame,"Need a frame in order to start dragging")
-
-        local _dragging = false
-        local _dragging_offset
-        local inputBegan = button.MouseButton1Down:Connect(function()
-            _dragging = true
-            _dragging_offset = Vector2.new(mouse.X,mouse.Y)-frame.AbsolutePosition
+        assert(button and frame, "Need a frame in order to start dragging")
+        local is_dragging = false
+        local last_input_pos
+        local input_began = button.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+                or input.UserInputType == Enum.UserInputType.Touch then
+                is_dragging = true
+                last_input_pos = Vector2.new(input.Position.X, input.Position.Y)
+            end
         end)
 
-        local inputEnded = mouse.Button1Up:Connect(function()
-            _dragging = false
-            _dragging_offset = nil
+        local input_ended = UIS.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+                or input.UserInputType == Enum.UserInputType.Touch then
+                is_dragging = false
+                last_input_pos = nil
+            end
         end)
 
-        local updateEvent
-        LPH_JIT_MAX(function()
-            updateEvent = Run.RenderStepped:Connect(function()
-                if frame.Visible == false or not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-                    _dragging = false
-                    _dragging_offset = nil
-                end
-                if _dragging and _dragging_offset then
-                    frame.Position = UDim2.fromOffset(mouse.X-_dragging_offset.X+(frame.AbsoluteSize.X*frame.AnchorPoint.X),mouse.Y-_dragging_offset.Y+36+(frame.AbsoluteSize.Y*frame.AnchorPoint.Y))
-                end
-            end)
-        end)()
+        local update_event = UIS.InputChanged:Connect(function(input)
+            if not is_dragging or not last_input_pos then return end
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                local current_pos = Vector2.new(input.Position.X, input.Position.Y)
+                local delta = current_pos - last_input_pos
 
-        return {inputBegan,inputEnded,updateEvent}
+                frame.Position = UDim2.new(
+                    frame.Position.X.Scale, frame.Position.X.Offset + delta.X,
+                    frame.Position.Y.Scale, frame.Position.Y.Offset + delta.Y
+                )
+
+                last_input_pos = current_pos
+            end
+        end)
+
+        return {input_began, input_ended, update_event}
     end
 
     function utility:HandleButton(button,callback)
@@ -2459,7 +2466,9 @@ do
         local closeBtn = utility:CreateButtonObject(lib.Main.Contents.Top.Close)
         closeBtn.Activated:Connect(function()
             self:Toggle(false)
-            if g.notify then g.notify("Success", "Press: "..tostring(self.toggleBind).." to toggle the UI.", 1.25) else  end
+            if not Is_Mobile then
+                if g.notify then g.notify("Success", "Press: "..tostring(self.toggleBind).." to toggle the UI.", 1.25) else print("Press: "..tostring(self.toggleBind).." to toggle the UI.") end
+            end
         end)
 
         if Is_Mobile then
