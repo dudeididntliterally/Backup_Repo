@@ -2500,17 +2500,18 @@ function set_protect_state(state)
 end
 
 g.anti_follow_reset = g.anti_follow_reset or function()
-   local char = g.Character or g.LocalPlayer.Character or game.LocalPlayer.Character
+   local char = g.Character or g.LocalPlayer.Character or LocalPlayer.Character
    if not char then return end
-   local root = g.HumanoidRootPart or char and char:FindFirstChild("HumanoidRootPart") or get_root(LocalPlayer, 5)
+   local root = g.HumanoidRootPart or char:FindFirstChild("HumanoidRootPart") or get_root(LocalPlayer, 5)
    if not root then return end
-   local oldpos = root.CFrame
-   
+   getgenv().Org_Destroy_Height = getgenv().Org_Destroy_Height or workspace.FallenPartsDestroyHeight
+   if not getgenv().Org_Destroy_Height then getgenv().Org_Destroy_Height = 500 end
+   local old_pos = root.CFrame
    workspace.FallenPartsDestroyHeight = 0
-   root.CFrame = CFrame.new(Vector3.new(0, orgDestroyHeight - 25, 0))
+   root.CFrame = CFrame.new(Vector3.new(0, getgenv().Org_Destroy_Height - 25, 0))
    task.wait(1)
-   root.CFrame = oldpos
-   workspace.FallenPartsDestroyHeight = orgDestroyHeight
+   root.CFrame = old_pos
+   workspace.FallenPartsDestroyHeight = getgenv().Org_Destroy_Height
 end
 
 g.afEnabled = g.afEnabled or false
@@ -2748,43 +2749,25 @@ end
 g.anti_void = function(flag)
    local lib = getgenv().FlamesLibrary
    local key = "anti_void_stepped"
-
    if flag == true then
-      if g.Anti_Void_Enabled_Bool then
-         return g.notify("Warning", "Anti-Void is already enabled.", 5)
-      end
-      if lib.is_alive(key) then
-         return g.notify("Warning", "Anti-Void is already enabled.", 5)
-      end
-      if not g.originalFPDH then
-         g.originalFPDH = workspace.FallenPartsDestroyHeight
-      end
-
-      task.wait(0.1)
-      workspace.FallenPartsDestroyHeight = -9e9
+      if g.Anti_Void_Enabled_Bool then return g.notify("Warning", "Anti-Void is already enabled.", 5) end
+      if lib.is_alive(key) then return g.notify("Warning", "Anti-Void is already enabled.", 5) end
+      if not g.originalFPDH then g.originalFPDH = workspace.FallenPartsDestroyHeight end
+      task.wait(0.15)
+      workspace.FallenPartsDestroyHeight = -100000
       lib.connect(key, RunService.Stepped:Connect(function()
-         local root = g.HumanoidRootPart or g.Character and g.Character:FindFirstChild("HumanoidRootPart")
-         if root and root.Position.Y <= g.originalFPDH + 25 then
-            root.Velocity = root.Velocity + Vector3.new(0, 300, 0)
-         end
+         local root = g.HumanoidRootPart or g.Character and g.Character:FindFirstChild("HumanoidRootPart") or g.get_root(LocalPlayer, 5)
+         if root and root.Position.Y <= g.originalFPDH + 25 then root.AssemblyLinearVelocity = root.AssemblyLinearVelocity + Vector3.new(0, 300, 0) end
       end))
 
       g.Anti_Void_Enabled_Bool = true
-      if g.notify then
-         g.notify("Success", "Enabled anti-void.", 5)
-      end
+      if g.notify then g.notify("Success", "Flames Hub | Anti-Void V2 has been enabled.", 5) end
    elseif flag == false then
-      if not g.Anti_Void_Enabled_Bool then
-         return g.notify("Warning", "Anti-Void is not enabled.", 5)
-      end
-
+      if not g.Anti_Void_Enabled_Bool then return g.notify("Warning", "Anti-Void is not enabled.", 5) end
       workspace.FallenPartsDestroyHeight = g.originalFPDH or -500
       lib.disconnect(key)
       g.Anti_Void_Enabled_Bool = false
-
-      if g.notify then
-         g.notify("Success", "Disabled anti-void.", 5)
-      end
+      if g.notify then g.notify("Success", "Flames Hub | Anti-Void V2 has been disabled.", 5) end
    end
 end
 
