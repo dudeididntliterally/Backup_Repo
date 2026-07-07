@@ -1874,12 +1874,10 @@ end
 g.start_loopfling = function(target_player)
 	local lib = g.FlamesLibrary
    local fw = lib.wait
-	if g.Loop_Flinging_Player_Flames_Hub then
-		return g.notify("Warning", "You're already using Flames Hub | LoopFling-V2 on someone!", 5)
-	end
-	if not target_player or not target_player.Parent then
-		return g.notify("Error", "That player does not exist / left the game.", 5)
-	end
+	if g.Loop_Flinging_Player_Flames_Hub then return g.notify("Warning", "You're already using Flames Hub | LoopFling-V2 on someone!", 3) end
+	if not target_player or not target_player.Parent then return g.notify("Error", "That player does not exist / left the game.", 3) end
+   if g.Noclip_Enabled then return g.notify("Error", "NoClip is enabled, please turn it off first.", 3) end
+   if g.afEnabled then return g.notify("Error", "Anti-Fling is enabled, please turn it off first.", 3) end
 
 	g.Loop_Flinging_Player_Flames_Hub = true
    lib.spawn("loopfling", "spawn", function()
@@ -1942,11 +1940,7 @@ end
 
 g.stop_loopfling = function()
 	local lib = g.FlamesLibrary
-
-	if not g.Loop_Flinging_Player_Flames_Hub then
-		return g.notify("Warning", "Flames Hub | LoopFling-V2 is not enabled.", 5)
-	end
-
+	if not g.Loop_Flinging_Player_Flames_Hub then return g.notify("Warning", "Flames Hub | LoopFling-V2 is not enabled.", 5) end
 	g.Loop_Flinging_Player_Flames_Hub = false
 	lib.disconnect("loopfling")
 	cleanup_fling_resources()
