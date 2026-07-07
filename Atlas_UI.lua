@@ -6,6 +6,7 @@ if not LPH_OBFUSCATED then
     LPH_JIT = r
 end
 
+local g = getgenv()
 local Players = game:GetService("Players")
 local TS = game:GetService("TweenService")
 local Run = game:GetService("RunService")
