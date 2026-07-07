@@ -1873,11 +1873,13 @@ g.stop_loopfling = function()
 	g.Loop_Flinging_Player_Flames_Hub = false
 	lib.disconnect("loopfling")
 	cleanup_fling_resources()
+
    local Camera = workspace.CurrentCamera
    if not Camera then
       warn("CurrentCamera not found")
       return
    end
+
    local Char = g.Character or (g.LocalPlayer and g.LocalPlayer.Character) or (g.get_char and g.get_char(LocalPlayer, 5))
    if not Char then
       warn("Char not found")
@@ -1889,13 +1891,39 @@ g.stop_loopfling = function()
       warn("Hum not found")
       return
    end
-   
+
+   local function Is_Out_Of_Map()
+      local Root = Char:FindFirstChild("HumanoidRootPart") or Hum.RootPart
+      if not Root then return false end
+      local myPos = Root.Position
+      local closestDist = math.huge
+      for _, plr in ipairs(Players:GetPlayers()) do
+         if plr ~= Players.LocalPlayer and plr.Character then
+            local theirRoot = plr.Character:FindFirstChild("HumanoidRootPart")
+            if theirRoot then
+               local dist = (myPos - theirRoot.Position).Magnitude
+               if dist < closestDist then
+                  closestDist = dist
+               end
+            end
+         end
+      end
+      
+      return closestDist > 7500
+   end
+
+   if Is_Out_Of_Map() and Hum.Health > 0 then
+      pcall(function() Hum.Health = 0 end)
+      g.notify("Reset", "Flames Hub | You were in the void. Character reset.", 4)
+   end
+   wait(0.15)
    if Camera.CameraSubject ~= Char and Camera.CameraSubject ~= Hum then
       repeat
          Camera.CameraSubject = Char or Hum
          task.wait()
       until Camera.CameraSubject == Char or Camera.CameraSubject == Hum
    end
+
 	g.notify("Success", "Flames Hub | LoopFling-V2 is now disabled.", 5)
 end
 
@@ -1924,7 +1952,6 @@ g.start_loopfling = function(target_player)
          if not character or not humanoid or humanoid.Health <= 0 or not root_part then
             if not waiting_for_respawn then
                waiting_for_respawn = true
-               g.notify("Info", "Target dead/respawning, waiting...", 1)
             end
 
             repeat
