@@ -13,6 +13,7 @@ local avatar_editor = g.AvatarEditorService or cloneref and cloneref(game:GetSer
 local ReplicatedStorage = g.ReplicatedStorage or cloneref and cloneref(game:GetService("ReplicatedStorage")) or game:GetService("ReplicatedStorage")
 local parent_gui = (get_hidden_gui and get_hidden_gui()) or (gethui and gethui()) or CoreGui
 local runservice = RunService
+local InstanceNew = Instance.new
 g.Script_Creator = "👑 Flames Hub 👑"
 g.Script_Owner = "✅ Flames Hub | ✅"
 getgenv().Flames_Hub_Emojis = {
