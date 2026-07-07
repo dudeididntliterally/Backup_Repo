@@ -1234,14 +1234,9 @@ g.skid_fling = g.skid_fling or function(target_player)
 	local Accessory = TCharacter:FindFirstChildOfClass("Accessory")
 	local Handle = Accessory and Accessory:FindFirstChild("Handle")
 	local RootPart = HRP
-
 	if not TRootPart and not THead and not Handle then return end
-	if not g.flingManager.lFlingOldPos or RootPart.Velocity.Magnitude < 50 then
-		g.flingManager.lFlingOldPos = RootPart.CFrame
-	end
-
+	if not g.flingManager.lFlingOldPos or RootPart.Velocity.Magnitude < 50 then pcall(function() g.flingManager.lFlingOldPos = RootPart.CFrame end) end
 	if THumanoid and THumanoid.Sit then return end
-
 	if THead and THead.Parent then
 		workspace.CurrentCamera.CameraSubject = THead
 	elseif Handle then
