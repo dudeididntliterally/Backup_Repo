@@ -1871,6 +1871,15 @@ g.tools_menu_for_life_together_flames_hub = g.tools_menu_for_life_together_flame
    end)
 end
 
+g.stop_loopfling = function()
+	local lib = g.FlamesLibrary
+	if not g.Loop_Flinging_Player_Flames_Hub then return g.notify("Warning", "Flames Hub | LoopFling-V2 is not enabled.", 5) end
+	g.Loop_Flinging_Player_Flames_Hub = false
+	lib.disconnect("loopfling")
+	cleanup_fling_resources()
+	g.notify("Success", "Flames Hub | LoopFling-V2 is now disabled.", 5)
+end
+
 g.start_loopfling = function(target_player)
 	local lib = g.FlamesLibrary
    local fw = lib.wait
@@ -1878,35 +1887,32 @@ g.start_loopfling = function(target_player)
 	if not target_player or not target_player.Parent then return g.notify("Error", "That player does not exist / left the game.", 3) end
    if g.Noclip_Enabled then return g.notify("Error", "NoClip is enabled, please turn it off first.", 3) end
    if g.afEnabled then return g.notify("Error", "Anti-Fling is enabled, please turn it off first.", 3) end
-
 	g.Loop_Flinging_Player_Flames_Hub = true
    lib.spawn("loopfling", "spawn", function()
       local was_dead = false
       local waiting_for_respawn = false
-
       while g.Loop_Flinging_Player_Flames_Hub == true do
-         fw()
+         fw(0)
          if not target_player or not target_player.Parent then
             g.notify("Warning", "Target left, stopping LoopFling.", 5)
             g.stop_loopfling()
             break
          end
 
-         local character = target_player.Character or get_char(target_player, 5)
-         local humanoid = character and character:FindFirstChildOfClass("Humanoid") or character and getHum(character, 5) or get_human(target_player, 5)
-         local root_part = character and character:FindFirstChild("HumanoidRootPart") or humanoid and humanoid.RootPart or get_root(target_player, 5)
-
+         local character = target_player.Character or get_char(target_player, 1)
+         local humanoid = character and character:FindFirstChildOfClass("Humanoid") or character and getHum(character, 1) or get_human(target_player, 1)
+         local root_part = character and character:FindFirstChild("HumanoidRootPart") or humanoid and humanoid.RootPart or get_root(target_player, 1)
          if not character or not humanoid or humanoid.Health <= 0 or not root_part then
             if not waiting_for_respawn then
                waiting_for_respawn = true
-               g.notify("Info", "Target dead/respawning, waiting...", 2)
+               g.notify("Info", "Target dead/respawning, waiting...", 1)
             end
 
             repeat
-               fw(0.2)
-               character = target_player.Character or get_char(target_player, 5)
-               humanoid = character and character:FindFirstChildOfClass("Humanoid") or character and getHum(character, 5) or get_human(target_player, 5)
-               root_part = character and character:FindFirstChild("HumanoidRootPart") or humanoid and humanoid.RootPart or get_root(target_player, 5)
+               fw(0.1)
+               character = target_player.Character or get_char(target_player, 1)
+               humanoid = character and character:FindFirstChildOfClass("Humanoid") or character and getHum(character, 1) or get_human(target_player, 1)
+               root_part = character and character:FindFirstChild("HumanoidRootPart") or humanoid and humanoid.RootPart or get_root(target_player, 1)
             until not g.Loop_Flinging_Player_Flames_Hub
                or not target_player.Parent
                or (humanoid and humanoid.Health > 0 and root_part)
@@ -1936,15 +1942,6 @@ g.start_loopfling = function(target_player)
    end)
 
 	g.notify("Success", "Flames Hub | LoopFling-V2 is now enabled.", 5)
-end
-
-g.stop_loopfling = function()
-	local lib = g.FlamesLibrary
-	if not g.Loop_Flinging_Player_Flames_Hub then return g.notify("Warning", "Flames Hub | LoopFling-V2 is not enabled.", 5) end
-	g.Loop_Flinging_Player_Flames_Hub = false
-	lib.disconnect("loopfling")
-	cleanup_fling_resources()
-	g.notify("Success", "Flames Hub | LoopFling-V2 is now disabled.", 5)
 end
 
 g.firehidden      = g.firehidden      or false
