@@ -2769,12 +2769,12 @@ do
         if self.container then
             pcall(function() self.container:Destroy() end)
         end
-        for _, v in pairs(self._drag_events) do
+        for _, v in pairs(self._drag_events or {}) do
             if v then
                 pcall(function() v:Disconnect() end)
             end
         end
-        for _, v in pairs(self._connections) do
+        for _, v in pairs(self._connections or {}) do
             if v then
                 pcall(function() v:Disconnect() end)
             end
