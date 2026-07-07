@@ -1203,10 +1203,10 @@ end
 
 g.skid_fling = g.skid_fling or function(target_player)
 	local Player = g.LocalPlayer or Players.LocalPlayer or game.Players.LocalPlayer
-	local Character = g.Character or Player.Character or get_char(LocalPlayer, 10)
-	local Humanoid = g.Humanoid or Character and Character:FindFirstChildOfClass("Humanoid") or get_human(LocalPlayer, 5) or getHum(Character, 5)
-	local HRP = g.HumanoidRootPart or Character and Character:FindFirstChild("HumanoidRootPart") or Humanoid and Humanoid.RootPart or get_root(LocalPlayer, 5)
-	local TCharacter = target_player.Character or get_char(target_player, 5)
+	local Character = g.Character or Player.Character or get_char(LocalPlayer, 5)
+	local Humanoid = g.Humanoid or Character and Character:FindFirstChildOfClass("Humanoid") or get_human(LocalPlayer, 1) or getHum(Character, 1)
+	local HRP = g.HumanoidRootPart or Character and Character:FindFirstChild("HumanoidRootPart") or Humanoid and Humanoid.RootPart or get_root(LocalPlayer, 1)
+	local TCharacter = target_player.Character or get_char(target_player, 1)
 	if not Character or not Humanoid or not HRP or not TCharacter then return end
 	cleanup_fling_resources()
 	local camera = workspace.CurrentCamera
@@ -1228,9 +1228,9 @@ g.skid_fling = g.skid_fling or function(target_player)
 	bodyGyro.P = 2000
 	bodyGyro.Parent = g.loopprotect
 
-	local THumanoid = getPlrHum(TCharacter)
-	local TRootPart = THumanoid and THumanoid.RootPart
-	local THead = getHead(TCharacter)
+	local THumanoid = TCharacter and TCharacter:FindFirstChildWhichIsA("Humanoid") or getPlrHum(TCharacter)
+	local TRootPart = TCharacter and TCharacter:FindFirstChild("HumanoidRootPart") or THumanoid and THumanoid.RootPart
+	local THead = TCharacter and TCharacter:FindFirstChild("Head") or getHead(TCharacter)
 	local Accessory = TCharacter:FindFirstChildOfClass("Accessory")
 	local Handle = Accessory and Accessory:FindFirstChild("Handle")
 	local RootPart = HRP
@@ -1319,8 +1319,6 @@ g.skid_fling = g.skid_fling or function(target_player)
 		end)
 		task.wait()
 	until (RootPart.Position - g.flingManager.lFlingOldPos.p).Magnitude < 25
-
-	workspace.FallenPartsDestroyHeight = OrgDestroyHeight
 	cleanup_fling_resources()
 end
 
@@ -1893,7 +1891,7 @@ g.stop_loopfling = function()
       warn("Hum not found")
       return
    end
-
+   
    if Camera.CameraSubject ~= Char and Camera.CameraSubject ~= Hum then
       repeat
          Camera.CameraSubject = Char or Hum
