@@ -14,6 +14,7 @@ local ReplicatedStorage = g.ReplicatedStorage or cloneref and cloneref(game:GetS
 local parent_gui = (get_hidden_gui and get_hidden_gui()) or (gethui and gethui()) or CoreGui
 local runservice = RunService
 local InstanceNew = Instance.new
+local orgDestroyHeight = workspace.FallenPartsDestroyHeight
 g.Script_Creator = "👑 Flames Hub 👑"
 g.Script_Owner = "✅ Flames Hub | ✅"
 getgenv().Flames_Hub_Emojis = {
@@ -2477,8 +2478,6 @@ function set_protect_state(state)
 	end
 end
 
-local orgDestroyHeight = workspace.FallenPartsDestroyHeight
-wait(0.1)
 g.anti_follow_reset = g.anti_follow_reset or function()
    local char = g.Character or g.LocalPlayer.Character or game.LocalPlayer.Character
    if not char then return end
