@@ -86,19 +86,18 @@ if getgenv().anti_server_logging_enabled_flames_hub then
       return workspace:GetAttribute("loggingEnabled")
    end)
 
-   if ok and ws_log_attr ~= false then
-      workspace:SetAttribute("loggingEnabled", false)
-   end
+   if ok and ws_log_attr ~= false then workspace:SetAttribute("loggingEnabled", false) end
 end
 
-if not getgenv().Flames_Hub_Annoying_Messages_Blocker then
+-- [[ Doesn't really work anyway. ]] --
+--[[if not getgenv().Flames_Hub_Annoying_Messages_Blocker then
    getgenv().Flames_Hub_Annoying_Messages_Blocker = true
    if hookfunction and newcclosure then
       local Timer = g.Timer or require(ReplicatedStorage:FindFirstChild("Timer", true))
       if Timer and typeof(Timer) == "table" then
          local old_new
          old_new = hookfunction(Timer.new, newcclosure(function(interval, callback, ...)
-            if interval == 600 then
+            if interval >= 100 then
                if getgenv().notify then getgenv().notify("Success", "Flames Hub has blocked an annoying message.", 0.75) end
                return {
                   enabled = false,
@@ -111,7 +110,7 @@ if not getgenv().Flames_Hub_Annoying_Messages_Blocker then
          end))
       end
    end
-end
+end--]]
 
 local E = g.Flames_Emojis_Content_Stuff
 local function wrap(t, e) return e.." "..t.." "..e end
@@ -211,7 +210,6 @@ g.getholiday = g.getholiday or function()
 
    if m == 10 and d == 31 then return wrap("Halloween", E["Holiday_Halloween"]) end
    if m == 11 and d == 11 then return wrap("Veterans Day", E["Holiday_Veterans"]) end
-
    local function thanksgivingdate(year)
       local t = os.time({year=year, month=11, day=1})
       local wd = tonumber(os.date("%w", t))
@@ -1204,9 +1202,9 @@ end
 g.skid_fling = g.skid_fling or function(target_player)
 	local Player = g.LocalPlayer or Players.LocalPlayer or game.Players.LocalPlayer
 	local Character = g.Character or Player.Character or get_char(LocalPlayer, 5)
-	local Humanoid = g.Humanoid or Character and Character:FindFirstChildOfClass("Humanoid") or get_human(LocalPlayer, 1) or getHum(Character, 1)
+	local Humanoid = g.Humanoid or Character and Character:FindFirstChildOfClass("Humanoid") or get_human(LocalPlayer, 0.5) or getHum(Character, 0.5)
 	local HRP = g.HumanoidRootPart or Character and Character:FindFirstChild("HumanoidRootPart") or Humanoid and Humanoid.RootPart or get_root(LocalPlayer, 1)
-	local TCharacter = target_player.Character or get_char(target_player, 1)
+	local TCharacter = target_player.Character or get_char(target_player, 0.75)
 	if not Character or not Humanoid or not HRP or not TCharacter then return end
 	cleanup_fling_resources()
 	local camera = workspace.CurrentCamera
@@ -1245,42 +1243,56 @@ g.skid_fling = g.skid_fling or function(target_player)
 		workspace.CurrentCamera.CameraSubject = THumanoid
 	end
 
-	local function FPos(BasePart, Pos, Ang)
+   local function FPos(BasePart, Pos, Ang)
       pcall(function()
          RootPart.CFrame = CFrame.new(BasePart.Position) * Pos * Ang
          Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position) * Pos * Ang)
-         RootPart.Velocity = Vector3.new(9e7,9e8,9e7)
-         RootPart.RotVelocity = Vector3.new(9e8,9e8,9e8)
+         RootPart.Velocity = Vector3.new(9e7, 9e8, 9e7)
+         RootPart.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
       end)
-	end
+   end
 
-	local function SFBasePart(BasePart)
-		local TimeToWait = 2
-		local Time = tick()
-		local Angle = 0
-		repeat
-			if RootPart and THumanoid then
-				if BasePart.Velocity.Magnitude < 50 then
-					Angle = Angle + 100
-					FPos(BasePart, CFrame.new(0,1.5,0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude/1.25, CFrame.Angles(math.rad(Angle),0,0))
-					task.wait()
-					FPos(BasePart, CFrame.new(0,-1.5,0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude/1.25, CFrame.Angles(math.rad(Angle),0,0))
-					task.wait()
-					FPos(BasePart, CFrame.new(2.25,1.5,-2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude/1.25, CFrame.Angles(math.rad(Angle),0,0))
-					task.wait()
-					FPos(BasePart, CFrame.new(-2.25,-1.5,2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude/1.25, CFrame.Angles(math.rad(Angle),0,0))
-					task.wait()
-				else
-					FPos(BasePart, CFrame.new(0,1.5,THumanoid.WalkSpeed), CFrame.Angles(math.rad(90),0,0))
-					task.wait()
-					FPos(BasePart, CFrame.new(0,-1.5,-THumanoid.WalkSpeed), CFrame.Angles(0,0,0))
-					task.wait()
-				end
-			else
-				break
-			end
-		until BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= target_player.Character or target_player.Parent ~= Players or THumanoid.Sit or Humanoid.Health <= 0 or tick() > Time + TimeToWait
-	end
+   local function SFBasePart(BasePart)
+      local TimeToWait = 2
+      local Time = tick()
+      local Angle = 0
+      local direction = 1
+
+      repeat
+         if RootPart and THumanoid then
+            local moveDir = THumanoid.MoveDirection
+            local speedBoost = BasePart.Velocity.Magnitude / 1.25
+
+            if BasePart.Velocity.Magnitude < 50 then
+               Angle = Angle + 100
+               FPos(BasePart, CFrame.new(0, 1.5, 0) * direction + moveDir * speedBoost, CFrame.Angles(math.rad(Angle), 0, 0))
+               task.wait()
+               FPos(BasePart, CFrame.new(0, -1.5, 0) * direction + moveDir * speedBoost, CFrame.Angles(math.rad(Angle), 0, 0))
+               task.wait()
+
+               FPos(BasePart, CFrame.new(2.25, 1.5, -2.25) * direction + moveDir * speedBoost, CFrame.Angles(math.rad(Angle), 0, 0))
+               task.wait()
+               FPos(BasePart, CFrame.new(-2.25, -1.5, 2.25) * direction + moveDir * speedBoost, CFrame.Angles(math.rad(Angle), 0, 0))
+               task.wait()
+            else
+               local offset = direction * (THumanoid.WalkSpeed * 0.8)
+               FPos(BasePart, CFrame.new(0, 1.5, offset) + moveDir * speedBoost, CFrame.Angles(math.rad(90), 0, 0))
+               task.wait()
+               FPos(BasePart, CFrame.new(0, -1.5, -offset) + moveDir * speedBoost, CFrame.Angles(0, 0, 0))
+               task.wait()
+            end
+
+            direction = -direction
+         else
+            break
+         end
+      until BasePart.Velocity.Magnitude > 500 
+         or BasePart.Parent ~= target_player.Character 
+         or target_player.Parent ~= Players 
+         or THumanoid.Sit 
+         or Humanoid.Health <= 0 
+         or tick() > Time + TimeToWait
+   end
 
 	workspace.FallenPartsDestroyHeight = 0/0
 	g.fling_bv = InstanceNew("BodyVelocity")
@@ -1920,9 +1932,9 @@ g.start_loopfling = function(target_player)
             break
          end
 
-         local character = target_player.Character or get_char(target_player, 1)
-         local humanoid = character and character:FindFirstChildOfClass("Humanoid") or character and getHum(character, 1) or get_human(target_player, 1)
-         local root_part = character and character:FindFirstChild("HumanoidRootPart") or humanoid and humanoid.RootPart or get_root(target_player, 1)
+         local character = target_player.Character or get_char(target_player, 0.75)
+         local humanoid = character and character:FindFirstChildOfClass("Humanoid") or character and getHum(character, 0.5) or get_human(target_player, 0.5)
+         local root_part = character and character:FindFirstChild("HumanoidRootPart") or humanoid and humanoid.RootPart or get_root(target_player, 0.5)
          if not character or not humanoid or humanoid.Health <= 0 or not root_part then
             if not waiting_for_respawn then
                waiting_for_respawn = true
@@ -1931,9 +1943,9 @@ g.start_loopfling = function(target_player)
 
             repeat
                fw(0.1)
-               character = target_player.Character or get_char(target_player, 1)
-               humanoid = character and character:FindFirstChildOfClass("Humanoid") or character and getHum(character, 1) or get_human(target_player, 1)
-               root_part = character and character:FindFirstChild("HumanoidRootPart") or humanoid and humanoid.RootPart or get_root(target_player, 1)
+               character = target_player.Character or get_char(target_player, 0.75)
+               humanoid = character and character:FindFirstChildOfClass("Humanoid") or character and getHum(character, 0.5) or get_human(target_player, 0.5)
+               root_part = character and character:FindFirstChild("HumanoidRootPart") or humanoid and humanoid.RootPart or get_root(target_player, 0.5)
             until not g.Loop_Flinging_Player_Flames_Hub
                or not target_player.Parent
                or (humanoid and humanoid.Health > 0 and root_part)
