@@ -1243,56 +1243,42 @@ g.skid_fling = g.skid_fling or function(target_player)
 		workspace.CurrentCamera.CameraSubject = THumanoid
 	end
 
-   local function FPos(BasePart, Pos, Ang)
+	local function FPos(BasePart, Pos, Ang)
       pcall(function()
          RootPart.CFrame = CFrame.new(BasePart.Position) * Pos * Ang
          Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position) * Pos * Ang)
-         RootPart.Velocity = Vector3.new(9e7, 9e8, 9e7)
-         RootPart.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
+         RootPart.Velocity = Vector3.new(9e7,9e8,9e7)
+         RootPart.RotVelocity = Vector3.new(9e8,9e8,9e8)
       end)
-   end
+	end
 
-   local function SFBasePart(BasePart)
-      local TimeToWait = 1
-      local Time = tick()
-      local Angle = 0
-      local direction = 1
-
-      repeat
-         if RootPart and THumanoid then
-            local moveDir = THumanoid.MoveDirection
-            local speedBoost = BasePart.Velocity.Magnitude / 1.25
-
-            if BasePart.Velocity.Magnitude < 50 then
-               Angle = Angle + 100
-               FPos(BasePart, CFrame.new(0, 1.5, 0) * direction + moveDir * speedBoost, CFrame.Angles(math.rad(Angle), 0, 0))
-               task.wait()
-               FPos(BasePart, CFrame.new(0, -1.5, 0) * direction + moveDir * speedBoost, CFrame.Angles(math.rad(Angle), 0, 0))
-               task.wait()
-
-               FPos(BasePart, CFrame.new(2.25, 1.5, -2.25) * direction + moveDir * speedBoost, CFrame.Angles(math.rad(Angle), 0, 0))
-               task.wait()
-               FPos(BasePart, CFrame.new(-2.25, -1.5, 2.25) * direction + moveDir * speedBoost, CFrame.Angles(math.rad(Angle), 0, 0))
-               task.wait()
-            else
-               local offset = direction * (THumanoid.WalkSpeed * 0.8)
-               FPos(BasePart, CFrame.new(0, 1.5, offset) + moveDir * speedBoost, CFrame.Angles(math.rad(90), 0, 0))
-               task.wait()
-               FPos(BasePart, CFrame.new(0, -1.5, -offset) + moveDir * speedBoost, CFrame.Angles(0, 0, 0))
-               task.wait()
-            end
-
-            direction = -direction
-         else
-            break
-         end
-      until BasePart.Velocity.Magnitude > 500 
-         or BasePart.Parent ~= target_player.Character 
-         or target_player.Parent ~= Players 
-         or THumanoid.Sit 
-         or Humanoid.Health <= 0 
-         or tick() > Time + TimeToWait
-   end
+	local function SFBasePart(BasePart)
+		local TimeToWait = 2
+		local Time = tick()
+		local Angle = 0
+		repeat
+			if RootPart and THumanoid then
+				if BasePart.Velocity.Magnitude < 50 then
+					Angle = Angle + 100
+					FPos(BasePart, CFrame.new(0,1.5,0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude/1.25, CFrame.Angles(math.rad(Angle),0,0))
+					task.wait()
+					FPos(BasePart, CFrame.new(0,-1.5,0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude/1.25, CFrame.Angles(math.rad(Angle),0,0))
+					task.wait()
+					FPos(BasePart, CFrame.new(2.25,1.5,-2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude/1.25, CFrame.Angles(math.rad(Angle),0,0))
+					task.wait()
+					FPos(BasePart, CFrame.new(-2.25,-1.5,2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude/1.25, CFrame.Angles(math.rad(Angle),0,0))
+					task.wait()
+				else
+					FPos(BasePart, CFrame.new(0,1.5,THumanoid.WalkSpeed), CFrame.Angles(math.rad(90),0,0))
+					task.wait()
+					FPos(BasePart, CFrame.new(0,-1.5,-THumanoid.WalkSpeed), CFrame.Angles(0,0,0))
+					task.wait()
+				end
+			else
+				break
+			end
+		until BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= target_player.Character or target_player.Parent ~= Players or THumanoid.Sit or Humanoid.Health <= 0 or tick() > Time + TimeToWait
+	end
 
 	workspace.FallenPartsDestroyHeight = 0/0
 	g.fling_bv = InstanceNew("BodyVelocity")
