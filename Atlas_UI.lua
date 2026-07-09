@@ -12,27 +12,26 @@ local TS = game:GetService("TweenService")
 local Run = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local Core = game:GetService("CoreGui")
-local MP = game:GetService("MarketplaceService")
+local MPS = game:GetService("MarketplaceService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = Core or game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
 local UIS = UserInputService
 local Is_Mobile = UserInputService.TouchEnabled
 local player = Players.LocalPlayer
 local mouse = player:GetMouse()
+local function blank_function(...) return ... end
 local Library = {}
 local Page = {}
 local Section = {}
 local Element = {}
 local existing_atlas = Core:FindFirstChild("Atlas")
-if existing_atlas and existing_atlas:IsA("ScreenGui") then
-    existing_atlas:Destroy()
-    repeat task.wait() until existing_atlas.Parent == nil
-end
+if existing_atlas and existing_atlas:IsA("ScreenGui") then existing_atlas:Destroy() repeat task.wait() until existing_atlas.Parent == nil end
 Library.__index = Library
 Page.__index = Page
 Section.__index = Section
 Element.__index = Element
-local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+local GameName = MPS:GetProductInfo(game.PlaceId).Name
 Library.Icons = {
     ["Warning"] = 11110093949;
     ["Info"] = 11109991278;
@@ -42,23 +41,22 @@ Library.Icons = {
 local old_warn = warn
 local warn = function(...) old_warn("[FLAMES]:",...) end
 local utility = {}
+local function resolve_fs_function(name)
+    if getgenv()[name] and type(getgenv()[name]) == "function" then return getgenv()[name] end
+    if _G[name] and type(_G[name]) == "function" then return _G[name] end
+    return blank_function
+end
 
+getgenv().writefile = writefile or resolve_fs_function("writefile")
+getgenv().makefolder = makefolder or resolve_fs_function("makefolder")
+getgenv().isfolder = isfolder or resolve_fs_function("isfolder")
+getgenv().isfile = isfile or resolve_fs_function("isfile")
+getgenv().readfile = readfile or resolve_fs_function("readfile")
 do
-    function utility.BlankFunction()
-    end
-
-    function utility:Lerp(start,goal,alpha)
-        return start+(goal-start)*alpha
-    end
-
-    function utility:Warn(...)
-        warn("ARTEMIS:", ...)
-    end
-
-    function utility:Wait()
-        return Run.RenderStepped:Wait()
-    end
-
+    function utility.BlankFunction() end
+    function utility:Lerp(start,goal,alpha) return start+(goal-start)*alpha end
+    function utility:Warn(...) warn("[ATLAS_FLAMES_UI]:", ...) end
+    function utility:Wait() return Run.RenderStepped:Wait() end
     function utility:Disconnect(connection)
         pcall(function()
             connection:Disconnect()
@@ -69,7 +67,6 @@ do
         element.Active = true
         local button = element
         local gradient = element:FindFirstChildOfClass("UIGradient")
-
         button.InputBegan:Connect(function(input)
             if input.UserInputType==Enum.UserInputType.MouseButton1 then
                 gradient.Rotation = 90
@@ -112,24 +109,19 @@ do
         return formatted
     end
 
-    function utility:IsPadding(element)
-        return element:IsA("Frame") and string.lower(element.Name):find("padding")
-    end
-
+    function utility:IsPadding(element) return element:IsA("Frame") and string.lower(element.Name):find("padding") end
     function utility:DoClickEffect(element)
         local function makeEffect()
             local Converted = {
                 ["__buttonEffect"] = Instance.new("Frame");
                 ["_ImageLabel"] = Instance.new("ImageLabel");
             }
-
             Converted["__buttonEffect"].BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Converted["__buttonEffect"].BackgroundTransparency = 1
             Converted["__buttonEffect"].ClipsDescendants = true
             Converted["__buttonEffect"].Size = UDim2.new(1, 0, 1, 0)
             Converted["__buttonEffect"].ZIndex = 0
             Converted["__buttonEffect"].Name = "_buttonEffect"
-
             Converted["_ImageLabel"].Image = "http://www.roblox.com/asset/?id=10261338527"
             Converted["_ImageLabel"].ImageRectSize = Vector2.new(200, 200)
             Converted["_ImageLabel"].ImageTransparency = 0.8999999761581421
@@ -150,15 +142,12 @@ do
         local tweenInfo = TweenInfo.new(0.5,Enum.EasingStyle.Linear,Enum.EasingDirection.In,0,false,0)
         local realAbsPosition = Vector2.new(element.AbsolutePosition.X-(element.AbsoluteSize.X*element.AnchorPoint.X),element.AbsolutePosition.Y-(element.AbsoluteSize.Y*element.AnchorPoint.Y))
         local relative = Vector2.new(mouse.X,mouse.Y)-realAbsPosition
-
         effect.ImageLabel.Position = UDim2.new(0,relative.X,0.5,0)
         effect.ImageLabel.ImageRectOffset = Vector2.new(0,-relative.Y)
-
         local tween = TS:Create(effect.ImageLabel,tweenInfo,{
             ["Size"] = UDim2.new(0,375,1,0);
             ["ImageTransparency"] = 1;
         })
-
         tween:Play()
         tween.Completed:Connect(function()
             effect:Destroy()
@@ -168,7 +157,7 @@ do
     end
 
     function utility:GetColor(percentage, ColorKeyPoints)
-        if (percentage < 0) or (percentage>1) then utility:Warn('getColor got out of bounds percentage (less than 0 or greater than 1') end
+        if (percentage < 0) or (percentage>1) then utility:Warn('getColor got out of bounds percentage (less than 0 or greater than 1).') end
         local closestToLeft = ColorKeyPoints[1]
         local closestToRight = ColorKeyPoints[#ColorKeyPoints]
         local LocalPercentage = .5
@@ -1971,23 +1960,17 @@ do
         if info.ConfigFolder then
             local cf = info.ConfigFolder
             local config = cf.."/config.json"
-            if not isfolder(cf) then
-                makefolder(cf)
-            end
-            if not isfile(config) then
-                writefile(config,"")
-            end
+            if not isfolder("Flames_Hub_Menu") then makefolder("Flames_Hub_Menu") end
+            wait(0.25)
+            if not isfolder(cf) then makefolder(cf) end
+            if not isfile(config) then writefile(config,"") end
             if info.CheckKey then
                 local key = cf.."/key.txt"
-                if not isfile(key) then
-                    writefile(key,"")
-                end
+                if not isfile(key) then writefile(key,"") end
                 savedKey = readfile(key)
-                if savedKey == "" then
-                    savedKey = nil
-                end
+                if savedKey == "" then savedKey = nil end
             end
-            flags = readfile(config)=="" and {} or game:GetService("HttpService"):JSONDecode(readfile(config))
+            flags = readfile(config)=="" and {} or HttpService:JSONDecode(readfile(config))
             for i,v in pairs(flags) do
                 if type(v)=="string" then
                     if string.sub(v,1,9)=="?special|" then
@@ -2021,7 +2004,7 @@ do
                             end
                             edited_flags[i] = v
                         end
-                        writefile(config,game:GetService("HttpService"):JSONEncode(edited_flags))
+                        writefile(config,HttpService:JSONEncode(edited_flags))
                         task.wait(0.5)
                     end
                 end)()
