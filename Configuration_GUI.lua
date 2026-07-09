@@ -146,12 +146,12 @@ end
 -- [[ safer wait functionality. ]] --
 getgenv().FlamesLibrary.wait = function(t)
     if not t or t <= 0 then
-        safe_wrapper("RunService").Heartbeat:Wait()
+        safe_wrap("RunService").Heartbeat:Wait()
         return
     end
     local ok = pcall(task.wait, t)
     if not ok then
-        safe_wrapper("RunService").Heartbeat:Wait()
+        safe_wrap("RunService").Heartbeat:Wait()
     end
 end
 
