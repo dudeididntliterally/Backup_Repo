@@ -810,7 +810,6 @@ ScreenGui.Name = "FlamesAdminGUI"
 ScreenGui.Parent = parent_gui
 ScreenGui.Enabled = false
 ScreenGui.ResetOnSpawn = false
-ScreenGui.IgnoreGuiInset = false
 
 local Frame = Instance.new("Frame")
 local Camera = workspace.CurrentCamera
