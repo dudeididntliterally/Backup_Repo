@@ -733,7 +733,12 @@ local function format_title(str)
    local key=str:lower()
    return valid_titles[key] or "Info"
 end
-getgenv().notify=getgenv().notify or function(title,msg,dur) local fixed_title=format_title(title) NotifyLib:External_Notification(fixed_title,tostring(msg),tonumber(dur)) end
+
+getgenv().notify = getgenv().notify or function(title,msg,dur)
+    if getgenv().Notifications_Disabled_In_Flames_Hub then return end
+    local fixed_title = format_title(title)
+    NotifyLib:External_Notification(fixed_title, tostring(msg), tonumber(dur))
+end
 g.Characters = g.Characters or {}
 
 if not getgenv().Initialized_Flames_All_Characters_Global_System then
