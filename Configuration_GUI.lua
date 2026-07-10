@@ -812,10 +812,10 @@ ScreenGui.Enabled = false
 ScreenGui.ResetOnSpawn = false
 
 local Frame = Instance.new("Frame")
-if not is_mob_device then
-    Frame.Size = UDim2.new(0, 300, 0, 400)
+if is_mob_device then
+    Frame.Size = UDim2.new(0, 260, 0, 175)
 else
-    Frame.Size = UDim2.new(0, 300, 0, 175)
+    Frame.Size = UDim2.new(0, 300, 0, 400)
 end
 Frame.AutomaticSize = Enum.AutomaticSize.Y
 Frame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -826,6 +826,10 @@ Frame.Parent = ScreenGui
 Frame.Active = true
 Frame.Draggable = true
 Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 12)
+local Size_Constraint = Instance.new("UISizeConstraint")
+Size_Constraint.MinSize = is_mob_device and Vector2.new(260, 150) or Vector2.new(300, 200)
+Size_Constraint.MaxSize = is_mob_device and Vector2.new(260, 300) or Vector2.new(300, 500)
+Size_Constraint.Parent = Frame
 
 local List_Layout = Instance.new("UIListLayout")
 List_Layout.SortOrder = Enum.SortOrder.LayoutOrder
