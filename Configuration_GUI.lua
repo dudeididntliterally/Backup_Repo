@@ -30,7 +30,6 @@ end
 
 getgenv().FlamesLibrary.disconnect = function(name)
 	local list = getgenv().FlamesLibrary._connections[name]
-
 	if list then
 		for _, item in ipairs(list) do
 			if typeof(item) == "RBXScriptConnection" then
@@ -183,6 +182,8 @@ Players = get_or_set("Players", safe_wrap("Players"))
 LocalPlayer = get_or_set("LocalPlayer", Players.LocalPlayer)
 CoreGui = get_or_set("CoreGui", safe_wrap("CoreGui"))
 RunService = get_or_set("RunService", safe_wrap("RunService"))
+UserInputService = get_or_set("UserInputService", safe_wrap("UserInputService"))
+local is_mob_device = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 local parent_gui = CoreGui
 local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Notify_Lib.lua"))()
 local function retrieve_executor()
@@ -230,25 +231,25 @@ local default_config = {
 
 ReplicatedStorage = get_or_set("ReplicatedStorage", safe_wrap("ReplicatedStorage"))
 Workspace = get_or_set("Workspace", safe_wrap("Workspace"))
-Modules = get_or_set("Modules", ReplicatedStorage:WaitForChild("Modules"))
-Core = get_or_set("Core", Modules:WaitForChild("Core"))
-Game_Folder = get_or_set("Game_Folder", Modules:WaitForChild("Game"))
-InvisibleMode = get_or_set("InvisibleMode", require(Game_Folder:FindFirstChild("InvisibleMode")))
-CharacterBillboardGui = get_or_set("CharacterBillboardGui", require(Game_Folder:FindFirstChild("CharacterBillboardGui")))
-PlotMarker = get_or_set("PlotMarker", require(Game_Folder:FindFirstChild("PlotMarker")))
-Data = get_or_set("Data", require(Core:FindFirstChild("Data")))
-Phone_Module = get_or_set("Phone_Module", Game_Folder:FindFirstChild("Phone"))
-Phone = get_or_set("Phone", require(Game_Folder:FindFirstChild("Phone")))
-Privacy = get_or_set("Privacy", require(Core:FindFirstChild("Privacy")))
-AppModules = get_or_set("AppModules", Phone_Module:FindFirstChild("AppModules"))
-Messages = get_or_set("Messages", require(AppModules:FindFirstChild("Messages")))
-Network = get_or_set("Network", require(Core:FindFirstChild("Net")))
-CCTV = get_or_set("CCTV", require(Game_Folder:FindFirstChild("CCTV")))
-Tween = get_or_set("Tween", require(Core:FindFirstChild("Tween")))
-Seat = get_or_set("Seat", require(Game_Folder:FindFirstChild("Seat")))
-Blur = get_or_set("Blur", require(Core:FindFirstChild("Blur")))
-RateLimiter = get_or_set("RateLimiter", require(Core:FindFirstChild("RateLimiter")))
-UI = get_or_set("UI", require(Core:FindFirstChild("UI")))
+Modules = get_or_set("Modules", ReplicatedStorage:FindFirstChild("Modules"))
+Core = get_or_set("Core", Modules and Modules:FindFirstChild("Core"))
+Game_Folder = get_or_set("Game_Folder", Modules and Modules:FindFirstChild("Game"))
+InvisibleMode = get_or_set("InvisibleMode", Game_Folder and require(Game_Folder:FindFirstChild("InvisibleMode")))
+CharacterBillboardGui = get_or_set("CharacterBillboardGui", Game_Folder and require(Game_Folder:FindFirstChild("CharacterBillboardGui")))
+PlotMarker = get_or_set("PlotMarker", Game_Folder and require(Game_Folder:FindFirstChild("PlotMarker")))
+Data = get_or_set("Data", Core and require(Core:FindFirstChild("Data")))
+Phone_Module = get_or_set("Phone_Module", Game_Folder and Game_Folder:FindFirstChild("Phone"))
+Phone = get_or_set("Phone", Game_Folder and require(Game_Folder:FindFirstChild("Phone")))
+Privacy = get_or_set("Privacy", Core and require(Core:FindFirstChild("Privacy")))
+AppModules = get_or_set("AppModules", Phone_Module and Phone_Module:FindFirstChild("AppModules"))
+Messages = get_or_set("Messages", AppModules and require(AppModules:FindFirstChild("Messages")))
+Network = get_or_set("Network", Core and require(Core:FindFirstChild("Net")))
+CCTV = get_or_set("CCTV", Game_Folder and require(Game_Folder:FindFirstChild("CCTV")))
+Tween = get_or_set("Tween", Core and require(Core:FindFirstChild("Tween")))
+Seat = get_or_set("Seat", Game_Folder and require(Game_Folder:FindFirstChild("Seat")))
+Blur = get_or_set("Blur", Core and require(Core:FindFirstChild("Blur")))
+RateLimiter = get_or_set("RateLimiter", Core and require(Core:FindFirstChild("RateLimiter")))
+UI = get_or_set("UI", Core and require(Core:FindFirstChild("UI")))
 
 function set_enrolled_state(state)
     local valid = (state == "enabled" or state == "disabled")
@@ -284,26 +285,12 @@ local function freepay_func(state)
     local Data = getgenv().Data
     local notify = getgenv().notify
     local ReplicatedStorage = getgenv().ReplicatedStorage
-
-    if not Data or not Data.initiate then
-        return notify("Error", "Data module missing.", 5)
-    end
-    if not debug.getupvalue then
-        return notify("Error", "Executor does not support getupvalue.", 5)
-    end
-    if not ReplicatedStorage then
-        return notify("Error", "ReplicatedStorage is missing.", 3)
-    end
-
-    if state == nil then
-        state = not getgenv().Has_Free_LifePremium
-    end
-
+    if not Data or not Data.initiate then return notify("Error", "Data module missing.", 5) end
+    if not debug.getupvalue then return notify("Error", "Executor does not support getupvalue.", 5) end
+    if not ReplicatedStorage then return notify("Error", "ReplicatedStorage is missing.", 3) end
+    if state == nil then state = not getgenv().Has_Free_LifePremium end
     if state then
-        if getgenv().Has_Free_LifePremium then
-            return notify("Error", "FreePay is already enabled.", 5)
-        end
-
+        if getgenv().Has_Free_LifePremium then return notify("Error", "FreePay is already enabled.", 5) end
         for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
             local val = v:GetAttribute("IsVerifiedOnly")
             if val ~= nil then
@@ -519,7 +506,7 @@ getgenv().anti_outfit_copier = function(toggle)
                 end
             else
                 getgenv().anti_outfit_stealer = true
-                getgenv().Send("bio", "`~ Flames Hub Anti Stealer Is Enabled ~`")
+                if getgenv().Send then getgenv().Send("bio", "`~ Flames Hub Anti Stealer Is Enabled ~`") end
             end
 
             local last_check = 0
@@ -580,6 +567,7 @@ function anti_sit_func(toggle)
     local lib = g.FlamesLibrary
     local key = "anti_sit_loop"
     local fw = lib.wait
+	if not g.Game_Folder then return end
     g.Seat = require(g.Game_Folder:FindFirstChild("Seat"))
 
     if toggle == true then
@@ -683,7 +671,7 @@ getgenv().job_spammer = getgenv().job_spammer or function(toggle)
         g.notify("Success", "Job-Spammer is now enabled.", 3)
         lib.spawn(key, "spawn", function()
             while getgenv().Every_Job == true do
-            fw(0)
+            task.wait(0)
                 getgenv().Send("job", "Police")
                 fw(0)
                 getgenv().Send("job", "Firefighter")
@@ -797,9 +785,7 @@ g.anti_car_fling = g.anti_car_fling or function(state)
         if vehicles_folder then setup_vehicles_folder(vehicles_folder) end
         lib.connect("VehicleDestroyer_FolderWatch", Workspace.ChildAdded:Connect(function(child)
             if not g.VehicleDestroyer_Enabled then return end
-            if child.Name == "Vehicles" and child:IsA("Folder") then
-                setup_vehicles_folder(child)
-            end
+            if child.Name == "Vehicles" and child:IsA("Folder") then setup_vehicles_folder(child) end
         end))
     elseif state == false then
         if not g.VehicleDestroyer_Enabled then
@@ -825,8 +811,14 @@ ScreenGui.Enabled = false
 ScreenGui.ResetOnSpawn = false
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 300, 0, 400)
-Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+if not is_mob_device then
+    Frame.Size = UDim2.new(0, 300, 0, 400)
+else
+    Frame.Size = UDim2.new(0, 300, 0, 300)
+end
+Frame.AutomaticSize = Enum.AutomaticSize.Y
+Frame.AnchorPoint = Vector2.new(0.5, 0.5)
+Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
 Frame.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
@@ -834,9 +826,26 @@ Frame.Active = true
 Frame.Draggable = true
 Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 12)
 
-local Title = Instance.new("TextLabel", Frame)
+local List_Layout = Instance.new("UIListLayout")
+List_Layout.SortOrder = Enum.SortOrder.LayoutOrder
+List_Layout.Padding = UDim.new(0, 5)
+List_Layout.Parent = Frame
+
+local Frame_Padding = Instance.new("UIPadding")
+Frame_Padding.PaddingBottom = UDim.new(0, 10)
+Frame_Padding.PaddingLeft = UDim.new(0.1, 0)
+Frame_Padding.Parent = Frame
+
+local Header = Instance.new("Frame")
+Header.Size = UDim2.new(1, 0, 0, 45)
+Header.BackgroundTransparency = 1
+Header.LayoutOrder = 1
+Header.Parent = Frame
+
+local Title = Instance.new("TextLabel")
+Title.Parent = Header
 Title.Size = UDim2.new(0.850000024, 0, 0, 45)
-Title.Position = UDim2.new(0, 0, 0, 0)
+Title.Position = UDim2.new(0, -5, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "🔥 Flames Admin | Config 🔥"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -844,7 +853,8 @@ Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
 Title.TextScaled = false
 
-local Close = Instance.new("TextButton", Frame)
+local Close = Instance.new("TextButton")
+Close.Parent = Header
 Close.Size = UDim2.new(0, 35, 0, 35)
 Close.Position = UDim2.new(1, -40, 0, 5)
 Close.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
@@ -925,16 +935,16 @@ end
 local function create_toggle(name, order)
     if config[name] == "enabled" then handle_toggle(name, "enabled") end
     task.defer(function()
-        local Button = Instance.new("TextButton", Frame)
+        local Button = Instance.new("TextButton")
+        Button.Parent = Frame
         Button.Size = UDim2.new(1, -20, 0, 35)
-        Button.Position = UDim2.new(0, 10, 0, 50 + (order - 1) * 40)
+        Button.LayoutOrder = order + 1
         Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         Button.TextColor3 = Color3.fromRGB(255, 255, 255)
         Button.Font = Enum.Font.Gotham
         Button.TextScaled = true
         Button.Text = name .. ": " .. (config[name] == "enabled" and "ON" or "OFF")
         Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 8)
-        while not Button do fw() end
         Button.MouseButton1Click:Connect(function()
             config[name] = (config[name] == "enabled") and "disabled" or "enabled"
             Button.Text = name .. ": " .. (config[name] == "enabled" and "ON" or "OFF")
