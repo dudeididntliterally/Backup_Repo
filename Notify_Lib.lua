@@ -24,7 +24,6 @@ local Sound_ID_iPhone = "rbxassetid://73722479618078"
 local Sound_ID_Android = "rbxassetid://17582299860"
 local Sound_ID_Universal = "rbxassetid://18595195017"
 local Notification_Wrapper = {}
-
 local function Device_Detector()
     local platform = UserInputService:GetPlatform()
     local platformMap = {
@@ -72,16 +71,14 @@ function Play_Notification_Sound()
     end
     task.wait()
     Notification_Sound:Play()
-
     Notification_Sound.Ended:Connect(function()
         Notification_Sound:Destroy()
     end)
 end
 
 function Notification_Wrapper:External_Notification(Type, Content, Time)
-    if not Time then
-        Time = 5
-    end
+    if getgenv().Notifications_Disabled_In_Flames_Hub then return end
+    if not Time then Time = 5 end
     wait()
     Play_Notification_Sound()
     NotificationLibrary_External:SendNotification(tostring(Type), tostring(Content), tonumber(Time))
