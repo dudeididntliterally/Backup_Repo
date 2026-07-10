@@ -2046,9 +2046,7 @@ local function flush_queue()
    QueueDirty = false
    local snapshot = PendingQueue
    PendingQueue = {}
-   for i = 1, #snapshot do
-      handle_object(snapshot[i])
-   end
+   for i = 1, #snapshot do handle_object(snapshot[i]) end
 end
 
 if not g.firesystem_init then g.firesystem_init = true end
@@ -2056,12 +2054,8 @@ g.set_fire_state = function(state)
    local lib = getgenv().FlamesLibrary
    local da_key  = "anti_fire_descendant_added"
    local hb_key  = "anti_fire_heartbeat"
-
    if state == true then
-      if g.firehidden then
-         return g.notify("Warning", "Flames Hub | Anti-Fire V2 is already enabled.", 6)
-      end
-
+      if g.firehidden then return g.notify("Warning", "Flames Hub | Anti-Fire V2 is already enabled.", 6) end
       g.firemanual = true
       g.firehidden = true
       g.notify("Success", "Flames Hub | Anti-Fire V2 is now enabled.", 5)
@@ -2074,16 +2068,12 @@ g.set_fire_state = function(state)
          PendingQueue[#PendingQueue + 1] = obj
          QueueDirty = true
       end))
-
       lib.connect(hb_key, RunService.Heartbeat:Connect(function()
          if not g.firehidden then return end
          flush_queue()
       end))
    else
-      if not g.firehidden then
-         return g.notify("Warning", "Anti-Fire V2 is not enabled.", 6)
-      end
-
+      if not g.firehidden then return g.notify("Warning", "Anti-Fire V2 is not enabled.", 6) end
       g.firemanual = false
       g.firehidden = false
       g.notify("Success", "Anti-Fire V2 is now disabled.", 5)
@@ -2098,28 +2088,14 @@ g.tool_configuration_system_func = g.tool_configuration_system_func or function(
    option = option:lower()
    task.wait(0.1)
    if option == "get_tool" or option == "gettool" or option == "grab_tool" or option == "request_tool" then
-      if g.Send then
-         g.Send("get_tool", tostring(Tool_Name))
-      end
+      if g.Send then g.Send("get_tool", tostring(Tool_Name)) end
    elseif option == "delete_tool" or option == "delete_tools" or option == "remove_tool" or option == "removetools" or option == "remove_tools" or option == "deletetools" then
-      if g.Send then
-         g.Send("delete_tool")
-      end
+      if g.Send then g.Send("delete_tool") end
    elseif option == "equip_tools" or option == "equiptools" or option == "equipalltools" or option == "equip_all_tools" then
       if g.Character and g.Character:FindFirstChildOfClass("Humanoid") and g.Humanoid then
-         for _, v in ipairs(g.LocalPlayer.Backpack:GetChildren()) do
-            if v:IsA("Tool") then
-               pcall(function() g.Humanoid:EquipTool(v) end)
-            end
-         end
+         for _, v in ipairs(g.LocalPlayer.Backpack:GetChildren()) do if v:IsA("Tool") then pcall(function() g.Humanoid:EquipTool(v) end) end end
       else
-         for _, v in ipairs(g.LocalPlayer.Backpack:GetChildren()) do
-            if v:IsA("Tool") then
-               pcall(function()
-                  v.Parent = g.Character or g.LocalPlayer.Character or get_char(g.LocalPlayer or game.Players.LocalPlayer)
-               end)
-            end
-         end
+         for _, v in ipairs(g.LocalPlayer.Backpack:GetChildren()) do if v:IsA("Tool") then pcall(function() v.Parent = g.Character or g.LocalPlayer.Character or get_char(g.LocalPlayer or game.Players.LocalPlayer, 5) end) end end
       end
    end
 end
@@ -2127,24 +2103,11 @@ end
 g.AdminPrefix = g.AdminPrefix or "-"
 g.AdminVersion = g.AdminVersion or "v1.0"
 g.AdminConfigChanged = g.AdminConfigChanged or Instance.new("BindableEvent")
-g.setAdminPrefix = g.setAdminPrefix or function(newPrefix)
-   if typeof(newPrefix) == "string" and g.AdminPrefix ~= newPrefix then
-      g.AdminPrefix = newPrefix
-      g.AdminConfigChanged:Fire("prefix")
-   end
-end
-
-g.setAdminVersion = g.setAdminVersion or function(newVersion)
-   if typeof(newVersion) == "string" and g.AdminVersion ~= newVersion then
-      g.AdminVersion = newVersion
-      g.AdminConfigChanged:Fire("version")
-   end
-end
-
+g.setAdminPrefix = g.setAdminPrefix or function(newPrefix) if typeof(newPrefix) == "string" and g.AdminPrefix ~= newPrefix then g.AdminPrefix = newPrefix g.AdminConfigChanged:Fire("prefix") end end
+g.setAdminVersion = g.setAdminVersion or function(newVersion) if typeof(newVersion) == "string" and g.AdminVersion ~= newVersion then g.AdminVersion = newVersion g.AdminConfigChanged:Fire("version") end end
 local ismobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 g.CommandsMenu_Tooltip_Init = g.CommandsMenu_Tooltip_Init or function()
    if g.CommandsMenu_Tooltip and g.CommandsMenu_Tooltip.Parent then return end
-
    local tooltipGui = parent_gui:FindFirstChild("AdminTooltipUI") or Instance.new("ScreenGui")
    tooltipGui.Name = "AdminTooltipUI"
    tooltipGui.ResetOnSpawn = false
@@ -2181,26 +2144,16 @@ g.CommandsMenu_Tooltip_Init = g.CommandsMenu_Tooltip_Init or function()
    g.CommandsMenu_Tooltip = tooltip
 end
 
-if FlamesLibrary.is_alive("CommandsMenu_Tooltip_RenderStepped") then
-   FlamesLibrary.disconnect("CommandsMenu_Tooltip_RenderStepped")
-end
-
-if FlamesLibrary.is_alive("CommandsMenu_Tooltip_InputChanged") then
-   FlamesLibrary.disconnect("CommandsMenu_Tooltip_InputChanged")
-end
-
+if FlamesLibrary.is_alive("CommandsMenu_Tooltip_RenderStepped") then FlamesLibrary.disconnect("CommandsMenu_Tooltip_RenderStepped") end
+if FlamesLibrary.is_alive("CommandsMenu_Tooltip_InputChanged") then FlamesLibrary.disconnect("CommandsMenu_Tooltip_InputChanged") end
 local mousePos = Vector2.new()
 FlamesLibrary.connect("CommandsMenu_Tooltip_InputChanged", UserInputService.InputChanged:Connect(function(input)
-   if input.UserInputType == Enum.UserInputType.MouseMovement then
-      mousePos = Vector2.new(input.Position.X, input.Position.Y)
-   end
+   if input.UserInputType == Enum.UserInputType.MouseMovement then mousePos = Vector2.new(input.Position.X, input.Position.Y) end
 end))
 
 FlamesLibrary.connect("CommandsMenu_Tooltip_RenderStepped", RunService.RenderStepped:Connect(function()
    local tooltip = g.CommandsMenu_Tooltip
-   if tooltip and tooltip.Visible then
-      tooltip.Position = UDim2.fromOffset(mousePos.X + 15, mousePos.Y - 10)
-   end
+   if tooltip and tooltip.Visible then tooltip.Position = UDim2.fromOffset(mousePos.X + 15, mousePos.Y - 10) end
 end))
 
 g.CommandsMenu_ShowTooltip = g.CommandsMenu_ShowTooltip or function(text)
@@ -2221,38 +2174,25 @@ g.CommandsMenu_HideTooltip = g.CommandsMenu_HideTooltip or function()
       BackgroundTransparency = 1,
       TextTransparency = 1
    }):Play()
-   task.delay(0.15, function()
-      if tooltip then tooltip.Visible = false end
-   end)
+   task.delay(0.15, function() if tooltip then tooltip.Visible = false end end)
 end
 
 g.CommandsMenu_Rebuild = g.CommandsMenu_Rebuild or function(Filter)
    local Scroll = g.CommandsMenu_Scroll
    if not Scroll then return end
-
    Filter = Filter and string.lower(Filter) or ""
-
-   for _, V in ipairs(Scroll:GetChildren()) do
-      if not V:IsA("UIListLayout") and not V:IsA("UIPadding") then
-         V:Destroy()
-      end
-   end
-
+   for _, V in ipairs(Scroll:GetChildren()) do if not V:IsA("UIListLayout") and not V:IsA("UIPadding") then V:Destroy() end end
    local Rebuilt = string.gsub(cmdsString, "{prefix}", g.AdminPrefix)
-
    for Line in string.gmatch(Rebuilt, "[^\r\n]+") do
       Line = Line:match("^%s*(.-)%s*$")
       if Line ~= "" then
          local Parts = string.split(Line, " - ")
          local Cmd_Text = Parts[1] or Line
          local Desc = Parts[2] or ""
-
          if Filter ~= "" then
             local Cmd_Lower = string.lower(Cmd_Text)
             local Desc_Lower = string.lower(Desc)
-            if not string.find(Cmd_Lower, Filter, 1, true) and not string.find(Desc_Lower, Filter, 1, true) then
-               continue
-            end
+            if not string.find(Cmd_Lower, Filter, 1, true) and not string.find(Desc_Lower, Filter, 1, true) then continue end
          end
 
          local Frame = Instance.new("Frame")
@@ -2298,9 +2238,7 @@ g.CommandsMenu_Rebuild = g.CommandsMenu_Rebuild or function(Filter)
             g.CommandsMenu_HideTooltip()
          end)
          Button.MouseButton1Click:Connect(function()
-            if g.DirectCommand then
-               g.DirectCommand(Cmd_Text)
-            end
+            if g.DirectCommand then g.DirectCommand(Cmd_Text) end
          end)
       end
    end
@@ -2314,7 +2252,6 @@ g.CommandsMenu = function()
    end
 
    g.CommandsMenu_Tooltip_Init()
-
    local gui = Instance.new("ScreenGui")
    gui.Name = "AdminCommandList_LifeTogether_RP"
    gui.ResetOnSpawn = false
@@ -2352,10 +2289,7 @@ g.CommandsMenu = function()
    title.TextColor3 = Color3.new(1,1,1)
    title.TextXAlignment = Enum.TextXAlignment.Left
    title.Parent = header
-   while not title or not title.Parent do
-      g.heartbeat_wait_function(3)
-   end
-
+   while not title or not title.Parent do g.heartbeat_wait_function(3) end
    if ismobile then
       local close = Instance.new("TextButton")
       close.Size = UDim2.new(0,36,0,36)
@@ -2425,25 +2359,17 @@ g.CommandsMenu = function()
    padding.PaddingRight = UDim.new(0,5)
    padding.Parent = scroll
 
-   Search_Bar:GetPropertyChangedSignal("Text"):Connect(function()
-      g.CommandsMenu_Rebuild(Search_Bar.Text)
-   end)
-
+   Search_Bar:GetPropertyChangedSignal("Text"):Connect(function() g.CommandsMenu_Rebuild(Search_Bar.Text) end)
    g.CommandsMenu_Scroll = scroll
    g.CommandsMenu_Rebuild()
 end
 
-if FlamesLibrary.is_alive("CommandsMenu_AdminConfigChanged") then
-   FlamesLibrary.disconnect("CommandsMenu_AdminConfigChanged")
-end
-
+if FlamesLibrary.is_alive("CommandsMenu_AdminConfigChanged") then FlamesLibrary.disconnect("CommandsMenu_AdminConfigChanged") end
 FlamesLibrary.connect("CommandsMenu_AdminConfigChanged", g.AdminConfigChanged.Event:Connect(function(Kind)
    if Kind == "prefix" then
       g.CommandsMenu_Rebuild()
    elseif Kind == "version" then
-      if g.CommandsMenu_VersionLabel then
-         g.CommandsMenu_VersionLabel.Text = "Version: " .. g.AdminVersion
-      end
+      if g.CommandsMenu_VersionLabel then g.CommandsMenu_VersionLabel.Text = "Version: " .. g.AdminVersion end
    end
 end))
 
@@ -2472,15 +2398,12 @@ local function protect_local_character()
 	local tracking = g.player_overlap_tracking
 	local parts = workspace:GetPartsInPart(hrp, overlap_params)
 	local now = os.clock()
-
 	for _, part in ipairs(parts) do
 		local model = part:FindFirstAncestorOfClass("Model")
 		if model then
 			local plr = Players:GetPlayerFromCharacter(model)
 			if plr and plr ~= localplayer then
-				if not tracking[plr] then
-					tracking[plr] = {attempts = 0, last_time = 0, reset_time = now}
-				end
+				if not tracking[plr] then tracking[plr] = {attempts = 0, last_time = 0, reset_time = now} end
 				local data = tracking[plr]
 				if (now - data.last_time) > 3 then
 					data.attempts = 0
@@ -2493,31 +2416,20 @@ local function protect_local_character()
 					local attacker_hrp = model:FindFirstChild("HumanoidRootPart")
 					local push_origin = attacker_hrp and attacker_hrp.Position or part.Position
 					local push_dir = hrp.Position - push_origin
-					if push_dir.Magnitude > 0 then
-						hrp.CFrame += push_dir.Unit * 3
-					end
+					if push_dir.Magnitude > 0 then hrp.CFrame += push_dir.Unit * 3 end
 				end
 			end
 		end
 	end
-
-	for plr in pairs(tracking) do
-		if not plr or not plr.Parent then
-			tracking[plr] = nil
-		end
-	end
+	for plr in pairs(tracking) do if not plr or not plr.Parent then tracking[plr] = nil end end
 end
 
 function set_protect_state(state)
 	g.protect_enabled = state and true or false
 	if g.protect_enabled then
-		if not FlamesLibrary.is_alive("protect_heartbeat") then
-			FlamesLibrary.connect("protect_heartbeat", RunService.Heartbeat:Connect(protect_local_character))
-		end
+		if not FlamesLibrary.is_alive("protect_heartbeat") then FlamesLibrary.connect("protect_heartbeat", RunService.Heartbeat:Connect(protect_local_character)) end
 	else
-		if FlamesLibrary.is_alive("protect_heartbeat") then
-			FlamesLibrary.disconnect("protect_heartbeat")
-		end
+		if FlamesLibrary.is_alive("protect_heartbeat") then FlamesLibrary.disconnect("protect_heartbeat") end
 		g.player_overlap_tracking = {}
 	end
 end
@@ -2548,9 +2460,7 @@ g.EnableAntiFling = function()
       for _, plr in ipairs(Players:GetPlayers()) do
          if plr ~= Players.LocalPlayer and plr.Character then
             for _, part in ipairs(plr.Character:GetDescendants()) do
-               if part:IsA("BasePart") then
-                  part.CanCollide = false
-               end
+               if part:IsA("BasePart") then part.CanCollide = false end
             end
          end
       end
@@ -2565,12 +2475,9 @@ g.DisableAntiFling = function()
 end
 
 g.resolve_humanoid = function() -- specifically for do_emote and safe_emote, but I'll definitely use it for other stuff, like in the main code.
-   local hum = g.Humanoid
-   if hum and hum.Parent and hum:IsDescendantOf(game) then
-      return hum
-   end
-
-   local char = g.Character
+   local hum = g.Humanoid or g.Character:FindFirstChildWhichIsA("Humanoid") or g.get_human(game.Players.LocalPlayer, 10)
+   if hum and hum.Parent and hum:IsDescendantOf(game) then return hum end
+   local char = g.Character or g.LocalPlayer.Character or g.get_char(game.Players.LocalPlayer, 10)
    if char and char.Parent then
       hum = char:FindFirstChildOfClass("Humanoid") or char:FindFirstChildWhichIsA("Humanoid")
       if hum then
@@ -2579,13 +2486,13 @@ g.resolve_humanoid = function() -- specifically for do_emote and safe_emote, but
       end
    end
 
-   local plr = Players and Players.LocalPlayer
+   local plr = game.Players.LocalPlayer
    if plr then
-      local resolvedChar = g.return_char and g.return_char(plr,10)
-      if resolvedChar then
-         hum = resolvedChar:FindFirstChildOfClass("Humanoid") or resolvedChar:FindFirstChildWhichIsA("Humanoid")
+      local resolved_char = g.return_char and g.return_char(plr, 10)
+      if resolved_char then
+         hum = resolved_char:FindFirstChildOfClass("Humanoid") or resolved_char:FindFirstChildWhichIsA("Humanoid")
          if hum then
-            g.Character = resolvedChar
+            g.Character = resolved_char
             g.Humanoid = hum
             return hum
          end
@@ -2615,80 +2522,56 @@ local function refresh_parts()
    table.clear(g.noclip_parts)
    local Character = g.Character or LocalPlayer.Character or get_char(LocalPlayer, 10)
    if not Character then return end
-   for _, inst in ipairs(Character:GetDescendants()) do
-      if inst:IsA("BasePart") then
-         table.insert(g.noclip_parts, inst)
-      end
-   end
+   for _, inst in ipairs(Character:GetDescendants()) do if inst:IsA("BasePart") then table.insert(g.noclip_parts, inst) end end
 end
 
 local function noclip_step()
    local parts = g.noclip_parts
    for i = 1, #parts do
       local p = parts[i]
-      if p and p.Parent and p.CanCollide then
-         p.CanCollide = false
-      end
+      if p and p.Parent and p.CanCollide then p.CanCollide = false end
    end
 end
 
 g.ToggleNoclip = function(state)
    local lib = getgenv().FlamesLibrary
    local key = "noclip_stepped"
-
    if state == true then
       if g.Noclip_Enabled then
-         if g.notify then
-            return g.notify("Warning", "Noclip is already enabled!", 5)
-         end
+         if g.notify then return g.notify("Warning", "Noclip is already enabled!", 5) end
          return
       end
 
-      if lib.is_alive(key) then
-         lib.disconnect(key)
-      end
-
+      if lib.is_alive(key) then lib.disconnect(key) end
       refresh_parts()
       lib.connect(key, RunService.Stepped:Connect(noclip_step))
       g.Noclip_Enabled = true
       if g.notify then g.notify("Success", "Noclip has been enabled.", 5) end
    elseif state == false then
       if not g.Noclip_Enabled then
-         if g.notify then
-            return g.notify("Error", "Noclip is not enabled!", 5)
-         end
+         if g.notify then return g.notify("Error", "Noclip is not enabled!", 5) end
          return
       end
 
       lib.disconnect(key)
-
       for i = 1, #g.noclip_parts do
          local part = g.noclip_parts[i]
-         if part and part.Parent then
-            part.CanCollide = true
-         end
+         if part and part.Parent then part.CanCollide = true end
       end
 
       table.clear(g.noclip_parts)
       g.Noclip_Enabled = false
-
       if g.notify then g.notify("Success", "Noclip has been disabled.", 5) end
    else
-      if g.notify then
-         return g.notify("Error", "Invalid arg, expected true/false", 5)
-      end
+      if g.notify then return g.notify("Error", "Invalid arg, expected true/false", 5) end
    end
 end
 
 g.spamming_flames = function(toggle)
    local lib = g.FlamesLibrary
    local connection_name = "flames_spammer"
-
    if toggle == true then
-      if g.spamming_all_that_fire then
-         return g.notify("Warning", "Flames Spammer V2 is already enabled.", 5)
-      end
-
+      if g.spamming_all_that_fire then return g.notify("Warning", "Flames Spammer V2 is already enabled.", 5) end
       g.spamming_all_that_fire = true
       lib.spawn(connection_name, "spawn", function()
          while g.spamming_all_that_fire == true do
@@ -2697,17 +2580,14 @@ g.spamming_flames = function(toggle)
          end
       end)
    elseif toggle == false then
-      if not g.spamming_all_that_fire then
-         return g.notify("Warning", "Flames Spammer V2 is not enabled.", 5)
-      end
-
+      if not g.spamming_all_that_fire then return g.notify("Warning", "Flames Spammer V2 is not enabled.", 5) end
       g.spamming_all_that_fire = false
       lib.disconnect(connection_name)
    end
 end
 
 g.Toggleable_Noclip = g.ToggleNoclip
-wait(0.1)
+wait(0.15)
 g.Toggle_AntiFling_Boolean_Func = function(flag)
    if flag == true then
       if g.EnableAntiFling then
@@ -2736,12 +2616,8 @@ g.anti_sit_func = function(toggle)
    local lib = g.FlamesLibrary
    local key = "anti_sit_loop"
    g.Seat = require(g.Game_Folder:FindFirstChild("Seat"))
-
    if toggle == true then
-      if g.Not_Ever_Sitting then
-         return notify("Warning", "AntiSit is already enabled!", 5)
-      end
-
+      if g.Not_Ever_Sitting then return notify("Warning", "AntiSit is already enabled!", 5) end
       g.Not_Ever_Sitting = true
       g.notify("Success", "Anti-Sit is now enabled.", 5)
       show_notification("Success:", "Anti-Sit is now enabled.", "Normal")
@@ -2754,10 +2630,7 @@ g.anti_sit_func = function(toggle)
          lib.disconnect(key)
       end)
    elseif toggle == false then
-      if not g.Not_Ever_Sitting then
-         return notify("Warning", "AntiSit is not enabled!", 5)
-      end
-
+      if not g.Not_Ever_Sitting then return notify("Warning", "AntiSit is not enabled!", 5) end
       g.Not_Ever_Sitting = false
       lib.disconnect(key)
       fw(0.2)
@@ -2782,7 +2655,6 @@ g.anti_void = function(flag)
          local root = g.HumanoidRootPart or g.Character and g.Character:FindFirstChild("HumanoidRootPart") or g.get_root(LocalPlayer, 5)
          if root and root.Position.Y <= g.originalFPDH + 25 then root.AssemblyLinearVelocity = root.AssemblyLinearVelocity + Vector3.new(0, 300, 0) end
       end))
-
       g.Anti_Void_Enabled_Bool = true
       if g.notify then g.notify("Success", "Flames Hub | Anti-Void V2 has been enabled.", 5) end
    elseif flag == false then
@@ -2807,13 +2679,9 @@ local function process_veh_part(part)
    if my_vehicle and is_in_vehicle(part, my_vehicle) then return end
    part.CanCollide = false
    g.vehicle_parts_cache[part] = true
-
    local key = make_key("VehicleDestroyer_PartCleanup", part)
    lib.connect(key, part.AncestryChanged:Connect(function()
-      if not part:IsDescendantOf(game) then
-         g.vehicle_parts_cache[part] = nil
-         lib.disconnect(key)
-      end
+      if not part:IsDescendantOf(game) then g.vehicle_parts_cache[part] = nil lib.disconnect(key) end
    end))
 end
 
@@ -2824,17 +2692,10 @@ local function process_veh_model(model)
       if not model or not model.Parent then return end
    end
    local key = make_key("VehicleDestroyer_ModelCleanup", model)
-   for _, inst in ipairs(model:GetDescendants()) do
-      if inst:IsA("BasePart") then
-         process_veh_part(inst)
-      end
-   end
-
+   for _, inst in ipairs(model:GetDescendants()) do if inst:IsA("BasePart") then process_veh_part(inst) end end
    lib.connect(make_key("VehicleDestroyer_DescAdded", model), model.DescendantAdded:Connect(function(desc)
       if not g.VehicleDestroyer_Enabled then return end
-      if desc:IsA("BasePart") then
-         process_veh_part(desc)
-      end
+      if desc:IsA("BasePart") then process_veh_part(desc) end
    end))
 end
 
@@ -2847,10 +2708,7 @@ local function setup_vehicles_folder(folder)
       end
    end
 
-   if lib.is_alive("VehicleDestroyer_ChildAdded") then
-      lib.disconnect("VehicleDestroyer_ChildAdded")
-   end
-
+   if lib.is_alive("VehicleDestroyer_ChildAdded") then lib.disconnect("VehicleDestroyer_ChildAdded") end
    lib.connect("VehicleDestroyer_ChildAdded", folder.ChildAdded:Connect(function(child)
       if not g.VehicleDestroyer_Enabled then return end
       if child:IsA("Model") then
@@ -2860,9 +2718,7 @@ local function setup_vehicles_folder(folder)
       end
    end))
 
-   if g.notify then
-      g.notify("Success", "Flames Hub | Anti Vehicle Fling is now enabled.", 5)
-   end
+   if g.notify then g.notify("Success", "Flames Hub | Anti Vehicle Fling is now enabled.", 5) end
 end
 
 local function clear_all()
@@ -2874,20 +2730,14 @@ end
 g.anti_car_fling = function(state)
    if state == true then
       if g.VehicleDestroyer_Enabled then
-         if g.notify then
-            g.notify("Warning", "Flames Hub | Anti Vehicle Fling is already enabled.", 5)
-         end
+         if g.notify then g.notify("Warning", "Flames Hub | Anti Vehicle Fling is already enabled.", 5) end
          return
       end
 
       g.VehicleDestroyer_Enabled = true
       table.clear(g.vehicle_parts_cache)
-
       local vehicles_folder = Workspace:FindFirstChild("Vehicles")
-      if vehicles_folder then
-         setup_vehicles_folder(vehicles_folder)
-      end
-
+      if vehicles_folder then setup_vehicles_folder(vehicles_folder) end
       lib.connect("VehicleDestroyer_FolderWatch", Workspace.ChildAdded:Connect(function(child)
          if not g.VehicleDestroyer_Enabled then return end
          if child.Name == "Vehicles" and child:IsA("Folder") then
@@ -2896,17 +2746,12 @@ g.anti_car_fling = function(state)
       end))
    elseif state == false then
       if not g.VehicleDestroyer_Enabled then
-         if g.notify then
-            g.notify("Warning", "Anti Vehicle Fling not enabled.", 5)
-         end
+         if g.notify then g.notify("Warning", "Anti Vehicle Fling not enabled.", 5) end
          return
       end
 
       clear_all()
-
-      if g.notify then
-         g.notify("Success", "Anti Vehicle Fling disabled.", 5)
-      end
+      if g.notify then g.notify("Success", "Anti Vehicle Fling disabled.", 5) end
    end
 end
 
@@ -3054,13 +2899,24 @@ local Emotes = {
       124924265548892,
    },
    michaelmyers = {
-      103115491327846,
       114619890795549,
-      85106566131117,
-      120061939060268, -- I fw that lowkey lmfao.
-      131290182355038,
-      108434770822522,
       130952080730659,
+      102592510788385,
+      94386721940218,
+      129072747762246,
+      75064305822996, -- nice
+      119386568711840,
+      130952080730659,
+      99854735126388, -- lowkey chill lol
+      85547971879829,
+      90233857167220, -- chill
+      138936895286746,
+      98535647465049,
+      84288917893504,
+      92880905247755,
+      119501268589276,
+      120157815610637,
+      83876507034315, -- smooth
    },
    sturdy = {
       122687759897103,
@@ -3138,11 +2994,27 @@ local Emotes = {
       105856550104502,
       91510776097850,
       106512155105010,
+   },
+   michaeljackson = {
+      136661789802174, -- I fw this a ton bro lol.
+      114675249793699,
+      101839749225177, -- smooth
+      90568160524259, -- michael jackson floating?
+      140440735589603,
+      122773107025712,
+      123601584523368, -- clean moonwalk
+      74299469547363,
+      74729925285351,
+      104974397351883,
+      89131492194676,
+      75365447884173,
+      74191064962748,
+      132838372169509,
+      87183065958660 -- glide
    }
 }
 wait(0.1)
 g.Emotes = Emotes -- needs to dynamically update, I'm not sure why in the hell I wouldn't make it that way.
-
 local function safeemote(emote_id)
    local hum = g.Humanoid or g.Character:FindFirstChildWhichIsA("Humanoid") or get_human(LocalPlayer or game.Players.LocalPlayer)
    if not hum or not hum.Parent then
@@ -3154,11 +3026,7 @@ local function safeemote(emote_id)
    end
 
    local tries = 0
-   while not hum:IsDescendantOf(game) and tries < 30 do
-      task.wait(0.1)
-      tries += 1
-   end
-
+   while not hum:IsDescendantOf(game) and tries < 30 do task.wait(0.1) tries += 1 end
    if not hum:IsDescendantOf(game) then
       if g.notify then
          return g.notify("Error", "Humanoid not fully initialized in DataModel.", 5)
@@ -3215,7 +3083,9 @@ local Aliases = {
    ["needy"] = "needydance",
    ["needytwerk"] = "needydance",
    ["needyshake"] = "needydance",
-   ["needy_twerk"] = "needydance"
+   ["needy_twerk"] = "needydance",
+   ["michael_jackson"] = "michaeljackson",
+   ["moonwalk"] = "michaeljackson"
 }
 wait(0.1)
 g.Aliases = Aliases -- this also needs to be dynamic, leave it as such.
@@ -3230,16 +3100,8 @@ g.disable_emoting_from_broken_animation = function()
       end
    end
 
-   if g.Humanoid and g.Humanoid.Sit then
-      pcall(function() g.Humanoid:ChangeState(3) end)
-   end
-
-   pcall(function()
-      for _, v in ipairs(Humanoid:GetPlayingAnimationTracks()) do
-         v:Stop()
-      end
-   end)
-
+   if g.Humanoid and g.Humanoid.Sit then pcall(function() g.Humanoid:ChangeState(3) end) end
+   pcall(function() for _, v in ipairs(Humanoid:GetPlayingAnimationTracks()) do v:Stop() end end)
    if g.Humanoid and g.Humanoid.Parent and g.Humanoid:IsDescendantOf(game) then
       pcall(function() g.Humanoid.WalkSpeed = 0 end)
       wait(0.3)
@@ -3264,16 +3126,8 @@ function disable_emoting()
       end
    end
 
-   if g.Humanoid and g.Humanoid.Sit then
-      pcall(function() g.Humanoid:ChangeState(3) end)
-   end
-
-   pcall(function()
-      for _, v in ipairs(Humanoid:GetPlayingAnimationTracks()) do
-         v:Stop()
-      end
-   end)
-
+   if g.Humanoid and g.Humanoid.Sit then pcall(function() g.Humanoid:ChangeState(3) end) end
+   pcall(function() for _, v in ipairs(Humanoid:GetPlayingAnimationTracks()) do v:Stop() end end)
    if g.Humanoid and g.Humanoid.Parent and g.Humanoid:IsDescendantOf(game) then
       pcall(function() g.Humanoid.WalkSpeed = 0 end)
       wait(0.3)
@@ -3292,29 +3146,20 @@ g.disable_emoting_script = disable_emoting
 g.disable_emoting = disable_emoting
 
 local function safe_emote(emote_id)
-   while not g.Humanoid or not g.Humanoid:IsDescendantOf(game) do
-      task.wait(0.1)
-   end
-
+   while not g.Humanoid or not g.Humanoid:IsDescendantOf(game) do task.wait(0.1) end
    local animator = g.Humanoid:FindFirstChildOfClass("Animator")
    if not animator then
       animator = Instance.new("Animator")
       animator.Parent = g.Humanoid
    end
 
-   local resolvedTrack
+   local resolved_track
    local connection
-   connection = g.Humanoid.AnimationPlayed:Connect(function(track)
-      resolvedTrack = track
-   end)
-
+   connection = g.Humanoid.AnimationPlayed:Connect(function(track) resolved_track = track end)
    local result = g.Humanoid:PlayEmoteAndGetAnimTrackById(emote_id)
-
    task.wait()
-
    connection:Disconnect()
-
-   if typeof(resolvedTrack) ~= "Instance" or not resolvedTrack:IsA("AnimationTrack") then
+   if typeof(resolved_track) ~= "Instance" or not resolved_track:IsA("AnimationTrack") then
       if g.notify then
          if g.disable_emoting_script then
             pcall(function() g.disable_emoting_from_broken_animation() end)
@@ -3325,44 +3170,36 @@ local function safe_emote(emote_id)
       end
    end
 
-   local animObject = resolvedTrack.Animation
+   local animObject = resolved_track.Animation
    if not animObject or not animObject.AnimationId then
-      resolvedTrack:Stop()
+      resolved_track:Stop()
       return
    end
 
-   local internalId = animObject.AnimationId
-   resolvedTrack:Stop()
-
+   local internal_id = animObject.AnimationId
+   resolved_track:Stop()
    for _, v in ipairs(g.Humanoid:GetPlayingAnimationTracks()) do pcall(function() v:Stop() end) end
-   local newAnim = Instance.new("Animation")
-   newAnim.AnimationId = internalId
-
-   local newTrack = animator:LoadAnimation(newAnim)
-   newAnim:Destroy()
-   newTrack.Priority = Enum.AnimationPriority.Movement
-   newTrack.Looped = true
-   newTrack:Play()
-
+   local new_anim = Instance.new("Animation")
+   new_anim.AnimationId = internal_id
+   local new_track = animator:LoadAnimation(new_anim)
+   new_anim:Destroy()
+   new_track.Priority = Enum.AnimationPriority.Movement
+   new_track.Looped = true
+   new_track:Play()
    g.Is_Currently_Emoting = true
-
    task.defer(function()
-      newTrack.Stopped:Wait()
+      new_track.Stopped:Wait()
       g.Is_Currently_Emoting = false
    end)
 end
 
 local function playemote(emote_id)
    if g.Is_Currently_Emoting then
-      for _, v in ipairs(g.Humanoid:GetPlayingAnimationTracks()) do
-         pcall(function() v:Stop() end)
-      end
+      for _, v in ipairs(g.Humanoid:GetPlayingAnimationTracks()) do pcall(function() v:Stop() end) end
       g.Is_Currently_Emoting = false
    end
 
-   task.spawn(function()
-      safe_emote(emote_id)
-   end)
+   task.spawn(function() safe_emote(emote_id) end)
 end
 
 g.playemote = playemote
@@ -3378,7 +3215,6 @@ function do_emote(input)
 
    local key = input:lower():gsub("%s+", "")
    key = g.Aliases[key] or key
-
    local list = g.Emotes[key]
    if not list then
       if g.notify then
@@ -3393,7 +3229,6 @@ function do_emote(input)
 end
 
 g.do_emote = do_emote
-
 local function fetch_emotes(keyword, count)
    count = count or 25
    local params = CatalogSearchParams.new()
@@ -3405,10 +3240,7 @@ local function fetch_emotes(keyword, count)
    params.SortType = Enum.CatalogSortType.Relevance
    params.Limit = 10
 
-   local ok, pages = pcall(function()
-      return avatar_editor:SearchCatalog(params)
-   end)
-
+   local ok, pages = pcall(function() return avatar_editor:SearchCatalog(params) end)
    if not ok or not pages then
       warn("fetch failed")
       return {}
@@ -3416,12 +3248,8 @@ local function fetch_emotes(keyword, count)
 
    local results = {}
    while #results < count do
-      local ok2, page = pcall(function()
-         return pages:GetCurrentPage()
-      end)
-
+      local ok2, page = pcall(function() return pages:GetCurrentPage() end)
       if not ok2 or not page then break end
-
       for _, item in ipairs(page) do
          table.insert(results, {
             id       = item.Id,
@@ -3432,11 +3260,7 @@ local function fetch_emotes(keyword, count)
       end
 
       if pages.IsFinished or #results >= count then break end
-
-      local ok3 = pcall(function()
-         pages:AdvanceToNextPageAsync()
-      end)
-
+      local ok3 = pcall(function() pages:AdvanceToNextPageAsync() end)
       if not ok3 then break end
    end
 
@@ -3444,7 +3268,6 @@ local function fetch_emotes(keyword, count)
 end
 
 local emotes = fetch_emotes("needy", 25)
-
 g.emote_list = emotes
 g.play_random_emote = function()
    if #emotes == 0 then return getgenv().notify("Warning", "No emotes loaded.", 5) end
