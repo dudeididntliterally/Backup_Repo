@@ -815,7 +815,7 @@ local Frame = Instance.new("Frame")
 if not is_mob_device then
     Frame.Size = UDim2.new(0, 300, 0, 400)
 else
-    Frame.Size = UDim2.new(0, 300, 0, 300)
+    Frame.Size = UDim2.new(0, 300, 0, 175)
 end
 Frame.AutomaticSize = Enum.AutomaticSize.Y
 Frame.AnchorPoint = Vector2.new(0.5, 0.5)
