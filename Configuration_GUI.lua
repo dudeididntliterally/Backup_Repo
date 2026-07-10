@@ -810,18 +810,9 @@ ScreenGui.Name = "FlamesAdminGUI"
 ScreenGui.Parent = parent_gui
 ScreenGui.Enabled = false
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = false
 
 local Frame = Instance.new("Frame")
-local Camera = workspace.CurrentCamera
-local viewport = Camera.ViewportSize
-local mobile_width = math.min(260, viewport.X * 0.85)
-local mobile_height = math.min(300, viewport.Y * 0.6)
-
-if is_mob_device then
-    Frame.Size = UDim2.new(0, mobile_width, 0, mobile_height)
-else
-    Frame.Size = UDim2.new(0, 300, 0, 400)
-end
 Frame.AutomaticSize = Enum.AutomaticSize.None
 Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -981,6 +972,25 @@ local function create_toggle(name, order)
 end
 
 local toggles = {"RainbowVehicle", "RainbowPhone", "AntiCarFling", "AntiFling", "AntiVoid", "NoClip", "NoSit", "AntiOutfitStealer", "JobSpammer", "FreePremium", "DisableNotifications"}
-local function update_frame_size() local total_height = 50 + (#toggles * 40) + 10 Frame.Size = UDim2.new(0, 300, 0, total_height) end
+local function get_viewport()
+    local Camera = workspace.CurrentCamera
+    if not Camera then return nil end
+    return Camera.ViewportSize
+end
+
+local function update_frame_size()
+    local viewport = get_viewport()
+    if not viewport then return end
+    local desired_width = 300
+    local desired_height = 50 + (#toggles * 40) + 10
+    local max_width_scale = is_mob_device and 0.85 or 0.9
+    local max_height_scale = is_mob_device and 0.75 or 0.85
+    local final_width = math.min(desired_width, viewport.X * max_width_scale)
+    local final_height = math.min(desired_height, viewport.Y * max_height_scale)
+    Frame.Size = UDim2.new(0, final_width, 0, final_height)
+end
+
 for i, t in ipairs(toggles) do create_toggle(t, i) end
 update_frame_size()
+local Camera = workspace.CurrentCamera
+if Camera then lib.connect("FlamesConfigGUI_ViewportResize", Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function() update_frame_size() end)) end
