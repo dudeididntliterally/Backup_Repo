@@ -812,12 +812,17 @@ ScreenGui.Enabled = false
 ScreenGui.ResetOnSpawn = false
 
 local Frame = Instance.new("Frame")
+local Camera = workspace.CurrentCamera
+local viewport = Camera.ViewportSize
+local mobile_width = math.min(260, viewport.X * 0.85)
+local mobile_height = math.min(300, viewport.Y * 0.6)
+
 if is_mob_device then
-    Frame.Size = UDim2.new(0, 260, 0, 175)
+    Frame.Size = UDim2.new(0, mobile_width, 0, mobile_height)
 else
     Frame.Size = UDim2.new(0, 300, 0, 400)
 end
-Frame.AutomaticSize = Enum.AutomaticSize.Y
+Frame.AutomaticSize = Enum.AutomaticSize.None
 Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
 Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -826,25 +831,11 @@ Frame.Parent = ScreenGui
 Frame.Active = true
 Frame.Draggable = true
 Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 12)
-local Size_Constraint = Instance.new("UISizeConstraint")
-Size_Constraint.MinSize = is_mob_device and Vector2.new(260, 150) or Vector2.new(300, 200)
-Size_Constraint.MaxSize = is_mob_device and Vector2.new(260, 300) or Vector2.new(300, 500)
-Size_Constraint.Parent = Frame
-
-local List_Layout = Instance.new("UIListLayout")
-List_Layout.SortOrder = Enum.SortOrder.LayoutOrder
-List_Layout.Padding = UDim.new(0, 5)
-List_Layout.Parent = Frame
-
-local Frame_Padding = Instance.new("UIPadding")
-Frame_Padding.PaddingBottom = UDim.new(0, 10)
-Frame_Padding.PaddingLeft = UDim.new(0.1, 0)
-Frame_Padding.Parent = Frame
 
 local Header = Instance.new("Frame")
 Header.Size = UDim2.new(1, 0, 0, 45)
+Header.Position = UDim2.new(0, 0, 0, 0)
 Header.BackgroundTransparency = 1
-Header.LayoutOrder = 1
 Header.Parent = Frame
 
 local Title = Instance.new("TextLabel")
@@ -871,6 +862,30 @@ Instance.new("UICorner", Close).CornerRadius = UDim.new(0, 8)
 Close.MouseButton1Click:Connect(function()
    ScreenGui.Enabled = false
 end)
+
+local Toggle_List = Instance.new("ScrollingFrame")
+Toggle_List.Size = UDim2.new(1, 0, 1, -45)
+Toggle_List.Position = UDim2.new(0, 0, 0, 45)
+Toggle_List.BackgroundTransparency = 1
+Toggle_List.BorderSizePixel = 0
+Toggle_List.ScrollBarThickness = 4
+Toggle_List.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+Toggle_List.CanvasSize = UDim2.new(0, 0, 0, 0)
+Toggle_List.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Toggle_List.Parent = Frame
+
+local List_Layout = Instance.new("UIListLayout")
+List_Layout.SortOrder = Enum.SortOrder.LayoutOrder
+List_Layout.Padding = UDim.new(0, 8)
+List_Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+List_Layout.Parent = Toggle_List
+
+local List_Padding = Instance.new("UIPadding")
+List_Padding.PaddingTop = UDim.new(0, 8)
+List_Padding.PaddingBottom = UDim.new(0, 10)
+List_Padding.PaddingLeft = UDim.new(0, 10)
+List_Padding.PaddingRight = UDim.new(0, 14)
+List_Padding.Parent = Toggle_List
 
 getgenv().Flames_Features = getgenv().Flames_Features or {}
 local function handle_toggle(name, state)
@@ -947,9 +962,9 @@ local function create_toggle(name, order)
     if config[name] == "enabled" then handle_toggle(name, "enabled") end
     task.defer(function()
         local Button = Instance.new("TextButton")
-        Button.Parent = Frame
+        Button.Parent = Toggle_List
         Button.Size = UDim2.new(1, -20, 0, 35)
-        Button.LayoutOrder = order + 1
+        Button.LayoutOrder = order
         Button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         Button.TextColor3 = Color3.fromRGB(0, 0, 0)
         Button.Font = Enum.Font.GothamBold
