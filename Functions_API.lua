@@ -89,7 +89,7 @@ if getgenv().anti_server_logging_enabled_flames_hub then
    if ok and ws_log_attr ~= false then workspace:SetAttribute("loggingEnabled", false) end
 end
 
--- [[ Doesn't really work anyway. ]] --
+-- [[ Doesn't really work anyway + isn't efficient. ]] --
 --[[if not getgenv().Flames_Hub_Annoying_Messages_Blocker then
    getgenv().Flames_Hub_Annoying_Messages_Blocker = true
    if hookfunction and newcclosure then
@@ -2743,8 +2743,8 @@ g.anti_sit_func = function(toggle)
       end
 
       g.Not_Ever_Sitting = true
-      g.notify("Success", "Anti-Sit is now enabled!", 5)
-      show_notification("Success:", "Anti-Sit is now enabled!", "Normal")
+      g.notify("Success", "Anti-Sit is now enabled.", 5)
+      show_notification("Success:", "Anti-Sit is now enabled.", "Normal")
       lib.spawn(key, "spawn", function()
          while g.Not_Ever_Sitting == true do
             g.Seat.enabled.set(false)
@@ -2762,8 +2762,8 @@ g.anti_sit_func = function(toggle)
       lib.disconnect(key)
       fw(0.2)
       g.Seat.enabled.set(true)
-      notify("Success", "Sitting is now enabled!", 5)
-      Phone.show_notification("Success:", "Sitting is now enabled!", "Normal")
+      notify("Success", "Anti-Sit is now disabled.", 5)
+      Phone.show_notification("Success:", "Anti-Sit is now disabled.", "Normal")
    else
       return 
    end
