@@ -10,6 +10,12 @@ local function safe_wrap(service)
         return game:GetService(service)
     end
 end
+wait(0.25)
+if not g.GlobalEnvironmentFramework_Initialized then
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Global_Environment.lua"))()
+   wait(0.1)
+   g.GlobalEnvironmentFramework_Initialized = true
+end
 
 getgenv().FlamesLibrary = getgenv().FlamesLibrary or {}
 getgenv().FlamesLibrary._connections = getgenv().FlamesLibrary._connections or {}
@@ -170,13 +176,7 @@ local function get_or_set(global, value)
     end
     return v
 end
-
-if not g.GlobalEnvironmentFramework_Initialized then
-   loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/Backup_Repo/refs/heads/main/Global_Environment.lua"))()
-   wait(0.1)
-   g.GlobalEnvironmentFramework_Initialized = true
-end
-wait(1)
+wait(0.25)
 HttpService  = get_or_set("HttpService", safe_wrap("HttpService"))
 Players = get_or_set("Players", safe_wrap("Players"))
 LocalPlayer = get_or_set("LocalPlayer", Players.LocalPlayer)
@@ -202,19 +202,10 @@ end
 wait(0.1)
 local executor_string = identify_executor()
 local function executor_contains(substr)
-    if type(executor_string) ~= "string" then
-        return false
-    end
-
+    if type(executor_string) ~= "string" then return false end
     return string.find(string.lower(executor_string), string.lower(substr), 1, true) ~= nil
 end
 wait(0.2)
-function notify(notif_type, msg, duration)
-    NotifyLib:External_Notification(tostring(notif_type), tostring(msg), tonumber(duration))
-end
-
-notify = get_or_set("notify", notify)
-
 local config_path = "Flames_Admin_Config.json"
 local default_config = {
     Enrolled = "disabled",
@@ -603,6 +594,16 @@ function anti_sit_func(toggle)
     end
 end
 
+function disable_notifications(state)
+    if state == true then
+        getgenv().Notifications_Disabled_In_Flames_Hub = true
+    elseif state == false then
+        getgenv().Notifications_Disabled_In_Flames_Hub = false
+    else
+        return 
+    end
+end
+
 function anti_void(toggle)
     if toggle == true then
         if getgenv().Anti_Void_Enabled_Bool then return notify("Warning", "Anti-Void is already enabled!", 5) end
@@ -819,7 +820,7 @@ end
 Frame.AutomaticSize = Enum.AutomaticSize.Y
 Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
 Frame.Active = true
@@ -847,7 +848,7 @@ Title.Parent = Header
 Title.Size = UDim2.new(0.850000024, 0, 0, 45)
 Title.Position = UDim2.new(0, -5, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "🔥 Flames Admin | Config 🔥"
+Title.Text = "👑 Flames Hub | Config 👑"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
@@ -929,6 +930,12 @@ local function handle_toggle(name, state)
         else
             freepay_func(false)
         end
+    elseif name == "DisableNotifications" then
+        if state == "enabled" then
+            disable_notifications(true)
+        else
+            disable_notifications(false)
+        end
     end
 end
 
@@ -939,9 +946,9 @@ local function create_toggle(name, order)
         Button.Parent = Frame
         Button.Size = UDim2.new(1, -20, 0, 35)
         Button.LayoutOrder = order + 1
-        Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Button.Font = Enum.Font.Gotham
+        Button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Button.TextColor3 = Color3.fromRGB(0, 0, 0)
+        Button.Font = Enum.Font.GothamBold
         Button.TextScaled = true
         Button.Text = name .. ": " .. (config[name] == "enabled" and "ON" or "OFF")
         Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 8)
@@ -954,7 +961,7 @@ local function create_toggle(name, order)
     end)
 end
 
-local toggles = {"RainbowVehicle", "RainbowPhone", "AntiCarFling", "AntiFling", "AntiVoid", "NoClip", "NoSit", "AntiOutfitStealer", "JobSpammer", "FreePremium"}
+local toggles = {"RainbowVehicle", "RainbowPhone", "AntiCarFling", "AntiFling", "AntiVoid", "NoClip", "NoSit", "AntiOutfitStealer", "JobSpammer", "FreePremium", "DisableNotifications"}
 local function update_frame_size() local total_height = 50 + (#toggles * 40) + 10 Frame.Size = UDim2.new(0, 300, 0, total_height) end
 for i, t in ipairs(toggles) do create_toggle(t, i) end
 update_frame_size()
