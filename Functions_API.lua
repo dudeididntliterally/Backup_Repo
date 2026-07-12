@@ -89,29 +89,6 @@ if getgenv().anti_server_logging_enabled_flames_hub then
    if ok and ws_log_attr ~= false then workspace:SetAttribute("loggingEnabled", false) end
 end
 
--- [[ Doesn't really work anyway + isn't efficient. ]] --
---[[if not getgenv().Flames_Hub_Annoying_Messages_Blocker then
-   getgenv().Flames_Hub_Annoying_Messages_Blocker = true
-   if hookfunction and newcclosure then
-      local Timer = g.Timer or require(ReplicatedStorage:FindFirstChild("Timer", true))
-      if Timer and typeof(Timer) == "table" then
-         local old_new
-         old_new = hookfunction(Timer.new, newcclosure(function(interval, callback, ...)
-            if interval >= 100 then
-               if getgenv().notify then getgenv().notify("Success", "Flames Hub has blocked an annoying message.", 0.75) end
-               return {
-                  enabled = false,
-                  start = function() end,
-                  stop = function() end,
-               }
-            end
-
-            return old_new(interval, callback, ...)
-         end))
-      end
-   end
-end--]]
-
 local E = g.Flames_Emojis_Content_Stuff
 local function wrap(t, e) return e.." "..t.." "..e end
 g.getholiday = g.getholiday or function()
