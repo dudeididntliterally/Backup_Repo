@@ -1,6 +1,6 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
 local g = getgenv()
-g.Game = game -- dynamically updating.
+g.Game = game
 local Players = g.Players or cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
 local RunService = g.RunService or cloneref and cloneref(game:GetService("RunService")) or game:GetService("RunService")
 local Workspace = g.Workspace or cloneref and cloneref(game:GetService("Workspace")) or game:GetService("Workspace")
@@ -96,7 +96,6 @@ g.getholiday = g.getholiday or function()
    local d = tonumber(os.date("%d"))
    local w = tonumber(os.date("%w"))
    local y = tonumber(os.date("%Y"))
-
    if m == 1 and d == 1 then return wrap("New Years", E["Holiday_New_Years"]) end
    if m == 1 and d == 27 then return wrap("National Chocolate Cake Day", E["Holiday_Chocolate_Cake"]) end
    if m == 1 and d == 28 then return wrap("Data Privacy Day", E["Holiday_Data_Privacy"]) end
@@ -204,6 +203,7 @@ g.getholiday = g.getholiday or function()
 
    return nil
 end
+
 local _na_env = g
 local Lower    = string.lower
 local Sub      = string.sub
@@ -374,25 +374,10 @@ wait(0.1)
 local FL = g.FlamesLibrary
 local fw = FL.wait
 g.big_color_mapper = g.big_color_mapper or color_mapper
-g.isProperty = g.isProperty or function(inst, prop)
-	local s, r = pcall(function() return inst[prop] end)
-	if not s then return nil end
-	return r
-end
-
-g.hasProp = g.hasProp or function(inst, prop)
-   return inst and isProperty(inst, prop) ~= nil
-end
-
-g.setProperty = g.setProperty or function(inst, prop, v)
-	local s, _ = pcall(function() inst[prop] = v end)
-	return s
-end
-
-g.safeSet = g.safeSet or function(inst, prop, val)
-   if inst and hasProp(inst, prop) then setProperty(inst, prop, val) end
-end
-
+g.isProperty = g.isProperty or function(inst, prop) local s, r = pcall(function() return inst[prop] end) if not s then return nil end return r end
+g.hasProp = g.hasProp or function(inst, prop) return inst and isProperty(inst, prop) ~= nil end
+g.setProperty = g.setProperty or function(inst, prop, v) local s, _ = pcall(function() inst[prop] = v end) return s end
+g.safeSet = g.safeSet or function(inst, prop, val) if inst and hasProp(inst, prop) then setProperty(inst, prop, val) end end
 g.cmdsString = [[
    {prefix}rgbcar - Enables RGB/Rainbow Vehicle (FE Rainbow Vehicle).
    {prefix}unrgbcar - Disables RGB/Rainbow Vehicle (FE, Rainbow Vehicle).
@@ -646,23 +631,13 @@ g.NA_GRAB_BODY = g.NA_GRAB_BODY or (function()
 	local setOverrideModel;
 	local pickOverrideModel;
 	local function asChar(obj)
-		if not obj or typeof(obj) ~= "Instance" then
-			return nil;
-		end;
-		if obj:IsA("Player") then
-			return obj.Character;
-		end;
-		if obj:IsA("Model") then
-			return obj;
-		end;
+		if not obj or typeof(obj) ~= "Instance" then return nil; end;
+		if obj:IsA("Player") then return obj.Character; end;
+		if obj:IsA("Model") then return obj; end;
 		return nil;
 	end;
 	local function firstPart(model)
-		for _, d in ipairs(model:GetDescendants()) do
-			if d:IsA("BasePart") then
-				return d;
-			end;
-		end;
+		for _, d in ipairs(model:GetDescendants()) do if d:IsA("BasePart") then return d; end; end;
 		return nil;
 	end;
 	setOverrideModel = function(model)
