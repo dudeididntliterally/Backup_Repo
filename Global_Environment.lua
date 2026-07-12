@@ -896,8 +896,21 @@ local function retry_find(func, retries, delay)
     return nil
 end
 wait(0.1)
-get_or_set("retry_find", retry_find)
+getgenv().Encode_To_Lua_Escapes = function(Text)
+    local Result = {}
+    for i = 1, #Text do table.insert(Result, "\\" .. string.byte(Text, i)) end
+    return table.concat(Result)
+end
 
+getgenv().Decode_Lua_Escapes = function(Escaped_String)
+    local Bytes = {}
+    for Byte_Str in Escaped_String:gmatch("\\(%d+)") do table.insert(Bytes, tonumber(Byte_Str)) end
+    local Chars = {}
+    for _, Byte in ipairs(Bytes) do table.insert(Chars, string.char(Byte)) end
+    return table.concat(Chars)
+end
+
+get_or_set("retry_find", retry_find)
 getgenv().return_char = function(Player, timeout)
 	if not Player or not Player:IsA("Player") then return nil end
 	timeout = tonumber(timeout) or 5
