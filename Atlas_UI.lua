@@ -3488,10 +3488,8 @@ do
             Converted["_1_Slider"].Position = UDim2.new(-1.51867283e-07, 0, 0.46425584, 0)
             Converted["_1_Slider"].Size = UDim2.new(1, 0, 0, 50)
             Converted["_1_Slider"].Name = "1_Slider"
-
             Converted["_UICorner"].CornerRadius = UDim.new(0, 4)
             Converted["_UICorner"].Parent = Converted["_1_Slider"]
-
             Converted["_Slider"].Image = "rbxassetid://10261338527"
             Converted["_Slider"].ImageColor3 = Color3.fromRGB(18.000000827014446, 18.000000827014446, 18.000000827014446)
             Converted["_Slider"].ScaleType = Enum.ScaleType.Slice
@@ -3503,7 +3501,6 @@ do
             Converted["_Slider"].Size = UDim2.new(1, -18, 0, 4)
             Converted["_Slider"].Name = "Slider"
             Converted["_Slider"].Parent = Converted["_1_Slider"]
-
             Converted["_Slider1"].Image = "rbxassetid://10261338527"
             Converted["_Slider1"].ImageColor3 = Color3.fromRGB(225.00000178813934, 225.00000178813934, 225.00000178813934)
             Converted["_Slider1"].ScaleType = Enum.ScaleType.Slice
@@ -3513,29 +3510,22 @@ do
             Converted["_Slider1"].Size = UDim2.new(0.5, 0, 1, 0)
             Converted["_Slider1"].Name = "Slider"
             Converted["_Slider1"].Parent = Converted["_Slider"]
-
             Converted["_Theme"].Value = "ImageColor3"
             Converted["_Theme"].Name = "Theme"
             Converted["_Theme"].Parent = Converted["_Slider1"]
-
             Converted["_Category"].Value = "Symbols"
             Converted["_Category"].Name = "Category"
             Converted["_Category"].Parent = Converted["_Theme"]
-
             Converted["_Ignore"].Name = "Ignore"
             Converted["_Ignore"].Parent = Converted["_Theme"]
-
             Converted["_Theme1"].Value = "ImageColor3"
             Converted["_Theme1"].Name = "Theme"
             Converted["_Theme1"].Parent = Converted["_Slider"]
-
             Converted["_Category1"].Value = "Background"
             Converted["_Category1"].Name = "Category"
             Converted["_Category1"].Parent = Converted["_Theme1"]
-
             Converted["_Ignore1"].Name = "Ignore"
             Converted["_Ignore1"].Parent = Converted["_Theme1"]
-
             Converted["_Input"].Font = Enum.Font.GothamMedium
             Converted["_Input"].PlaceholderColor3 = Color3.fromRGB(225.00000178813934, 225.00000178813934, 225.00000178813934)
             Converted["_Input"].Text = "0"
@@ -3550,18 +3540,14 @@ do
             Converted["_Input"].Size = UDim2.new(0.309244812, -45, 0, 14)
             Converted["_Input"].Name = "Input"
             Converted["_Input"].Parent = Converted["_1_Slider"]
-
             Converted["_Theme2"].Value = "TextColor3"
             Converted["_Theme2"].Name = "Theme"
             Converted["_Theme2"].Parent = Converted["_Input"]
-
             Converted["_Category2"].Value = "Symbols"
             Converted["_Category2"].Name = "Category"
             Converted["_Category2"].Parent = Converted["_Theme2"]
-
             Converted["_Ignore2"].Name = "Ignore"
             Converted["_Ignore2"].Parent = Converted["_Theme2"]
-
             Converted["_Title"].AnchorPoint = Vector2.new(0, 0.5)
             Converted["_Title"].BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Converted["_Title"].BackgroundTransparency = 1
@@ -3569,14 +3555,12 @@ do
             Converted["_Title"].Size = UDim2.new(0.787999988, -45, 0, 14)
             Converted["_Title"].Name = "Title"
             Converted["_Title"].Parent = Converted["_1_Slider"]
-
             Converted["_Main"].AutomaticSize = Enum.AutomaticSize.X
             Converted["_Main"].BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Converted["_Main"].BackgroundTransparency = 1
             Converted["_Main"].Size = UDim2.new(0, 1, 1, 0)
             Converted["_Main"].Name = "Main"
             Converted["_Main"].Parent = Converted["_Title"]
-
             Converted["_Title1"].Font = Enum.Font.GothamMedium
             Converted["_Title1"].Text = "Slider"
             Converted["_Title1"].TextColor3 = Color3.fromRGB(225.00000178813934, 225.00000178813934, 225.00000178813934)
@@ -3590,18 +3574,14 @@ do
             Converted["_Title1"].Size = UDim2.new(0, 1, 1, 0)
             Converted["_Title1"].Name = "Title"
             Converted["_Title1"].Parent = Converted["_Main"]
-
             Converted["_Theme3"].Value = "TextColor3"
             Converted["_Theme3"].Name = "Theme"
             Converted["_Theme3"].Parent = Converted["_Title1"]
-
             Converted["_Category3"].Value = "Symbols"
             Converted["_Category3"].Name = "Category"
             Converted["_Category3"].Parent = Converted["_Theme3"]
-
             Converted["_Ignore3"].Name = "Ignore"
             Converted["_Ignore3"].Parent = Converted["_Theme3"]
-
             Converted["_Warning"].Image = "http://www.roblox.com/asset/?id=10969141992"
             Converted["_Warning"].ImageColor3 = Color3.fromRGB(255, 249.0000155568123, 53.000004440546036)
             Converted["_Warning"].AnchorPoint = Vector2.new(0, 0.5)
@@ -3611,141 +3591,121 @@ do
             Converted["_Warning"].Visible = false
             Converted["_Warning"].Name = "Warning"
             Converted["_Warning"].Parent = Converted["_Title"]
-
             Converted["_Theme4"].Value = "ImageColor3"
             Converted["_Theme4"].Name = "Theme"
             Converted["_Theme4"].Parent = Converted["_Warning"]
-
             Converted["_Category4"].Value = "Warning"
             Converted["_Category4"].Name = "Category"
             Converted["_Category4"].Parent = Converted["_Theme4"]
-
             Converted["_Ignore4"].Name = "Ignore"
             Converted["_Ignore4"].Parent = Converted["_Theme4"]
-
             Converted["_UIListLayout"].Padding = UDim.new(0, 2)
             Converted["_UIListLayout"].FillDirection = Enum.FillDirection.Horizontal
             Converted["_UIListLayout"].SortOrder = Enum.SortOrder.LayoutOrder
             Converted["_UIListLayout"].VerticalAlignment = Enum.VerticalAlignment.Bottom
             Converted["_UIListLayout"].Parent = Converted["_Title"]
-
             Converted["_Theme5"].Value = "BackgroundColor3"
             Converted["_Theme5"].Name = "Theme"
             Converted["_Theme5"].Parent = Converted["_1_Slider"]
-
             Converted["_Category5"].Value = "Element"
             Converted["_Category5"].Name = "Category"
             Converted["_Category5"].Parent = Converted["_Theme5"]
-
             Converted["_Ignore5"].Name = "Ignore"
             Converted["_Ignore5"].Parent = Converted["_Theme5"]
-
             Converted["_Element"].Value = "Slider"
             Converted["_Element"].Name = "Element"
             Converted["_Element"].Parent = Converted["_1_Slider"]
-
             return Converted["_1_Slider"]
         end
 
         local element = createElement()
+    do
+        local slider = element.Slider
+        local inner = slider.Slider
+        local sliderButton = utility:CreateButtonObject(slider)
+        sliderButton.Size = UDim2.fromScale(1,3)
+        local input = element.Input
+        local dragging = false
+        local lastFlag = nil
+        local con
+        local lastMouseX = mouse.X
+        sliderButton.MouseButton1Down:Connect(function() dragging = true end)
+        local lerp = 0.45
+        local _last_text
+        local _focused = false
 
-        do
-            local slider = element.Slider
-            local inner = slider.Slider
-            local sliderButton = utility:CreateButtonObject(slider)
-            sliderButton.Size = UDim2.fromScale(1,3)
-            local input = element.Input
+        if type(_self.Flags[info.Flag]) ~= "number" then
+            _self.Flags[info.Flag] = tonumber(_self.Flags[info.Flag]) or info.Default or info.Min
+        end
 
-            local dragging = false
+        LPH_JIT_MAX(function()
+            con = Run.RenderStepped:Connect(function(dt)
+                if not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+                    dragging = false
+                end
 
-            local lastFlag = nil
-            local con
-            local lastMouseX = mouse.X
+                local current = tonumber(_self.Flags[info.Flag])
+                if not current then
+                    warn(("[Slider:%s] Flags value was non-numeric (%s), resetting"):format(tostring(info.Flag), typeof(_self.Flags[info.Flag])))
+                    current = info.Default or info.Min
+                end
+                _self.Flags[info.Flag] = current
 
-            sliderButton.MouseButton1Down:Connect(function()
-                dragging = true
+                local finalX = utility:Lerp(lastMouseX,mouse.X,lerp*(dt*60))
+                if dragging then
+                    local percent = math.clamp((finalX-slider.AbsolutePosition.X)/slider.AbsoluteSize.X,0,1)
+                    _self.Flags[info.Flag] = info.Min+((info.Max-info.Min)*percent)
+                end
+                if not info.AllowOutOfRange then
+                    _self.Flags[info.Flag] = math.clamp(_self.Flags[info.Flag],info.Min,info.Max)
+                end
+                local formatted = utility:FormatNumber(_self.Flags[info.Flag],info.Digits)
+                _self.Flags[info.Flag] = tonumber((formatted:gsub(",",""))) or _self.Flags[info.Flag]
+                if dragging then
+                    coroutine.wrap(info.Callback)(_self.Flags[info.Flag])
+                end
+                local currentFlag = _self.Flags[info.Flag]
+                if lastFlag~=currentFlag then
+                    inner.Size = UDim2.fromScale(math.clamp((currentFlag-info.Min)/(info.Max-info.Min),0,1),1)
+                    lastFlag = currentFlag
+                    input.Text = formatted
+                end
+                lastMouseX = finalX
+                if _focused == false then
+                    _last_text = input.Text
+                end
             end)
+        end)()
+        table.insert(_self._connections,con)
+        input.Focused:Connect(function()
+            _focused = true
+        end)
 
-            local lerp = 0.45
-            local _last_text
-            local _focused = false
-            LPH_JIT_MAX(function()
-                con = Run.RenderStepped:Connect(function(dt)
-                    if not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-                        dragging = false
-                    end
-                    local finalX = utility:Lerp(lastMouseX,mouse.X,lerp*(dt*60))
-                    if dragging then
-                        local percent = math.clamp((finalX-slider.AbsolutePosition.X)/slider.AbsoluteSize.X,0,1)
-                        _self.Flags[info.Flag] = info.Min+((info.Max-info.Min)*percent)
-                    end
+        input.FocusLost:Connect(function(enterPressed)
+            local newValue
+            if enterPressed then
+                local text = input.Text
+                local num = tonumber(text)
+                if num then
                     if not info.AllowOutOfRange then
-                        _self.Flags[info.Flag] = math.clamp(_self.Flags[info.Flag],info.Min,info.Max)
+                        num = math.clamp(num,info.Min,info.Max)
                     end
-                    local formatted = utility:FormatNumber(_self.Flags[info.Flag],info.Digits)
-                    _self.Flags[info.Flag] = tonumber((formatted:gsub(",",""))) or _self.Flags[info.Flag]
-                    if dragging then
-                        coroutine.wrap(info.Callback)(_self.Flags[info.Flag])
-                    end
-                    local currentFlag = _self.Flags[info.Flag]
-                    if lastFlag~=currentFlag then
-                        inner.Size = UDim2.fromScale(math.clamp((currentFlag-info.Min)/(info.Max-info.Min),0,1),1)
-                        lastFlag = currentFlag
-                        input.Text = formatted
-                    end
-                    lastMouseX = finalX
-                    if _focused == false then
-                        _last_text = input.Text
-                    end
-                end)
-            end)()
-            table.insert(_self._connections,con)
-
-            input.Focused:Connect(function()
-                _focused = true
-            end)
-    
-            input.FocusLost:Connect(function(enterPressed)
-                local newValue
-                if enterPressed then
-                    local text = input.Text
-                    local num = tonumber(text)
-                    if num then
-                        if not info.AllowOutOfRange then
-                            num = math.clamp(num,info.Min,info.Max)
-                        end
-                        input.Text = utility:FormatNumber(num,info.Digits)
-                        newValue = num
-                        _self.Flags[info.Flag] = newValue
-                    else
-                        input.Text = _last_text
-                    end
+                    input.Text = utility:FormatNumber(num,info.Digits)
+                    newValue = num
+                    _self.Flags[info.Flag] = newValue
                 else
                     input.Text = _last_text
                 end
-    
-                _focused = false
-            end)
-        end
+            else
+                input.Text = _last_text
+            end
 
-        info.WarningIcon = info.WarningIcon or Library.Icons.Warning
-        element.Title.Warning.Image = "http://www.roblox.com/asset/?id="..info.WarningIcon
-        if info.Warning then
-            element.Title.Warning.ImageColor3 = Color3.new(1,1,1)
-            element.Title.Warning.Visible = true
-            local hint = utility:CreateHint()
-            hint.Value = info.Warning
-            hint.Parent = element.Title.Warning
-        end
-
-        element.Title.Main.Title.Text = info.Name
-        element.Name = string.rep("_",elementNum)..info.Name
-        element.Parent = section.holder.Contents
+            _focused = false
+        end)
     end
 
     function Element.CreateSliderToggle(section,info)
         local _self = section._self
-        -- Requirements
         if info.Flag then
             warn("SliderToggle does not have a 'Flag' argument, as it instead has two flags titled 'SliderFlag' and 'ToggleFlag'. Please fix your script.")
         end
