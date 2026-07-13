@@ -3633,11 +3633,24 @@ do
             local lerp = 0.45
             local _last_text
             local _focused = false
+
+            if type(_self.Flags[info.Flag]) ~= "number" then
+                _self.Flags[info.Flag] = tonumber(_self.Flags[info.Flag]) or info.Default or info.Min
+            end
+
             LPH_JIT_MAX(function()
                 con = Run.RenderStepped:Connect(function(dt)
                     if not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
                         dragging = false
                     end
+
+                    local current = tonumber(_self.Flags[info.Flag])
+                    if not current then
+                        warn(("[Slider:%s] Flags value was non-numeric (%s), resetting"):format(tostring(info.Flag), typeof(_self.Flags[info.Flag])))
+                        current = info.Default or info.Min
+                    end
+                    _self.Flags[info.Flag] = current
+
                     local finalX = utility:Lerp(lastMouseX,mouse.X,lerp*(dt*60))
                     if dragging then
                         local percent = math.clamp((finalX-slider.AbsolutePosition.X)/slider.AbsoluteSize.X,0,1)
@@ -3664,10 +3677,11 @@ do
                 end)
             end)()
             table.insert(_self._connections,con)
+
             input.Focused:Connect(function()
                 _focused = true
             end)
-    
+
             input.FocusLost:Connect(function(enterPressed)
                 local newValue
                 if enterPressed then
@@ -3686,7 +3700,7 @@ do
                 else
                     input.Text = _last_text
                 end
-    
+
                 _focused = false
             end)
         end
