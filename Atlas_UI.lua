@@ -90,9 +90,7 @@ do
     end
 
     function utility:FormatNumber(number,decimalPlaces)
-        if not typeof(number)=="number" then
-            error("Arg 1 must be a number")
-        end
+        if not typeof(number)=="number" then error("Arg 1 must be a number") end
         decimalPlaces = math.clamp(decimalPlaces,0,math.huge)
         local exp = 10^decimalPlaces
         number = math.round(number*exp)/exp
@@ -3419,7 +3417,6 @@ do
         utility:Requirement(info.Min,"Missing min argument")
         utility:Requirement(info.Max,"Missing max argument")
         utility:Requirement(info.Max>info.Min,"Max must be larger than min")
-
         if _self._usedFlags[info.Flag] then
             warn("Flag must have unique name!")
             return
@@ -3485,8 +3482,6 @@ do
                 ["_Ignore5"] = Instance.new("BoolValue");
                 ["_Element"] = Instance.new("StringValue");
             }
-
-            --Properties
 
             Converted["_1_Slider"].BackgroundColor3 = Color3.fromRGB(28.000000230968, 28.000000230968, 28.000000230968)
             Converted["_1_Slider"].BorderColor3 = Color3.fromRGB(27.000000290572643, 42.000001296401024, 53.00000064074993)
@@ -3654,7 +3649,7 @@ do
 
         local element = createElement()
 
-        do -- sliding
+        do
             local slider = element.Slider
             local inner = slider.Slider
             local sliderButton = utility:CreateButtonObject(slider)
@@ -3674,13 +3669,12 @@ do
             local lerp = 0.45
             local _last_text
             local _focused = false
-
             LPH_JIT_MAX(function()
                 con = Run.RenderStepped:Connect(function(dt)
                     if not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
                         dragging = false
                     end
-                    local finalX = utility:Lerp(lastMouseX,mouse.X,lerp*(dt*60)) -- deltatime in case of slow framerates
+                    local finalX = utility:Lerp(lastMouseX,mouse.X,lerp*(dt*60))
                     if dragging then
                         local percent = math.clamp((finalX-slider.AbsolutePosition.X)/slider.AbsoluteSize.X,0,1)
                         _self.Flags[info.Flag] = info.Min+((info.Max-info.Min)*percent)
@@ -3688,7 +3682,8 @@ do
                     if not info.AllowOutOfRange then
                         _self.Flags[info.Flag] = math.clamp(_self.Flags[info.Flag],info.Min,info.Max)
                     end
-                    _self.Flags[info.Flag] = utility:FormatNumber(_self.Flags[info.Flag],info.Digits)
+                    local formatted = utility:FormatNumber(_self.Flags[info.Flag],info.Digits)
+                    _self.Flags[info.Flag] = tonumber((formatted:gsub(",",""))) or _self.Flags[info.Flag]
                     if dragging then
                         coroutine.wrap(info.Callback)(_self.Flags[info.Flag])
                     end
@@ -3696,7 +3691,7 @@ do
                     if lastFlag~=currentFlag then
                         inner.Size = UDim2.fromScale(math.clamp((currentFlag-info.Min)/(info.Max-info.Min),0,1),1)
                         lastFlag = currentFlag
-                        input.Text = currentFlag
+                        input.Text = formatted
                     end
                     lastMouseX = finalX
                     if _focused == false then
@@ -3747,6 +3742,7 @@ do
         element.Name = string.rep("_",elementNum)..info.Name
         element.Parent = section.holder.Contents
     end
+
     function Element.CreateSliderToggle(section,info)
         local _self = section._self
         -- Requirements
@@ -5511,6 +5507,7 @@ do
         element.Name = string.rep("_",elementNum)..info.Name
         element.Parent = section.holder.Contents
     end
+
     function Element.CreateDropdown(section,info)
         local _self = section._self
         -- Requirements
