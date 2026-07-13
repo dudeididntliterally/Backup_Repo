@@ -9,6 +9,8 @@ local Players = g.Players or cloneref and cloneref(game:GetService("Players")) o
 if not getgenv().Players then getgenv().Players = Players end
 local Workspace = g.Workspace or cloneref and cloneref(game:GetService("Workspace")) or game:GetService("Workspace")
 if not getgenv().Workspace then getgenv().Workspace = Workspace end
+local HttpService = g.HttpService or cloneref and cloneref(game:GetService("HttpService")) or game:GetService("HttpService")
+if not getgenv().HttpService then getgenv().HttpService = HttpService end
 g.wait_until = function(condition, interval, max_tries)
     interval = tonumber(interval) or 0.05
     if typeof(max_tries) == "string" then
@@ -41,6 +43,165 @@ g.wait_until = function(condition, interval, max_tries)
         tries += 1
     until condition() or tries >= max_tries
     return condition() and true or false
+end
+
+local http_service = HttpService
+g._rgb_conns = g._rgb_conns or {}
+g._rgb_global_conn = g._rgb_global_conn or nil
+g.rgb_color_map = g.rgb_color_map or {
+    red = Color3.fromRGB(255,0,0),
+    darkred = Color3.fromRGB(139,0,0),
+    green = Color3.fromRGB(0,255,0),
+    darkgreen = Color3.fromRGB(0,100,0),
+    lime = Color3.fromRGB(50,205,50),
+    blue = Color3.fromRGB(0,0,255),
+    darkblue = Color3.fromRGB(0,0,139),
+    lightblue = Color3.fromRGB(173,216,230),
+    skyblue = Color3.fromRGB(135,206,235),
+    white = Color3.fromRGB(255,255,255),
+    black = Color3.fromRGB(0,0,0),
+    gray = Color3.fromRGB(128,128,128),
+    lightgray = Color3.fromRGB(211,211,211),
+    darkgray = Color3.fromRGB(64,64,64),
+    yellow = Color3.fromRGB(255,255,0),
+    gold = Color3.fromRGB(255,215,0),
+    orange = Color3.fromRGB(255,165,0),
+    darkorange = Color3.fromRGB(255,140,0),
+    purple = Color3.fromRGB(128,0,128),
+    violet = Color3.fromRGB(238,130,238),
+    indigo = Color3.fromRGB(75,0,130),
+    pink = Color3.fromRGB(255,105,180),
+    hotpink = Color3.fromRGB(255,20,147),
+    cyan = Color3.fromRGB(0,255,255),
+    teal = Color3.fromRGB(0,128,128),
+    brown = Color3.fromRGB(139,69,19),
+    tan = Color3.fromRGB(210,180,140),
+    magenta = Color3.fromRGB(255,0,255),
+    coral = Color3.fromRGB(255,127,80),
+    salmon = Color3.fromRGB(250,128,114)
+}
+
+g.rgb_color_index = {}
+do
+    local i = 1
+    for name in pairs(g.rgb_color_map) do
+        g.rgb_color_index[i] = name
+        i = i + 1
+    end
+end
+
+local function ensure_global_loop()
+    if g._rgb_global_conn then return end
+    local rs = g.RunService or cloneref and cloneref(game:GetService("RunService")) or game:GetService("RunService")
+    local conn = rs.RenderStepped:Connect(function(dt)
+        local conns = g._rgb_conns
+        local any = false
+        for _, data in pairs(conns) do
+            if data and data.obj then
+                any = true
+                if not data.paused then
+                    data.hue = (data.hue + (dt * data.speed)) % 1
+                    data.obj.BackgroundColor3 = Color3.fromHSV(data.hue, 1, 1)
+                end
+            end
+        end
+
+        if not any then
+            g._rgb_global_conn:Disconnect()
+            g._rgb_global_conn = nil
+        end
+    end)
+
+    g._rgb_global_conn = conn
+end
+
+g.flowrgb = g.flowrgb or function(name, speed, obj, toggle)
+    local conns = g._rgb_conns
+    if toggle == false then
+        conns[name] = nil
+        return
+    end
+
+    conns[name] = {
+        obj = obj,
+        speed = speed,
+        hue = 0,
+        paused = false
+    }
+
+    ensure_global_loop()
+end
+
+g.toggle_rgb = g.toggle_rgb or function(name, state) -- toggle a certain connection.
+    local data = g._rgb_conns[name]
+    if data then
+        data.paused = state
+    end
+end
+
+g.toggle_all_rgb = g.toggle_all_rgb or function(state) -- toggle all
+    for _, data in pairs(g._rgb_conns) do
+        if data then
+            data.paused = state
+        end
+    end
+end
+
+g.set_rgb_color_smart = g.set_rgb_color_smart or function(name, input)
+    local data = g._rgb_conns[name]
+    if not data or not data.obj then return end
+
+    local color
+
+    if typeof(input) == "string" then
+        color = g.rgb_color_map[input:lower()]
+    elseif typeof(input) == "number" then
+        local cname = g.rgb_color_index[input]
+        if cname then color = g.rgb_color_map[cname] end
+    elseif typeof(input) == "Color3" then
+        color = input
+    end
+
+    if not color then
+        local keys = {}
+        for k in pairs(g.rgb_color_map) do keys[#keys+1] = k end
+        color = g.rgb_color_map[keys[math.random(1, #keys)]]
+    end
+
+    data.obj.BackgroundColor3 = color
+end
+
+g.set_all_rgb_color_smart = g.set_all_rgb_color_smart or function(input)
+    local color
+
+    if typeof(input) == "string" then
+        color = g.rgb_color_map[input:lower()]
+    elseif typeof(input) == "number" then
+        local cname = g.rgb_color_index[input]
+        if cname then color = g.rgb_color_map[cname] end
+    elseif typeof(input) == "Color3" then
+        color = input
+    end
+
+    if not color then
+        local keys = {}
+        for k in pairs(g.rgb_color_map) do keys[#keys+1] = k end
+        color = g.rgb_color_map[keys[math.random(1, #keys)]]
+    end
+
+    for _, data in pairs(g._rgb_conns) do
+        if data and data.obj then
+            data.obj.BackgroundColor3 = color
+        end
+    end
+end
+
+g.set_all_rgb_color = g.set_all_rgb_color or function(color)
+    for _, data in pairs(g._rgb_conns) do
+        if data and data.obj then
+            data.obj.BackgroundColor3 = color
+        end
+    end
 end
 
 getgenv().type_chooser = function(value)
