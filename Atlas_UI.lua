@@ -3619,93 +3619,96 @@ do
         end
 
         local element = createElement()
-    do
-        local slider = element.Slider
-        local inner = slider.Slider
-        local sliderButton = utility:CreateButtonObject(slider)
-        sliderButton.Size = UDim2.fromScale(1,3)
-        local input = element.Input
-        local dragging = false
-        local lastFlag = nil
-        local con
-        local lastMouseX = mouse.X
-        sliderButton.MouseButton1Down:Connect(function() dragging = true end)
-        local lerp = 0.45
-        local _last_text
-        local _focused = false
-
-        if type(_self.Flags[info.Flag]) ~= "number" then
-            _self.Flags[info.Flag] = tonumber(_self.Flags[info.Flag]) or info.Default or info.Min
-        end
-
-        LPH_JIT_MAX(function()
-            con = Run.RenderStepped:Connect(function(dt)
-                if not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-                    dragging = false
-                end
-
-                local current = tonumber(_self.Flags[info.Flag])
-                if not current then
-                    warn(("[Slider:%s] Flags value was non-numeric (%s), resetting"):format(tostring(info.Flag), typeof(_self.Flags[info.Flag])))
-                    current = info.Default or info.Min
-                end
-                _self.Flags[info.Flag] = current
-
-                local finalX = utility:Lerp(lastMouseX,mouse.X,lerp*(dt*60))
-                if dragging then
-                    local percent = math.clamp((finalX-slider.AbsolutePosition.X)/slider.AbsoluteSize.X,0,1)
-                    _self.Flags[info.Flag] = info.Min+((info.Max-info.Min)*percent)
-                end
-                if not info.AllowOutOfRange then
-                    _self.Flags[info.Flag] = math.clamp(_self.Flags[info.Flag],info.Min,info.Max)
-                end
-                local formatted = utility:FormatNumber(_self.Flags[info.Flag],info.Digits)
-                _self.Flags[info.Flag] = tonumber((formatted:gsub(",",""))) or _self.Flags[info.Flag]
-                if dragging then
-                    coroutine.wrap(info.Callback)(_self.Flags[info.Flag])
-                end
-                local currentFlag = _self.Flags[info.Flag]
-                if lastFlag~=currentFlag then
-                    inner.Size = UDim2.fromScale(math.clamp((currentFlag-info.Min)/(info.Max-info.Min),0,1),1)
-                    lastFlag = currentFlag
-                    input.Text = formatted
-                end
-                lastMouseX = finalX
-                if _focused == false then
-                    _last_text = input.Text
-                end
-            end)
-        end)()
-        table.insert(_self._connections,con)
-        input.Focused:Connect(function()
-            _focused = true
-        end)
-
-        input.FocusLost:Connect(function(enterPressed)
-            local newValue
-            if enterPressed then
-                local text = input.Text
-                local num = tonumber(text)
-                if num then
-                    if not info.AllowOutOfRange then
-                        num = math.clamp(num,info.Min,info.Max)
+        do
+            local slider = element.Slider
+            local inner = slider.Slider
+            local sliderButton = utility:CreateButtonObject(slider)
+            sliderButton.Size = UDim2.fromScale(1,3)
+            local input = element.Input
+            local dragging = false
+            local lastFlag = nil
+            local con
+            local lastMouseX = mouse.X
+            sliderButton.MouseButton1Down:Connect(function() dragging = true end)
+            local lerp = 0.45
+            local _last_text
+            local _focused = false
+            LPH_JIT_MAX(function()
+                con = Run.RenderStepped:Connect(function(dt)
+                    if not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+                        dragging = false
                     end
-                    input.Text = utility:FormatNumber(num,info.Digits)
-                    newValue = num
-                    _self.Flags[info.Flag] = newValue
+                    local finalX = utility:Lerp(lastMouseX,mouse.X,lerp*(dt*60))
+                    if dragging then
+                        local percent = math.clamp((finalX-slider.AbsolutePosition.X)/slider.AbsoluteSize.X,0,1)
+                        _self.Flags[info.Flag] = info.Min+((info.Max-info.Min)*percent)
+                    end
+                    if not info.AllowOutOfRange then
+                        _self.Flags[info.Flag] = math.clamp(_self.Flags[info.Flag],info.Min,info.Max)
+                    end
+                    local formatted = utility:FormatNumber(_self.Flags[info.Flag],info.Digits)
+                    _self.Flags[info.Flag] = tonumber((formatted:gsub(",",""))) or _self.Flags[info.Flag]
+                    if dragging then
+                        coroutine.wrap(info.Callback)(_self.Flags[info.Flag])
+                    end
+                    local currentFlag = _self.Flags[info.Flag]
+                    if lastFlag~=currentFlag then
+                        inner.Size = UDim2.fromScale(math.clamp((currentFlag-info.Min)/(info.Max-info.Min),0,1),1)
+                        lastFlag = currentFlag
+                        input.Text = formatted
+                    end
+                    lastMouseX = finalX
+                    if _focused == false then
+                        _last_text = input.Text
+                    end
+                end)
+            end)()
+            table.insert(_self._connections,con)
+            input.Focused:Connect(function()
+                _focused = true
+            end)
+    
+            input.FocusLost:Connect(function(enterPressed)
+                local newValue
+                if enterPressed then
+                    local text = input.Text
+                    local num = tonumber(text)
+                    if num then
+                        if not info.AllowOutOfRange then
+                            num = math.clamp(num,info.Min,info.Max)
+                        end
+                        input.Text = utility:FormatNumber(num,info.Digits)
+                        newValue = num
+                        _self.Flags[info.Flag] = newValue
+                    else
+                        input.Text = _last_text
+                    end
                 else
                     input.Text = _last_text
                 end
-            else
-                input.Text = _last_text
-            end
+    
+                _focused = false
+            end)
+        end
 
-            _focused = false
-        end)
+        info.WarningIcon = info.WarningIcon or Library.Icons.Warning
+        element.Title.Warning.Image = "http://www.roblox.com/asset/?id="..info.WarningIcon
+        if info.Warning then
+            element.Title.Warning.ImageColor3 = Color3.new(1,1,1)
+            element.Title.Warning.Visible = true
+            local hint = utility:CreateHint()
+            hint.Value = info.Warning
+            hint.Parent = element.Title.Warning
+        end
+
+        element.Title.Main.Title.Text = info.Name
+        element.Name = string.rep("_",elementNum)..info.Name
+        element.Parent = section.holder.Contents
     end
 
     function Element.CreateSliderToggle(section,info)
         local _self = section._self
+        -- Requirements
         if info.Flag then
             warn("SliderToggle does not have a 'Flag' argument, as it instead has two flags titled 'SliderFlag' and 'ToggleFlag'. Please fix your script.")
         end
