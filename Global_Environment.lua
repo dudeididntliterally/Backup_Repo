@@ -45,6 +45,58 @@ g.wait_until = function(condition, interval, max_tries)
     return condition() and true or false
 end
 
+g.FuzzyFindChild = function(parent, query, timeout)
+    if not parent or typeof(parent) ~= "Instance" then return nil end
+    if not query or query == "" then return nil end
+    timeout = timeout or 3
+    local Lowered_Query = query:lower()
+    local Start_Time = os.clock()
+
+    repeat
+        for _, Child in ipairs(parent:GetChildren()) do if Child.Name:lower():find(Lowered_Query, 1, true) then return Child end end
+        task.wait(0.1)
+    until os.clock() - Start_Time >= timeout
+    return nil
+end
+
+g.FuzzyFindChildWithClass = function(parent, query, class_name, timeout)
+    if not parent or typeof(parent) ~= "Instance" then return nil end
+    if not query or query == "" then return nil end
+    timeout = timeout or 3
+    local Lowered_Query = query:lower()
+    local Lowered_Class = class_name and class_name:lower() or nil
+    local Start_Time = os.clock()
+
+    repeat
+        for _, Child in ipairs(parent:GetChildren()) do
+            local Name_Match = Child.Name:lower():find(Lowered_Query, 1, true)
+            local Class_Match = not Lowered_Class or Child.ClassName:lower() == Lowered_Class
+            if Name_Match and Class_Match then return Child end
+        end
+        task.wait(0.1)
+    until os.clock() - Start_Time >= timeout
+    return nil
+end
+
+g.FuzzyFindDescendantWithClass = function(parent, query, class_name, timeout)
+    if not parent or typeof(parent) ~= "Instance" then return nil end
+    if not query or query == "" then return nil end
+    timeout = timeout or 3
+    local Lowered_Query = query:lower()
+    local Lowered_Class = class_name and class_name:lower() or nil
+    local Start_Time = os.clock()
+
+    repeat
+        for _, Child in ipairs(parent:GetDescendants()) do
+            local Name_Match = Child.Name:lower():find(Lowered_Query, 1, true)
+            local Class_Match = not Lowered_Class or Child.ClassName:lower() == Lowered_Class
+            if Name_Match and Class_Match then return Child end
+        end
+        task.wait(0.1)
+    until os.clock() - Start_Time >= timeout
+    return nil
+end
+
 local http_service = HttpService
 g._rgb_conns = g._rgb_conns or {}
 g._rgb_global_conn = g._rgb_global_conn or nil
