@@ -38,13 +38,13 @@ g.wait_until = function(condition, interval, max_tries)
     return condition() and true or false
 end
 
-g.Encode_To_Lua_Escapes = function(Text)
+getgenv().Encode_To_Lua_Escapes = function(Text)
     local Result = {}
     for i = 1, #Text do table.insert(Result, "\\" .. string.byte(Text, i)) end
     return table.concat(Result)
 end
 
-g.Decode_Lua_Escapes = function(Escaped_String)
+getgenv().Decode_Lua_Escapes = function(Escaped_String)
     local Bytes = {}
     for Byte_Str in Escaped_String:gmatch("\\(%d+)") do table.insert(Bytes, tonumber(Byte_Str)) end
     local Chars = {}
@@ -1137,20 +1137,6 @@ local function retry_find(func, retries, delay)
         task.wait(delay)
     end
     return nil
-end
-wait(0.1)
-getgenv().Encode_To_Lua_Escapes = function(Text)
-    local Result = {}
-    for i = 1, #Text do table.insert(Result, "\\" .. string.byte(Text, i)) end
-    return table.concat(Result)
-end
-
-getgenv().Decode_Lua_Escapes = function(Escaped_String)
-    local Bytes = {}
-    for Byte_Str in Escaped_String:gmatch("\\(%d+)") do table.insert(Bytes, tonumber(Byte_Str)) end
-    local Chars = {}
-    for _, Byte in ipairs(Bytes) do table.insert(Chars, string.char(Byte)) end
-    return table.concat(Chars)
 end
 
 get_or_set("retry_find", retry_find)
