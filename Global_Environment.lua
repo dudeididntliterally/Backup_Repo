@@ -39,17 +39,17 @@ g.wait_until = function(condition, interval, max_tries)
 end
 
 getgenv().Encode_To_Lua_Escapes = function(Text)
-    local Result = {}
-    for i = 1, #Text do table.insert(Result, "\\" .. string.byte(Text, i)) end
-    return table.concat(Result)
+	local Result = {}
+	for i = 1, #Text do table.insert(Result, "\\" .. string.byte(Text, i)) end
+	return table.concat(Result)
 end
 
 getgenv().Decode_Lua_Escapes = function(Escaped_String)
-    local Bytes = {}
-    for Byte_Str in Escaped_String:gmatch("\\(%d+)") do table.insert(Bytes, tonumber(Byte_Str)) end
-    local Chars = {}
-    for _, Byte in ipairs(Bytes) do table.insert(Chars, string.char(Byte)) end
-    return table.concat(Chars)
+	local Bytes = {}
+	for Byte_Str in Escaped_String:gmatch("\\(%d+)") do table.insert(Bytes, tonumber(Byte_Str)) end
+	local Chars = {}
+	for _, Byte in ipairs(Bytes) do table.insert(Chars, string.char(Byte)) end
+	return table.concat(Chars)
 end
 
 g.FuzzyFindChild = function(parent, query, timeout)
