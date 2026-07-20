@@ -24,20 +24,13 @@ g.wait_until = function(condition, interval, max_tries)
     end
 
     max_tries = max_tries or 500
-
-    if interval < 0.03 then
-        interval = 0.05
-    end
-
+    if interval < 0.03 then interval = 0.05 end
     if typeof(condition) ~= "function" then
         local target = condition
-        condition = function()
-            return (typeof(target) == "Instance" and target.Parent ~= nil) or target
-        end
+        condition = function() return (typeof(target) == "Instance" and target.Parent ~= nil) or target end
     end
 
     local tries = 0
-
     repeat
         task.wait(interval)
         tries += 1
@@ -96,6 +89,38 @@ g.FuzzyFindDescendantWithClass = function(parent, query, class_name, timeout)
     until os.clock() - Start_Time >= timeout
     return nil
 end
+
+g.colors = g.colors or {
+	Color3.fromRGB(255,255,255),
+	Color3.fromRGB(128,128,128),
+	Color3.fromRGB(0,0,0),
+	Color3.fromRGB(0,0,255),
+	Color3.fromRGB(0,255,0),
+	Color3.fromRGB(0,255,255),
+	Color3.fromRGB(255,165,0),
+	Color3.fromRGB(139,69,19),
+	Color3.fromRGB(255,255,0),
+	Color3.fromRGB(50,205,50),
+	Color3.fromRGB(255,0,0),
+	Color3.fromRGB(255,155,172),
+	Color3.fromRGB(128,0,128),
+}
+
+g.colors_color_three = g.colors_color_three or {
+	Color3.new(1, 1, 1),
+	Color3.new(0.5019607843137255, 0.5019607843137255, 0.5019607843137255),
+	Color3.new(0, 0, 0),
+	Color3.new(0, 0, 1),
+	Color3.new(0, 1, 0),
+	Color3.new(0, 1, 1),
+	Color3.new(1, 0.6470588235294118, 0),
+	Color3.new(0.5450980392156862, 0.27058823529411763, 0.07450980392156863),
+	Color3.new(1, 1, 0),
+	Color3.new(0.19607843137254902, 0.803921568627451, 0.19607843137254902),
+	Color3.new(1, 0, 0),
+	Color3.new(1, 0.6078431372549019, 0.6745098039215686),
+	Color3.new(0.5019607843137255, 0, 0.5019607843137255),
+}
 
 local http_service = HttpService
 g._rgb_conns = g._rgb_conns or {}
@@ -467,30 +492,21 @@ end
 
 getgenv().FlamesLibrary.is_thread_alive = function(input)
     local lib = getgenv().FlamesLibrary
-
     if type(input) == "thread" then
         local ok, status = pcall(coroutine.status, input)
-        if not ok then
-            return false
-        end
+        if not ok then return false end
         return status ~= "dead"
     end
 
     if type(input) == "string" then
         local list = lib._connections[input]
-        if not list then
-            return false
-        end
-
+        if not list then return false end
         for _, item in ipairs(list) do
             if type(item) == "thread" then
                 local ok, status = pcall(coroutine.status, item)
-                if ok and status ~= "dead" then
-                    return true
-                end
+                if ok and status ~= "dead" then return true end
             end
         end
-
         return false
     end
 
