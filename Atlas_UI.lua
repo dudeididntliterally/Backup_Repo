@@ -2399,9 +2399,7 @@ do
             end
 
             local searchBar = lib.Main.Contents.Top.SearchBar.TextBox
-
             local doSearchBtn = utility:CreateButtonObject(lib.Main.Contents.Top.SearchBar.Icon)
-
             doSearchBtn.Activated:Connect(function()
                 searchBar:ReleaseFocus()
             end)
@@ -2478,14 +2476,11 @@ do
         return self
     end
 
-    function Library:SetToggle(keyCodeName)
-        self.toggleBind = keyCodeName
-    end
-
+    function Library:SetToggle(keyCodeName) self.toggleBind = keyCodeName end
     function Library:Toggle(value)
-        if value==nil then
-            value = not self.container.Main.Visible
-        end
+        if not self or not self.container then return end
+        if not self.container:FindFirstChild("Main") then return end
+        if value == nil then value = not self.container.Main.Visible end
         self.container.Main.Visible = value
         return value
     end
