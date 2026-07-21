@@ -2882,7 +2882,7 @@ do
             Converted["_ScrollingFrame"].Size = UDim2.new(1, 0, 1, 0)
             Converted["_ScrollingFrame"].Parent = Converted["_Page"]
 
-            Converted["_UIListLayout"].Padding = UDim.new(0, 8)
+            Converted["_UIListLayout"].Padding = UDim.new(0, 25)
             Converted["_UIListLayout"].HorizontalAlignment = Enum.HorizontalAlignment.Center
             Converted["_UIListLayout"].Parent = Converted["_ScrollingFrame"]
 
