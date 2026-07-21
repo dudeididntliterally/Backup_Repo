@@ -52,6 +52,36 @@ getgenv().Decode_Lua_Escapes = function(Escaped_String)
 	return table.concat(Chars)
 end
 
+g.all_current_asset_types = {
+	[8]  = "Hat",
+	[11] = "Shirt",
+	[12] = "Pants",
+	[17] = "Head",
+	[18] = "Face",
+	[19] = "Gear",
+	[24] = "Animation",
+	[32] = "Package",
+	[41] = "HairAccessory",
+	[42] = "FaceAccessory",
+	[43] = "NeckAccessory",
+	[44] = "ShoulderAccessory",
+	[45] = "FrontAccessory",
+	[46] = "BackAccessory",
+	[47] = "WaistAccessory",
+	[64] = "TShirtAccessory",
+	[65] = "ShirtAccessory",
+	[66] = "PantsAccessory",
+	[67] = "JacketAccessory",
+	[68] = "SweaterAccessory",
+	[69] = "ShortsAccessory",
+	[70] = "LeftShoeAccessory",
+	[71] = "RightShoeAccessory",
+	[72] = "DressSkirtAccessory",
+	[74] = "EyebrowAccessory",
+	[75] = "EyelashAccessory",
+	[77] = "DynamicHead",
+}
+
 g.FuzzyFindChild = function(parent, query, timeout)
     if not parent or typeof(parent) ~= "Instance" then return nil end
     if not query or query == "" then return nil end
