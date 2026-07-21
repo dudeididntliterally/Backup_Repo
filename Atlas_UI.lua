@@ -1625,7 +1625,7 @@ do
             Converted["_Ignore15"].Parent = Converted["_Theme16"]
 
             Converted["_ScrollingFrame"].AutomaticCanvasSize = Enum.AutomaticSize.Y
-            Converted["_ScrollingFrame"].CanvasSize = UDim2.new(0, 0, 1, 0)
+            Converted["_ScrollingFrame"].CanvasSize = UDim2.new(0, 0, 0, 0)
             Converted["_ScrollingFrame"].ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
             Converted["_ScrollingFrame"].ScrollBarThickness = 0
             Converted["_ScrollingFrame"].Active = true
@@ -1666,7 +1666,7 @@ do
             Converted["_Page"].Parent = Converted["_Contents1"]
 
             Converted["_ScrollingFrame1"].AutomaticCanvasSize = Enum.AutomaticSize.Y
-            Converted["_ScrollingFrame1"].CanvasSize = UDim2.new(0, 0, 1, 0)
+            Converted["_ScrollingFrame1"].CanvasSize = UDim2.new(0, 0, 0, 0)
             Converted["_ScrollingFrame1"].ScrollBarImageColor3 = Color3.fromRGB(151.00000619888306, 151.00000619888306, 151.00000619888306)
             Converted["_ScrollingFrame1"].ScrollBarImageTransparency = 0.20000000298023224
             Converted["_ScrollingFrame1"].ScrollBarThickness = 5
@@ -2876,7 +2876,7 @@ do
             Converted["_Page"].Name = "Page"
 
             Converted["_ScrollingFrame"].AutomaticCanvasSize = Enum.AutomaticSize.Y
-            Converted["_ScrollingFrame"].CanvasSize = UDim2.new(0, 0, 1, 0)
+            Converted["_ScrollingFrame"].CanvasSize = UDim2.new(0, 0, 0, 0)
             Converted["_ScrollingFrame"].ScrollBarImageColor3 = Color3.fromRGB(151.00000619888306, 151.00000619888306, 151.00000619888306)
             Converted["_ScrollingFrame"].ScrollBarImageTransparency = 0.20000000298023224
             Converted["_ScrollingFrame"].ScrollBarThickness = 5
